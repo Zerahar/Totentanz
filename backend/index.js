@@ -2,8 +2,6 @@ const express = require('express')
 const app = express()
 const port = 3002
 const pass = "dbpass123"
-// var expressMongoDb = require('express-mongo-db');
-// app.use(expressMongoDb(`mongodb+srv://dbAdmin:${pass}@oppari.q4dhm.mongodb.net/data?retryWrites=true&w=majority`));
 
 app.get('/', (req, res) => {
   res.send('Hello World!')
@@ -32,7 +30,17 @@ mongo.MongoClient.connect(`mongodb+srv://dbAdmin:${pass}@oppari.q4dhm.mongodb.ne
   // Update character
   app.post('/character/:charId', (req, res) => {
     const query = { _id: new mongo.ObjectId(req.params.charId)}
-    const document = {}
+    const document = { $set: {
+      name: req.body.name,
+      age: req.body.age,
+      player: req.body.player,
+      gender: req.body.gender,
+      history: req.body.history,
+      description: req.body.description,
+      gameinfo: req.body.gameinfo,
+      saldo: req.body.saldo,
+      plots: req.body.plots,
+    }}
     db.collection('characters').updateOne(query, document, function (err, result) {
       if (err) throw err
       res.send(result)
@@ -42,7 +50,17 @@ mongo.MongoClient.connect(`mongodb+srv://dbAdmin:${pass}@oppari.q4dhm.mongodb.ne
 
     // Add character
     app.post('/character', (req, res) => {
-      const document = {}
+      const document = {
+        name: req.body.name,
+        age: req.body.age,
+        player: req.body.player,
+        gender: req.body.gender,
+        history: req.body.history,
+        description: req.body.description,
+        gameinfo: req.body.gameinfo,
+        saldo: req.body.saldo,
+        plots: req.body.plots,
+      }
       db.collection('characters').insertOne(document, function (err, result) {
         if (err) throw err
         res.send(result)
