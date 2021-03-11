@@ -3,24 +3,59 @@ function Info() {
     return (
         <div>
             <h2>Info</h2>
+            <p>Hahmotiedot</p>
         </div>
     );
 }
 
-function Pay() {
-    return (
-        <div>
-            <h2>Pay</h2>
-        </div>
-    );
+class Pay extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            characters: []
+        }
+    }
+    componentDidMount() {
+        this.setState({
+            characters: [{ name: "John" }, { name: "Ellis" }]
+        })
+    }
+    render() {
+        const options = this.state.characters.map((character) => <option>{character.name}</option>);
+        const saldo = 345
+        return (
+            <div>
+                <h2>Pay</h2>
+                <p>Sinulla on {saldo} eurodollaria.</p>
+                <form>
+                    <label>Vastaanottaja</label><br />
+                    <select>{options}</select><br />
+                    <label>Summa</label><br />
+                    <input type="number"></input>
+                    <button>Maksa</button>
+                </form>
+            </div>
+        )
+    }
 }
 
-function Message() {
-    return (
-        <div>
-            <h2>Message</h2>
-        </div>
-    );
+class Message extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            chats: [{ participants: ["Mary", "Ellie", "Rick"] }, { participants: ["Connor", "Ellie", "Rick"] }]
+        }
+    }
+    render() {
+        const chats = this.state.chats.map((chat) => <li>{chat.participants.map((participant) => participant + ", ")}</li>);
+        return (
+            <div>
+                <h2>Message</h2>
+                <button>Uusi keskustelu</button>
+                <ul>{chats}</ul>
+            </div>
+        )
+    }
 }
 
 class Tabs extends Component {
