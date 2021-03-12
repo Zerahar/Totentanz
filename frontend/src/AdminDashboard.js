@@ -91,6 +91,12 @@ class NewCharacter extends Component {
   }
   handleSubmit(event) {
     event.preventDefault();
+    const data = JSON.stringify(this.state)
+    console.log(data)
+    let xhttp = new XMLHttpRequest();
+    xhttp.open("POST", "http://localhost:3002/character/", true);
+    xhttp.setRequestHeader("Content-type", "application/json");
+    xhttp.send(data);
   }
 
   render() {
@@ -108,7 +114,7 @@ class NewCharacter extends Component {
           <Editor content={this.state.plots} onChange={this.onPlotsChange} />
           <label>Pelimekaniikat: </label>
           <Editor content={this.state.mechanics} onChange={this.onMechanicsChange} />
-          <button type="submit">Tallenna</button>
+          <button type="submit" onClick={this.handleSubmit}>Tallenna</button>
           <button type="reset">Poistu tallentamatta</button>
         </form>
       </div>

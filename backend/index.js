@@ -6,7 +6,7 @@ const pass = "dbpass123"
 app.get('/', (req, res) => {
   res.send('Hello World!')
 })
-
+app.use(express.json())
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
 })
@@ -17,9 +17,9 @@ mongo.MongoClient.connect(`mongodb+srv://dbAdmin:${pass}@oppari.q4dhm.mongodb.ne
   if (err) throw err
 
   const db = client.db('data')
-// Fetch character
+  // Fetch character
   app.get('/character/:charId', (req, res) => {
-    const query = { _id: new mongo.ObjectId(req.params.charId)}
+    const query = { _id: new mongo.ObjectId(req.params.charId) }
     db.collection('characters').findOne(query, function (err, result) {
       if (err) throw err
       res.send(result)
@@ -29,28 +29,9 @@ mongo.MongoClient.connect(`mongodb+srv://dbAdmin:${pass}@oppari.q4dhm.mongodb.ne
 
   // Update character
   app.post('/character/:charId', (req, res) => {
-    const query = { _id: new mongo.ObjectId(req.params.charId)}
-    const document = { $set: {
-      name: req.body.name,
-      age: req.body.age,
-      player: req.body.player,
-      gender: req.body.gender,
-      history: req.body.history,
-      description: req.body.description,
-      gameinfo: req.body.gameinfo,
-      saldo: req.body.saldo,
-      plots: req.body.plots,
-    }}
-    db.collection('characters').updateOne(query, document, function (err, result) {
-      if (err) throw err
-      res.send(result)
-      db.close
-    })
-  })
-
-    // Add character
-    app.post('/character', (req, res) => {
-      const document = {
+    const query = { _id: new mongo.ObjectId(req.params.charId) }
+    const document = {
+      $set: {
         name: req.body.name,
         age: req.body.age,
         player: req.body.player,
@@ -61,10 +42,20 @@ mongo.MongoClient.connect(`mongodb+srv://dbAdmin:${pass}@oppari.q4dhm.mongodb.ne
         saldo: req.body.saldo,
         plots: req.body.plots,
       }
-      db.collection('characters').insertOne(document, function (err, result) {
-        if (err) throw err
-        res.send(result)
-        db.close
-      })
+    }
+    db.collection('characters').updateOne(query, document, function (err, result) {
+      if (err) throw err
+      res.send(result)
+      db.close
     })
+  })
+
+  // Add character
+  app.post('/character', (req, res) => {
+    db.collection('characters').insertOne(req.body, function (err, result) {
+      if (err) throw err
+      res.send(result)
+      db.close
+    })
+  })
 })
