@@ -1,5 +1,5 @@
 // Import React dependencies.
-import React, { Component, useMemo, useState } from 'react'
+import React, { Component, useMemo, useState, useEffect } from 'react'
 // Import the Slate editor factory.
 import { createEditor } from 'slate'
 // Import the Slate components and React plugin.
@@ -23,23 +23,28 @@ class CharacterMenu extends Component {
 
 function Editor(props) {
   const editor = useMemo(() => withReact(createEditor()), [])
-  // Add the initial value when setting up our state.
-  const [value] = useState([
+  const [value, setValue] = useState([
     {
       type: 'paragraph',
       children: [{ text: props.content }],
     },
   ])
+  useEffect(() => {
+    if (value !== props.content)
+      props.onChange(value)
+  });
+
   return (
     <Slate
       editor={editor}
       value={value}
-      onChange={value => props.onChange(value)}
+      onChange={value => setValue(value)}
     >
       <Editable />
     </Slate>
   );
 }
+
 
 class NewCharacter extends Component {
   constructor(props) {
@@ -69,10 +74,9 @@ class NewCharacter extends Component {
       [name]: value
     });
   }
-  onDescriptionChange(e) {
-    console.log(e)
+  onDescriptionChange(content) {
     this.setState({
-      description: ''
+      description: content
     });
   }
   onPlotsChange(content) {
