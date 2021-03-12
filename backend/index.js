@@ -27,6 +27,15 @@ mongo.MongoClient.connect(`mongodb+srv://dbAdmin:${pass}@oppari.q4dhm.mongodb.ne
     })
   })
 
+  // Fetch all characters
+  app.get('/character/', (req, res) => {
+    db.collection('characters').find().toArray(function (err, result) {
+      if (err) throw err
+      res.send(result)
+      db.close
+    })
+  })
+
   // Update character
   app.post('/character/:charId', (req, res) => {
     const query = { _id: new mongo.ObjectId(req.params.charId) }

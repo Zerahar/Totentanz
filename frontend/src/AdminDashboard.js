@@ -9,14 +9,44 @@ class CharacterMenu extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      characters: [{ name: "Jack" }, { name: "Ripper" }, { name: "Hustler" }]
+      characters: [],
+      isLoaded: false,
+      error: null
     }
   }
+  componentDidMount() {
+    fetch('http://localhost:3002/character/')
+      .then(res => res.json())
+      .then(
+        (result) => {
+          this.setState({
+            isLoaded: true,
+            characters: result
+          });
+        },
+        // Note: it's important to handle errors here
+        // instead of a catch() block so that we don't swallow
+        // exceptions from actual bugs in components.
+        (error) => {
+          this.setState({
+            isLoaded: true,
+            error
+          });
+        }
+      )
+  }
   render() {
-    const characters = this.state.characters.map((character) => <tr><td>{character.name}</td><td><button>Muokkaa</button></td><td><button>Poista</button></td></tr>);
+    const characters = this.state.characters.map((character) => <tr><td>{character.name}</td><td>{character.player}</td><td><button>Muokkaa</button><button>Poista</button></td></tr>);
     return (
 
-      <table>{characters}</table>
+      <table>
+        <thead>
+          <tr><th>Nimi</th><th>Pelaaja</th><th>Operaatiot</th></tr>
+        </thead>
+        <tbody>
+          {characters}
+        </tbody>
+      </table>
     );
   }
 }
