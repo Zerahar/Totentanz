@@ -13,6 +13,10 @@ class CharacterMenu extends Component {
       isLoaded: false,
       error: null
     }
+    this.editCharacter = this.editCharacter.bind(this);
+  }
+  editCharacter(e) {
+    this.props.changeCharacter(e.target.id)
   }
   componentDidMount() {
     fetch('http://localhost:3002/character/')
@@ -36,7 +40,7 @@ class CharacterMenu extends Component {
       )
   }
   render() {
-    const characters = this.state.characters.map((character) => <tr><td>{character.name}</td><td>{character.player}</td><td><button>Muokkaa</button><button>Poista</button></td></tr>);
+    const characters = this.state.characters.map((character) => <tr><td>{character.name}</td><td>{character.player}</td><td><button id={character._id} onClick={this.editCharacter}>Muokkaa</button><button>Poista</button></td></tr>);
     return (
 
       <table>
@@ -95,7 +99,23 @@ class NewCharacter extends Component {
     this.onPlotsChange = this.onPlotsChange.bind(this);
     this.onMechanicsChange = this.onMechanicsChange.bind(this);
   }
-
+  componentDidMount() {
+    if (this.props.selectedCharacter) {
+      fetch('http://localhost:3002/character/' + this.props.selectedCharacter)
+        .then(response => response.json())
+        .then(blob => this.fillFields(blob))
+    }
+  }
+  fillFields(data) {
+    this.setState({ name: data.name })
+    this.setState({ age: data.age })
+    this.setState({ gender: data.gender })
+    this.setState({ player: data.player })
+    this.setState({ saldo: data.saldo })
+    this.setState({ description: data.description })
+    this.setState({ plots: data.plots })
+    this.setState({ mechanics: data.mechanics })
+  }
   handleChange(event) {
     const target = event.target;
     const value = target.type === 'checkbox' ? target.checked : target.value;
@@ -122,9 +142,11 @@ class NewCharacter extends Component {
   handleSubmit(event) {
     event.preventDefault();
     const data = JSON.stringify(this.state)
-    console.log(data)
     let xhttp = new XMLHttpRequest();
-    xhttp.open("POST", "http://localhost:3002/character/", true);
+    let url = "http://localhost:3002/character/"
+    if (this.props.selectedCharacter)
+      url += this.props.selectedCharacter
+    xhttp.open("POST", url, true);
     xhttp.setRequestHeader("Content-type", "application/json");
     xhttp.send(data);
   }
@@ -162,15 +184,21 @@ class AdminDashboard extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      mode: null
+      mode: null,
+      selectedCharacter: null
     }
+    this.changeCharacter = this.changeCharacter.bind(this);
+  }
+  changeCharacter(id) {
+    this.setState({ selectedCharacter: id })
+    this.setState({ mode: "new" })
   }
   render() {
     let tab
     switch (this.state.mode) {
-      case "new": tab = <NewCharacter />; break;
+      case "new": tab = <NewCharacter selectedCharacter={this.state.selectedCharacter} />; break;
       case "messages": tab = <Messages />; break;
-      default: tab = <CharacterMenu />
+      default: tab = <CharacterMenu selectedCharacter={this.state.selectedCharacter} changeCharacter={this.changeCharacter} />
     }
     return (
       <div>

@@ -47,7 +47,7 @@ mongo.MongoClient.connect(`mongodb+srv://dbAdmin:${pass}@oppari.q4dhm.mongodb.ne
         gender: req.body.gender,
         history: req.body.history,
         description: req.body.description,
-        gameinfo: req.body.gameinfo,
+        mechanics: req.body.mechanics,
         saldo: req.body.saldo,
         plots: req.body.plots,
       }
