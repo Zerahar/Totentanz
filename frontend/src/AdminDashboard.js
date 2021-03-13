@@ -42,15 +42,17 @@ class CharacterMenu extends Component {
   render() {
     const characters = this.state.characters.map((character) => <tr><td>{character.name}</td><td>{character.player}</td><td><button id={character._id} onClick={this.editCharacter}>Muokkaa</button><button>Poista</button></td></tr>);
     return (
-
-      <table>
-        <thead>
-          <tr><th>Nimi</th><th>Pelaaja</th><th>Operaatiot</th></tr>
-        </thead>
-        <tbody>
-          {characters}
-        </tbody>
-      </table>
+      <div>
+        <button onClick={this.props.switchMessages}>Keskustelut</button><button onClick={this.props.switchCharacter}>Uusi hahmo</button>
+        <table>
+          <thead>
+            <tr><th>Nimi</th><th>Pelaaja</th><th>Operaatiot</th></tr>
+          </thead>
+          <tbody>
+            {characters}
+          </tbody>
+        </table>
+      </div>
     );
   }
 }
@@ -98,6 +100,7 @@ class NewCharacter extends Component {
     this.onDescriptionChange = this.onDescriptionChange.bind(this);
     this.onPlotsChange = this.onPlotsChange.bind(this);
     this.onMechanicsChange = this.onMechanicsChange.bind(this);
+    this.resetForm = this.resetForm.bind(this)
   }
   componentDidMount() {
     if (this.props.selectedCharacter) {
@@ -150,10 +153,22 @@ class NewCharacter extends Component {
     xhttp.setRequestHeader("Content-type", "application/json");
     xhttp.send(data);
   }
+  resetForm() {
+    this.setState({ name: '' })
+    this.setState({ age: '' })
+    this.setState({ gender: '' })
+    this.setState({ player: '' })
+    this.setState({ saldo: '' })
+    this.setState({ description: '' })
+    this.setState({ plots: '' })
+    this.setState({ mechanics: '' })
+    this.props.return()
+  }
 
   render() {
     return (
       <div>
+        <button onClick={this.resetForm}>Takaisin</button>
         <form onSubmit={this.handleSubmit}>
           <label>Nimi:</label> <input type="text" value={this.state.name} onChange={this.handleChange} name="name"></input><br />
           <label>Ikä:</label> <input type="text" value={this.state.age} onChange={this.handleChange} name="age"></input><br />
@@ -167,16 +182,19 @@ class NewCharacter extends Component {
           <label>Pelimekaniikat: </label>
           <Editor content={this.state.mechanics} onChange={this.onMechanicsChange} />
           <button type="submit" onClick={this.handleSubmit}>Tallenna</button>
-          <button type="reset">Poistu tallentamatta</button>
+          <button type="reset" onClick={this.resetForm}>Poistu tallentamatta</button>
         </form>
       </div>
     );
   }
 }
 
-function Messages() {
+function Messages(props) {
   return (
-    <p>Täällä viestejä.</p>
+    <div>
+      <button onClick={props.return}>Takaisin</button>
+      <p>Täällä viestejä.</p>
+    </div>
   )
 }
 
@@ -188,22 +206,27 @@ class AdminDashboard extends Component {
       selectedCharacter: null
     }
     this.changeCharacter = this.changeCharacter.bind(this);
+    this.return = this.return.bind(this)
   }
   changeCharacter(id) {
     this.setState({ selectedCharacter: id })
     this.setState({ mode: "new" })
   }
+  return() {
+    this.setState({ mode: null })
+    this.setState({ selectedCharacter: null })
+  }
   render() {
     let tab
     switch (this.state.mode) {
-      case "new": tab = <NewCharacter selectedCharacter={this.state.selectedCharacter} />; break;
-      case "messages": tab = <Messages />; break;
-      default: tab = <CharacterMenu selectedCharacter={this.state.selectedCharacter} changeCharacter={this.changeCharacter} />
+      case "new": tab = <NewCharacter selectedCharacter={this.state.selectedCharacter} return={this.return} />; break;
+      case "messages": tab = <Messages return={this.return} />; break;
+      default: tab = <CharacterMenu selectedCharacter={this.state.selectedCharacter} changeCharacter={this.changeCharacter} switchCharacter={() => this.setState({ mode: "new" })} switchMessages={() => this.setState({ mode: "messages" })} />
     }
     return (
       <div>
         <h2>Dashboard</h2>
-        <button onClick={() => { this.setState({ mode: "messages" }) }}>Keskustelut</button><button onClick={() => { this.setState({ mode: "new" }) }}>Uusi hahmo</button>
+
         {tab}
       </div>
     );
