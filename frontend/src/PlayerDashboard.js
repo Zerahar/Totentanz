@@ -1,11 +1,51 @@
 import { Component } from "react";
-function Info() {
-    return (
-        <div>
-            <h2>Info</h2>
-            <p>Hahmotiedot</p>
-        </div>
-    );
+class Info extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            name: '',
+            age: '',
+            gender: '',
+            saldo: '',
+            description: 'Hahmon kuvaus',
+            mechanics: 'Pelimekaniikat',
+            plots: 'Juonet'
+        }
+        this.fillFields = this.fillFields.bind(this)
+    }
+    componentDidMount() {
+        fetch('http://localhost:3002/character/' + this.props.loggedCharacter)
+            .then(response => response.json())
+            .then(blob => this.fillFields(blob))
+    }
+    fillFields(data) {
+        this.setState({ name: data.name })
+        this.setState({ age: data.age })
+        this.setState({ gender: data.gender })
+        this.setState({ saldo: data.saldo })
+        this.setState({ description: data.description[0].children[0].text })
+        this.setState({ plots: data.plots[0].children[0].text })
+        this.setState({ mechanics: data.mechanics[0].children[0].text })
+    }
+    render() {
+        return (
+            <div>
+                <h2>Info</h2>
+                <ul>
+                    <li>Nimi: {this.state.name}</li>
+                    <li>Ikä: {this.state.age}</li>
+                    <li>Sukupuoli: {this.state.gender}</li>
+                    <li>Saldo: {this.state.saldo}</li>
+                </ul>
+                <h3>Kuvaus</h3>
+                <p>{this.state.description}</p>
+                <h3>Juonet</h3>
+                <p>{this.state.plots}</p>
+                <h3>Pelimekaniikat</h3>
+                <p>{this.state.mechanics}</p>
+            </div>
+        );
+    }
 }
 
 class Pay extends Component {
@@ -62,7 +102,8 @@ class Tabs extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            mode: null
+            mode: null,
+            loggedCharacter: "604b9d91babd4a59a81861d3"
         }
     }
     render() {
@@ -76,7 +117,7 @@ class Tabs extends Component {
         let tab
         switch (this.state.mode) {
             case "pay": tab = <Pay />; break;
-            case "info": tab = <Info />; break;
+            case "info": tab = <Info loggedCharacter={this.state.loggedCharacter} />; break;
             case "message": tab = <Message />; break;
             default: tab = null
         }
