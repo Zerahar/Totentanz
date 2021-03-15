@@ -11,21 +11,17 @@ class Info extends Component {
             mechanics: 'Pelimekaniikat',
             plots: 'Juonet'
         }
-        this.fillFields = this.fillFields.bind(this)
     }
     componentDidMount() {
-        fetch('http://localhost:3002/character/' + this.props.loggedCharacter)
-            .then(response => response.json())
-            .then(blob => this.fillFields(blob))
-    }
-    fillFields(data) {
-        this.setState({ name: data.name })
-        this.setState({ age: data.age })
-        this.setState({ gender: data.gender })
-        this.setState({ saldo: data.saldo })
-        this.setState({ description: data.description[0].children[0].text })
-        this.setState({ plots: data.plots[0].children[0].text })
-        this.setState({ mechanics: data.mechanics[0].children[0].text })
+        if (this.props.character) {
+            this.setState({ name: this.props.character.name })
+            // this.setState({ age: this.props.character.age })
+            // this.setState({ gender: this.props.character.gender })
+            // this.setState({ saldo: this.props.character.saldo })
+            // this.setState({ description: this.props.character.description[0].children[0].text })
+            // this.setState({ plots: this.props.character.plots[0].children[0].text })
+            // this.setState({ mechanics: this.props.character.mechanics[0].children[0].text })
+        }
     }
     render() {
         return (
@@ -83,18 +79,60 @@ class Message extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            chats: [{ participants: ["Mary", "Ellie", "Rick"] }, { participants: ["Connor", "Ellie", "Rick"] }]
+            chats: [],
+            mode: '',
+            isLoaded: false,
+            error: '',
+            selectedCharacters: []
+        }
+        this.handleChange = this.handleChange.bind(this)
+        this.createChat = this.createChat.bind(this)
+    }
+    componentDidMount() {
+        fetch('http://localhost:3002/chat/')
+            .then(res => res.json())
+            .then(
+                (result) => {
+                    this.setState({ chats: result });
+                }
+            )
+    }
+    handleChange(event) {
+        if (event.target.checked)
+            this.setState(prevState => ({ selectedCharacters: [...prevState.selectedCharacters, event.target.name] }))
+        else {
+            let filteredArray = this.state.selectedCharacters.filter(id => id !== event.target.name)
+            this.setState({ selectedCharacters: filteredArray })
         }
     }
+    createChat() {
+        const data = { participants: this.state.selectedCharacters }
+        let xhttp = new XMLHttpRequest();
+        xhttp.open("POST", "http://localhost:3002/chat/", true);
+        xhttp.setRequestHeader("Content-type", "application/json");
+        xhttp.send(JSON.stringify(data));
+    }
     render() {
+        const characters = this.props.characters.map((character) => <li><input type="checkbox" name={character._id} onChange={this.handleChange} />{character.name}</li>)
         const chats = this.state.chats.map((chat) => <li>{chat.participants.map((participant) => participant + ", ")}</li>);
-        return (
-            <div>
-                <h2>Message</h2>
-                <button>Uusi keskustelu</button>
-                <ul>{chats}</ul>
-            </div>
-        )
+        if (this.state.mode === "new") {
+            return (<div>
+                <label>Valitse keskustelun jäsenet</label>
+                <ul>
+                    {characters}
+                </ul>
+                <button onClick={this.createChat}>Luo keskustelu</button>
+            </div>)
+        }
+        else {
+            return (
+                <div>
+                    <h2>Message</h2>
+                    <button onClick={() => this.setState({ mode: "new" })}>Uusi keskustelu</button>
+                    <ul>{chats}</ul>
+                </div>
+            )
+        }
     }
 }
 
@@ -102,8 +140,7 @@ class Tabs extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            mode: null,
-            loggedCharacter: "604b9d91babd4a59a81861d3"
+            mode: null
         }
     }
     render() {
@@ -117,8 +154,8 @@ class Tabs extends Component {
         let tab
         switch (this.state.mode) {
             case "pay": tab = <Pay />; break;
-            case "info": tab = <Info loggedCharacter={this.state.loggedCharacter} />; break;
-            case "message": tab = <Message />; break;
+            case "info": tab = <Info character={this.props.characters.find(character => character._id === this.props.loggedCharacter)} />; break;
+            case "message": tab = <Message characters={this.props.characters} />; break;
             default: tab = null
         }
         return (
@@ -134,14 +171,18 @@ class Tabs extends Component {
     }
 }
 
-function PlayerDashboard() {
-    return (
-        <div>
-            <h2>Player Dashboard</h2>
-            <Tabs />
-        </div>
-    )
-
+class PlayerDashboard extends Component {
+    componentDidMount() {
+        this.props.fetchCharacters()
+    }
+    render() {
+        return (
+            <div>
+                <h2>Player Dashboard</h2>
+                <Tabs loggedCharacter={this.props.loggedCharacter} characters={this.props.characters} />
+            </div>
+        )
+    }
 }
 
 export default PlayerDashboard

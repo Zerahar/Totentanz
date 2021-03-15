@@ -90,4 +90,13 @@ mongo.MongoClient.connect(`mongodb+srv://dbAdmin:${pass}@oppari.q4dhm.mongodb.ne
       db.close
     })
   })
+
+  // Add chat
+  app.post('/chat', (req, res) => {
+    db.collection('chats').insertOne(req.body, function (err, result) {
+      if (err) throw err
+      res.send(result)
+      db.close
+    })
+  })
 })

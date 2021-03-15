@@ -8,39 +8,17 @@ import { Slate, Editable, withReact } from 'slate-react'
 class CharacterMenu extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      characters: [],
-      isLoaded: false,
-      error: null
-    }
     this.editCharacter = this.editCharacter.bind(this);
   }
   editCharacter(e) {
     this.props.changeCharacter(e.target.id)
   }
   componentDidMount() {
-    fetch('http://localhost:3002/character/')
-      .then(res => res.json())
-      .then(
-        (result) => {
-          this.setState({
-            isLoaded: true,
-            characters: result
-          });
-        },
-        // Note: it's important to handle errors here
-        // instead of a catch() block so that we don't swallow
-        // exceptions from actual bugs in components.
-        (error) => {
-          this.setState({
-            isLoaded: true,
-            error
-          });
-        }
-      )
+    if (this.props.characters.length === 0)
+      this.props.fetchCharacters()
   }
   render() {
-    const characters = this.state.characters.map((character) => <tr><td>{character.name}</td><td>{character.player}</td><td><button id={character._id} onClick={this.editCharacter}>Muokkaa</button><button>Poista</button></td></tr>);
+    const characters = this.props.characters.map((character) => <tr><td>{character.name}</td><td>{character.player}</td><td><button id={character._id} onClick={this.editCharacter}>Muokkaa</button><button>Poista</button></td></tr>);
     return (
       <div>
         <button onClick={this.props.switchMessages}>Keskustelut</button><button onClick={this.props.switchCharacter}>Uusi hahmo</button><button onClick={this.props.newUser}>Uusi käyttäjä</button>
@@ -152,6 +130,7 @@ class NewCharacter extends Component {
     xhttp.open("POST", url, true);
     xhttp.setRequestHeader("Content-type", "application/json");
     xhttp.send(data);
+    this.props.fetchCharacters()
   }
   resetForm() {
     this.setState({ name: '' })
@@ -284,10 +263,10 @@ class AdminDashboard extends Component {
   render() {
     let tab
     switch (this.state.mode) {
-      case "new": tab = <NewCharacter selectedCharacter={this.state.selectedCharacter} return={this.return} />; break;
-      case "messages": tab = <Messages return={this.return} />; break;
+      case "new": tab = <NewCharacter selectedCharacter={this.state.selectedCharacter} fetchCharacters={this.props.fetchCharacters} return={this.return} />; break;
+      case "messages": tab = <Messages return={this.return} characters={this.props.characters} />; break;
       case "user": tab = <NewUser />; break;
-      default: tab = <CharacterMenu selectedCharacter={this.state.selectedCharacter} changeCharacter={this.changeCharacter} newUser={() => this.setState({ mode: 'user' })} switchCharacter={() => this.setState({ mode: "new" })} switchMessages={() => this.setState({ mode: "messages" })} />
+      default: tab = <CharacterMenu characters={this.props.characters} fetchCharacters={this.props.fetchCharacters} selectedCharacter={this.state.selectedCharacter} changeCharacter={this.changeCharacter} newUser={() => this.setState({ mode: 'user' })} switchCharacter={() => this.setState({ mode: "new" })} switchMessages={() => this.setState({ mode: "messages" })} />
     }
     return (
       <div>
