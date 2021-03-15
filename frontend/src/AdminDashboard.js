@@ -145,6 +145,7 @@ class NewCharacter extends Component {
   }
 
   render() {
+    const players = this.props.players.map(player => <option value={player._id}>{player.playerName}</option>)
     return (
       <div>
         <button onClick={this.resetForm}>Takaisin</button>
@@ -152,7 +153,7 @@ class NewCharacter extends Component {
           <label>Nimi:</label> <input type="text" value={this.state.name} onChange={this.handleChange} name="name"></input><br />
           <label>Ikä:</label> <input type="text" value={this.state.age} onChange={this.handleChange} name="age"></input><br />
           <label>Sukupuoli:</label> <input type="text" value={this.state.gender} onChange={this.handleChange} name="gender"></input><br />
-          <label>Pelaaja:</label> <input type="text" value={this.state.player} onChange={this.handleChange} name="player"></input><br />
+          <label>Pelaaja:</label> <select value={this.state.player} onChange={this.handleChange} name="player">{players}</select><br />
           <label>Saldo:</label> <input type="text" value={this.state.saldo} onChange={this.handleChange} name="saldo"></input><br />
           <label>Kuvaus: </label>
           <Editor content={this.state.description} onChange={this.onDescriptionChange} />
@@ -247,10 +248,16 @@ class AdminDashboard extends Component {
     super(props);
     this.state = {
       mode: null,
-      selectedCharacter: null
+      selectedCharacter: null,
+      players: []
     }
     this.changeCharacter = this.changeCharacter.bind(this);
     this.return = this.return.bind(this)
+  }
+  componentDidMount() {
+    fetch('http://localhost:3002/user/')
+      .then(res => res.json())
+      .then(data => this.setState({ players: data }))
   }
   changeCharacter(id) {
     this.setState({ selectedCharacter: id })
@@ -263,7 +270,7 @@ class AdminDashboard extends Component {
   render() {
     let tab
     switch (this.state.mode) {
-      case "new": tab = <NewCharacter selectedCharacter={this.state.selectedCharacter} fetchCharacters={this.props.fetchCharacters} return={this.return} />; break;
+      case "new": tab = <NewCharacter selectedCharacter={this.state.selectedCharacter} fetchCharacters={this.props.fetchCharacters} return={this.return} players={this.state.players} />; break;
       case "messages": tab = <Messages return={this.return} characters={this.props.characters} />; break;
       case "user": tab = <NewUser />; break;
       default: tab = <CharacterMenu characters={this.props.characters} fetchCharacters={this.props.fetchCharacters} selectedCharacter={this.state.selectedCharacter} changeCharacter={this.changeCharacter} newUser={() => this.setState({ mode: 'user' })} switchCharacter={() => this.setState({ mode: "new" })} switchMessages={() => this.setState({ mode: "messages" })} />

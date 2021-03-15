@@ -83,10 +83,13 @@ class Message extends Component {
             mode: '',
             isLoaded: false,
             error: '',
-            selectedCharacters: []
+            selectedCharacters: [],
+            selectedChat: ''
         }
         this.handleChange = this.handleChange.bind(this)
         this.createChat = this.createChat.bind(this)
+        this.sendMessage = this.sendMessage.bind(this)
+        this.messageBeingWritten = this.messageBeingWritten.bind(this)
     }
     componentDidMount() {
         fetch('http://localhost:3002/chat/')
@@ -112,9 +115,18 @@ class Message extends Component {
         xhttp.setRequestHeader("Content-type", "application/json");
         xhttp.send(JSON.stringify(data));
     }
+    messageBeingWritten(event) {
+        this.setState({ userInput: event.target.value })
+    }
+    sendMessage() {
+        console.log(this.state.userInput)
+    }
     render() {
         const characters = this.props.characters.map((character) => <li><input type="checkbox" name={character._id} onChange={this.handleChange} />{character.name}</li>)
-        const chats = this.state.chats.map((chat) => <li>{chat.participants.map((participant) => participant + ", ")}</li>);
+        const chats = this.state.chats.map((chat) => <li>
+            {chat.participants.map((participant) => this.props.characters.find(character => character._id === participant).name + ", ")}
+            <button onClick={() => this.setState({ mode: "open", selectedChat: chat })}>Avaa</button>
+        </li>);
         if (this.state.mode === "new") {
             return (<div>
                 <label>Valitse keskustelun jäsenet</label>
@@ -123,6 +135,14 @@ class Message extends Component {
                 </ul>
                 <button onClick={this.createChat}>Luo keskustelu</button>
             </div>)
+        }
+        else if (this.state.mode === "open") {
+            return (
+                <div>
+                    <h2>{this.state.selectedChat.participants.map((participant) => this.props.characters.find(character => character._id === participant).name + ", ")}</h2>
+                    <input type="text" value={this.state.userInput} onChange={this.messageBeingWritten}></input><button onClick={this.sendMessage}>Lähetä</button>
+                </div>
+            )
         }
         else {
             return (

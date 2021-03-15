@@ -91,9 +91,37 @@ mongo.MongoClient.connect(`mongodb+srv://dbAdmin:${pass}@oppari.q4dhm.mongodb.ne
     })
   })
 
+  // Fetch all users
+  app.get('/user/', (req, res) => {
+    db.collection('users').find().toArray(function (err, result) {
+      if (err) throw err
+      res.send(result)
+      db.close
+    })
+  })
+
   // Add chat
   app.post('/chat', (req, res) => {
     db.collection('chats').insertOne(req.body, function (err, result) {
+      if (err) throw err
+      res.send(result)
+      db.close
+    })
+  })
+
+  // Fetch all chats
+  app.get('/chat/', (req, res) => {
+    db.collection('chats').find().toArray(function (err, result) {
+      if (err) throw err
+      res.send(result)
+      db.close
+    })
+  })
+
+  // Fetch all chats for certain user
+  app.get('/chat/user/:userId', (req, res) => {
+    const query = { participants: { userId: req.params.userId } }
+    db.collection('chats').find(query).toArray(function (err, result) {
       if (err) throw err
       res.send(result)
       db.close
