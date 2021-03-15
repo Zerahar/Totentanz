@@ -67,4 +67,27 @@ mongo.MongoClient.connect(`mongodb+srv://dbAdmin:${pass}@oppari.q4dhm.mongodb.ne
       db.close
     })
   })
+
+  // Add user
+  app.post('/user', (req, res) => {
+    db.collection('users').insertOne(req.body, function (err, result) {
+      if (err) throw err
+      res.send(result)
+      db.close
+    })
+  })
+
+  // Fetch user
+  app.get('/user/:login', (req, res) => {
+    console.log(req.params.login)
+    const query = { login: req.params.login }
+    db.collection('users').findOne(query, function (err, result) {
+      if (err) throw err
+      if (result)
+        res.send(result)
+      else
+        res.status(404).send('')
+      db.close
+    })
+  })
 })

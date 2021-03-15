@@ -43,7 +43,7 @@ class CharacterMenu extends Component {
     const characters = this.state.characters.map((character) => <tr><td>{character.name}</td><td>{character.player}</td><td><button id={character._id} onClick={this.editCharacter}>Muokkaa</button><button>Poista</button></td></tr>);
     return (
       <div>
-        <button onClick={this.props.switchMessages}>Keskustelut</button><button onClick={this.props.switchCharacter}>Uusi hahmo</button>
+        <button onClick={this.props.switchMessages}>Keskustelut</button><button onClick={this.props.switchCharacter}>Uusi hahmo</button><button onClick={this.props.newUser}>Uusi käyttäjä</button>
         <table>
           <thead>
             <tr><th>Nimi</th><th>Pelaaja</th><th>Operaatiot</th></tr>
@@ -198,6 +198,71 @@ function Messages(props) {
   )
 }
 
+class NewUser extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      characters: [],
+      login: '',
+      playerName: '',
+      selectedCharacter: '',
+      isLoaded: true
+    };
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+  handleChange(event) {
+    const target = event.target;
+    const value = target.type === 'checkbox' ? target.checked : target.value;
+    const name = target.name;
+    this.setState({
+      [name]: value
+    });
+  }
+  handleSubmit(event) {
+    event.preventDefault();
+    const data = { login: this.state.login, userName: this.state.playerName, character: this.state.selectedCharacter, userType: 'player' }
+    let xhttp = new XMLHttpRequest();
+    xhttp.open("POST", "http://localhost:3002/user/", true);
+    xhttp.setRequestHeader("Content-type", "application/json");
+    xhttp.send(JSON.stringify(data));
+  }
+  componentDidMount() {
+    fetch('http://localhost:3002/character/')
+      .then(res => res.json())
+      .then(
+        (result) => {
+          this.setState({
+            isLoaded: true,
+            characters: result
+          });
+        },
+        // Note: it's important to handle errors here
+        // instead of a catch() block so that we don't swallow
+        // exceptions from actual bugs in components.
+        (error) => {
+          this.setState({
+            isLoaded: true,
+            error
+          });
+        }
+      )
+  }
+  render() {
+    const characters = this.state.characters.map((character) => <option value={character._id}>{character.name}</option>)
+    return (
+      <div>
+        <form onSubmit={this.handleSubmit}>
+          <label>Kirjautumistunnus</label><input type="text" name="login" value={this.state.login} onChange={this.handleChange}></input><br />
+          <label>Pelaajan nimi</label><input type="text" name="playerName" value={this.state.playerName} onChange={this.handleChange}></input><br />
+          <label>Hahmo</label><select name="selectedCharacter" value={this.state.selectedCharacter} onChange={this.handleChange}>{characters}</select><br />
+          <button type="submit">Tallenna</button>
+        </form>
+      </div>
+    )
+  }
+}
+
 class AdminDashboard extends Component {
   constructor(props) {
     super(props);
@@ -221,7 +286,8 @@ class AdminDashboard extends Component {
     switch (this.state.mode) {
       case "new": tab = <NewCharacter selectedCharacter={this.state.selectedCharacter} return={this.return} />; break;
       case "messages": tab = <Messages return={this.return} />; break;
-      default: tab = <CharacterMenu selectedCharacter={this.state.selectedCharacter} changeCharacter={this.changeCharacter} switchCharacter={() => this.setState({ mode: "new" })} switchMessages={() => this.setState({ mode: "messages" })} />
+      case "user": tab = <NewUser />; break;
+      default: tab = <CharacterMenu selectedCharacter={this.state.selectedCharacter} changeCharacter={this.changeCharacter} newUser={() => this.setState({ mode: 'user' })} switchCharacter={() => this.setState({ mode: "new" })} switchMessages={() => this.setState({ mode: "messages" })} />
     }
     return (
       <div>
