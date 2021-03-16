@@ -27,6 +27,16 @@ mongo.MongoClient.connect(`mongodb+srv://dbAdmin:${pass}@oppari.q4dhm.mongodb.ne
     })
   })
 
+  // Remove character
+  app.get('/character/delete/:charId', (req, res) => {
+    const query = { _id: new mongo.ObjectId(req.params.charId) }
+    db.collection('characters').deleteOne(query, function (err, result) {
+      if (err) throw err
+      res.send(result)
+      db.close
+    })
+  })
+
   // Fetch all characters
   app.get('/character/', (req, res) => {
     db.collection('characters').find().toArray(function (err, result) {
@@ -77,6 +87,24 @@ mongo.MongoClient.connect(`mongodb+srv://dbAdmin:${pass}@oppari.q4dhm.mongodb.ne
     })
   })
 
+  // Update user
+  app.post('/user/:userId', (req, res) => {
+    const query = { _id: new mongo.ObjectId(req.params.userId) }
+    const document = {
+      $set: {
+        userName: req.body.userName,
+        login: req.body.login,
+        character: req.body.character,
+        userType: req.body.userType
+      }
+    }
+    db.collection('users').updateOne(query, document, function (err, result) {
+      if (err) throw err
+      res.send(result)
+      db.close
+    })
+  })
+
   // Fetch user
   app.get('/user/:login', (req, res) => {
     console.log(req.params.login)
@@ -94,6 +122,16 @@ mongo.MongoClient.connect(`mongodb+srv://dbAdmin:${pass}@oppari.q4dhm.mongodb.ne
   // Fetch all users
   app.get('/user/', (req, res) => {
     db.collection('users').find().toArray(function (err, result) {
+      if (err) throw err
+      res.send(result)
+      db.close
+    })
+  })
+
+  // Remove user
+  app.get('/user/delete/:charId', (req, res) => {
+    const query = { _id: new mongo.ObjectId(req.params.charId) }
+    db.collection('users').deleteOne(query, function (err, result) {
       if (err) throw err
       res.send(result)
       db.close

@@ -16,12 +16,12 @@ class Info extends Component {
     componentDidMount() {
         if (this.props.character) {
             this.setState({ name: this.props.character.name })
-            // this.setState({ age: this.props.character.age })
-            // this.setState({ gender: this.props.character.gender })
-            // this.setState({ saldo: this.props.character.saldo })
-            // this.setState({ description: this.props.character.description[0].children[0].text })
-            // this.setState({ plots: this.props.character.plots[0].children[0].text })
-            // this.setState({ mechanics: this.props.character.mechanics[0].children[0].text })
+            this.setState({ age: this.props.character.age })
+            this.setState({ gender: this.props.character.gender })
+            this.setState({ saldo: this.props.character.saldo })
+            this.setState({ description: this.props.character.description[0].children[0].text })
+            this.setState({ plots: this.props.character.plots[0].children[0].text })
+            this.setState({ mechanics: this.props.character.mechanics[0].children[0].text })
         }
     }
     render() {
