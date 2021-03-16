@@ -1,4 +1,5 @@
 import { Component } from "react";
+import OpenChat from './OpenChat.js'
 class Info extends Component {
     constructor(props) {
         super(props);
@@ -88,8 +89,6 @@ class Message extends Component {
         }
         this.handleChange = this.handleChange.bind(this)
         this.createChat = this.createChat.bind(this)
-        this.sendMessage = this.sendMessage.bind(this)
-        this.messageBeingWritten = this.messageBeingWritten.bind(this)
     }
     componentDidMount() {
         fetch('http://localhost:3002/chat/')
@@ -102,9 +101,9 @@ class Message extends Component {
     }
     handleChange(event) {
         if (event.target.checked)
-            this.setState(prevState => ({ selectedCharacters: [...prevState.selectedCharacters, event.target.name] }))
+            this.setState(prevState => ({ selectedCharacters: [...prevState.selectedCharacters, this.props.characters.find(character => character._id === event.target.name)] }))
         else {
-            let filteredArray = this.state.selectedCharacters.filter(id => id !== event.target.name)
+            let filteredArray = this.state.selectedCharacters.filter(character => character._id !== event.target.name)
             this.setState({ selectedCharacters: filteredArray })
         }
     }
@@ -115,16 +114,10 @@ class Message extends Component {
         xhttp.setRequestHeader("Content-type", "application/json");
         xhttp.send(JSON.stringify(data));
     }
-    messageBeingWritten(event) {
-        this.setState({ userInput: event.target.value })
-    }
-    sendMessage() {
-        console.log(this.state.userInput)
-    }
     render() {
         const characters = this.props.characters.map((character) => <li><input type="checkbox" name={character._id} onChange={this.handleChange} />{character.name}</li>)
         const chats = this.state.chats.map((chat) => <li>
-            {chat.participants.map((participant) => this.props.characters.find(character => character._id === participant).name + ", ")}
+            {chat.participants.map((participant) => participant.name + ", ")}
             <button onClick={() => this.setState({ mode: "open", selectedChat: chat })}>Avaa</button>
         </li>);
         if (this.state.mode === "new") {
@@ -138,10 +131,7 @@ class Message extends Component {
         }
         else if (this.state.mode === "open") {
             return (
-                <div>
-                    <h2>{this.state.selectedChat.participants.map((participant) => this.props.characters.find(character => character._id === participant).name + ", ")}</h2>
-                    <input type="text" value={this.state.userInput} onChange={this.messageBeingWritten}></input><button onClick={this.sendMessage}>Lähetä</button>
-                </div>
+                <OpenChat chat={this.state.selectedChat} user={this.props.characters.find(character => character._id === this.props.loggedCharacter)} />
             )
         }
         else {
@@ -175,7 +165,7 @@ class Tabs extends Component {
         switch (this.state.mode) {
             case "pay": tab = <Pay />; break;
             case "info": tab = <Info character={this.props.characters.find(character => character._id === this.props.loggedCharacter)} />; break;
-            case "message": tab = <Message characters={this.props.characters} />; break;
+            case "message": tab = <Message characters={this.props.characters} loggedCharacter={this.props.loggedCharacter} />; break;
             default: tab = null
         }
         return (
