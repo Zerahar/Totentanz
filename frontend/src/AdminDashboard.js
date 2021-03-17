@@ -246,7 +246,32 @@ class NewUser extends Component {
       url += this.props.existingUser._id
     xhttp.open("POST", url, true);
     xhttp.setRequestHeader("Content-type", "application/json");
-    xhttp.send(JSON.stringify(data));
+    if (this.state.selectedCharacter) {
+      const existingUser = this.props.existingUser
+      const characterId = this.state.selectedCharacter
+      const selectedCharacter = this.props.characters.find(character => character._id === characterId)
+
+      xhttp.onreadystatechange = function () {
+        let userId
+        if (this.readyState == 4 && this.status == 200) {
+          if (!existingUser)
+            userId = JSON.parse(this.response).insertedId
+          else
+            userId = existingUser._id
+
+          // Check that character has player as well
+
+          if (!selectedCharacter.player) {
+            xhttp.open("POST", "http://localhost:3002/character/user/" + characterId, true);
+            xhttp.setRequestHeader("Content-type", "application/json");
+            xhttp.send(JSON.stringify({ player: userId }));
+          }
+        }
+      }
+
+    }
+    xhttp.send(JSON.stringify(data))
+
   }
   fillFields() {
     this.setState({

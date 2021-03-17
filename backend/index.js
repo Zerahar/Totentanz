@@ -69,6 +69,21 @@ mongo.MongoClient.connect(`mongodb+srv://dbAdmin:${pass}@oppari.q4dhm.mongodb.ne
     })
   })
 
+  // Update character
+  app.post('/character/user/:charId', (req, res) => {
+    const query = { _id: new mongo.ObjectId(req.params.charId) }
+    const document = {
+      $set: {
+        player: req.body.player
+      }
+    }
+    db.collection('characters').updateOne(query, document, function (err, result) {
+      if (err) throw err
+      res.send(result)
+      db.close
+    })
+  })
+
   // Add character
   app.post('/character', (req, res) => {
     db.collection('characters').insertOne(req.body, function (err, result) {
