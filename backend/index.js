@@ -206,10 +206,7 @@ function htmlEntities(str) {
   return String(str)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;')
     .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}// Array with some colors
-var colors = ['red', 'green', 'blue', 'magenta', 'purple', 'plum', 'orange'];
-// ... in random order
-colors.sort(function (a, b) { return Math.random() > 0.5; });
+}
 // WebSocket server
 wsServer.on('request', function (request) {
   console.log((new Date()) + ' Connection from origin '
@@ -218,7 +215,6 @@ wsServer.on('request', function (request) {
   // we need to know client index to remove them on 'close' event
   var index = clients.push(connection) - 1;
   var userName = false;
-  var userColor = false;
   // send back chat history
   if (history.length > 0) {
     connection.sendUTF(
@@ -234,12 +230,6 @@ wsServer.on('request', function (request) {
     if (userName === false) {
       // remember user name
       userName = htmlEntities(message.utf8Data);
-      // get random color and send it back to the user
-      userColor = colors.shift();
-      connection.sendUTF(
-        JSON.stringify({ type: 'color', data: userColor }));
-      console.log((new Date()) + ' User is known as: ' + userName
-        + ' with ' + userColor + ' color.');
     } else { // log and broadcast the message
       console.log((new Date()) + ' Received Message from '
         + userName + ': ' + message.utf8Data);
@@ -248,25 +238,24 @@ wsServer.on('request', function (request) {
       var obj = {
         time: (new Date()).getTime(),
         text: htmlEntities(message.utf8Data),
-        author: userName,
-        color: userColor
+        author: userName
       };
       history.push(obj);
       history = history.slice(-100);        // broadcast message to all connected clients
       var json = JSON.stringify({ type: 'message', data: obj });
       for (var i = 0; i < clients.length; i++) {
+        console.log("Broadcasting message to " + i)
         clients[i].sendUTF(json);
       }
     }
   });
 
   connection.on('close', function (connection) {
-    if (userName !== false && userColor !== false) {
+    if (userName !== false) {
       console.log((new Date()) + " Peer "
         + connection.remoteAddress + " disconnected.");      // remove user from the list of connected clients
       clients.splice(index, 1);
-      // push back user's color to be reused by another user
-      colors.push(userColor);
+
     }
   });
 });

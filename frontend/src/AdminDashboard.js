@@ -32,7 +32,7 @@ class CharacterMenu extends Component {
       this.props.fetchCharacters()
   }
   render() {
-    const characterName = (characters, id) => { console.log(id); if (id) { try { return characters.find(character => character._id === id).name } catch { return "-" } } else { return "-" } }
+    const characterName = (characters, id) => { if (id) { try { return characters.find(character => character._id === id).name } catch { return "-" } } else { return "-" } }
     const playerName = (players, id) => { if (id) { try { return players.find(player => player._id === id).userName } catch { return "-" } } else { return "-" } }
     const characters = this.props.characters.map((character) => <tr>
       <td>{character.name}</td><td>{playerName(this.props.players, character.player)}</td>
