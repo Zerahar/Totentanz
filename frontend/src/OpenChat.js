@@ -26,8 +26,13 @@ class OpenChat extends Component {
         this.ws.onopen = () => {
             // on connecting, do nothing but log it to the console
             console.log('connected')
-            console.log("Sending username: ", this.props.user.name)
-            this.ws.send(JSON.stringify({ text: this.props.user.name, type: 'name', chat: this.props.chat._id }))
+            let name
+            if (this.props.user === "admin")
+                name = "admin"
+            else
+                name = this.props.user.name
+            console.log("Sending username: ", name)
+            this.ws.send(JSON.stringify({ text: name, type: 'name', chat: this.props.chat._id }))
             this.setState({ nameSent: true, ready: true })
         }
         this.ws.onmessage = evt => {

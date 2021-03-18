@@ -180,6 +180,15 @@ mongo.MongoClient.connect(url, function (err, client) {
       db.close
     })
   })
+  // Remove chat
+  app.get('/chat/delete/:chatId', (req, res) => {
+    const query = { _id: new mongo.ObjectId(req.params.chatId) }
+    db.collection('chats').deleteOne(query, function (err, result) {
+      if (err) throw err
+      res.send(result)
+      db.close
+    })
+  })
 })
 
 var WebSocketServer = require('websocket').server;

@@ -4,6 +4,7 @@ import React, { Component, useMemo, useState, useEffect } from 'react'
 import { createEditor } from 'slate'
 // Import the Slate components and React plugin.
 import { Slate, Editable, withReact } from 'slate-react'
+import OpenChat from './OpenChat.js'
 
 class CharacterMenu extends Component {
   constructor(props) {
@@ -208,15 +209,86 @@ class NewCharacter extends Component {
   }
 }
 
-function Messages(props) {
-  return (
-    <div>
-      <button onClick={props.return}>Takaisin</button>
-      <p>Täällä viestejä.</p>
-    </div>
-  )
+class Messages extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      chats: [],
+      selectedChat: '',
+      mode: '',
+      isLoaded: true,
+      selectedCharacters: []
+    };
+    this.fetchChats = this.fetchChats.bind(this)
+    this.deleteChat = this.deleteChat.bind(this)
+    this.handleChange = this.handleChange.bind(this)
+    this.createChat = this.createChat.bind(this)
+  }
+  componentDidMount() {
+    this.fetchChats()
+  }
+  fetchChats(e) {
+    console.log("Fetching chats")
+    fetch('http://localhost:3002/chat/')
+      .then(res => res.json())
+      .then(
+        (result) => {
+          this.setState({ chats: result, isLoaded: true });
+        }
+      )
+  }
+  deleteChat(e) {
+    fetch('http://localhost:3002/chat/delete/' + e.target.id)
+      .then(response => this.fetchChats())
+  }
+  createChat() {
+    const data = { participants: this.state.selectedCharacters }
+    let xhttp = new XMLHttpRequest();
+    xhttp.open("POST", "http://localhost:3002/chat/", true);
+    xhttp.setRequestHeader("Content-type", "application/json");
+    xhttp.onreadystatechange = (e) => this.fetchChats(e)
+    xhttp.send(JSON.stringify(data));
+    this.setState({ mode: '', selectedCharacters: [] })
+  }
+  handleChange(event) {
+    if (event.target.checked)
+      this.setState(prevState => ({ selectedCharacters: [...prevState.selectedCharacters, this.props.characters.find(character => character._id === event.target.name)] }))
+    else {
+      let filteredArray = this.state.selectedCharacters.filter(character => character._id !== event.target.name)
+      this.setState({ selectedCharacters: filteredArray })
+    }
+  }
+  render() {
+    const characters = this.props.characters.map((character) => <li><input type="checkbox" name={character._id} onChange={this.handleChange} />{character.name}</li>)
+    const chats = this.state.chats.map((chat) => <li>
+      {chat.participants.map((participant) => participant.name + ", ")}
+      <button onClick={() => this.setState({ mode: "open", selectedChat: chat })}>Avaa</button>
+      <button onClick={this.deleteChat} id={chat._id}>Poista</button>
+    </li>);
+    if (this.state.mode === "new") {
+      return (<div>
+        <label>Valitse keskustelun jäsenet</label>
+        <ul>
+          {characters}
+        </ul>
+        <button onClick={this.createChat}>Luo keskustelu</button>
+      </div>)
+    }
+    else if (this.state.mode === "open") {
+      return (
+        <OpenChat chat={this.state.selectedChat} user="admin" />
+      )
+    }
+    else {
+      return (
+        <div>
+          <button onClick={this.props.return}>Takaisin</button><button onClick={() => this.setState({ mode: "new" })}>Uusi keskustelu</button>
+          <ul>{chats}</ul>
+        </div>
+      )
+    }
+  }
 }
-
 class NewUser extends Component {
   constructor(props) {
     super(props);

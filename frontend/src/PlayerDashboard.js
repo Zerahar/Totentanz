@@ -109,14 +109,18 @@ class Message extends Component {
         }
     }
     createChat() {
-        const data = { participants: this.state.selectedCharacters }
+        const loggedCharacter = this.props.characters.find(character => character._id === this.props.loggedCharacter)
+        let characters = [{ _id: loggedCharacter._id, name: loggedCharacter.name, player: loggedCharacter.player }]
+        this.state.selectedCharacters.map(character => characters.push({ _id: character._id, name: character.name, player: character.player }))
+        const data = { participants: characters }
         let xhttp = new XMLHttpRequest();
         xhttp.open("POST", "http://localhost:3002/chat/", true);
         xhttp.setRequestHeader("Content-type", "application/json");
         xhttp.send(JSON.stringify(data));
+        this.setState({ mode: '', selectedCharacters: [] })
     }
     render() {
-        const characters = this.props.characters.map((character) => <li><input type="checkbox" name={character._id} onChange={this.handleChange} />{character.name}</li>)
+        const characters = this.props.characters.filter(character => character._id !== this.props.loggedCharacter).map((character) => <li><input type="checkbox" name={character._id} onChange={this.handleChange} />{character.name}</li>)
         const chats = this.state.chats.map((chat) => <li>
             {chat.participants.map((participant) => participant.name + ", ")}
             <button onClick={() => this.setState({ mode: "open", selectedChat: chat })}>Avaa</button>
