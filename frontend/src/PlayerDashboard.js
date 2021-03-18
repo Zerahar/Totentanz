@@ -91,11 +91,12 @@ class Message extends Component {
         this.createChat = this.createChat.bind(this)
     }
     componentDidMount() {
-        fetch('http://localhost:3002/chat/')
+        console.log("Fetching chats")
+        fetch('http://localhost:3002/chat/' + this.props.loggedCharacter)
             .then(res => res.json())
             .then(
                 (result) => {
-                    this.setState({ chats: result });
+                    this.setState({ chats: result, isLoaded: true });
                 }
             )
     }

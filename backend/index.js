@@ -171,9 +171,9 @@ mongo.MongoClient.connect(url, function (err, client) {
     })
   })
 
-  // Fetch all chats for certain user
-  app.get('/chat/user/:userId', (req, res) => {
-    const query = { participants: { userId: req.params.userId } }
+  // Fetch all chats for certain character
+  app.get('/chat/:charId', (req, res) => {
+    const query = { "participants._id": req.params.charId }
     db.collection('chats').find(query).toArray(function (err, result) {
       if (err) throw err
       res.send(result)
@@ -195,8 +195,7 @@ server.listen(1337, function () { });
 wsServer = new WebSocketServer({
   httpServer: server
 });
-// latest 100 messages
-var history = [];
+
 // list of currently connected clients (users)
 var clients = [];
 
@@ -207,12 +206,6 @@ wsServer.on('request', function (request) {
   var connection = request.accept(null, request.origin);
   // we need to know client index to remove them on 'close' event
   var userName = false;
-
-  // if (history.length > 0) {
-  //   connection.sendUTF(
-  //     JSON.stringify({ type: 'history', data: history }));
-  // }
-
   // This is the most important callback for us, we'll handle
   // all messages from users here.
   connection.on('message', function (message) {
@@ -244,7 +237,6 @@ wsServer.on('request', function (request) {
         author: userName,
         chat: data.chat
       };
-      // history.push(obj);
       // save message into database
       mongo.MongoClient.connect(url, function (err, client) {
         if (err) throw err
@@ -254,8 +246,7 @@ wsServer.on('request', function (request) {
           db.close
         })
       })
-
-      // history = history.slice(-100);        // broadcast message to all connected clients
+      // broadcast message to all connected clients
       var json = JSON.stringify({ type: 'message', data: obj });
       const participants = clients.filter(client => client.id === data.chat)
       participants.forEach(participant => {

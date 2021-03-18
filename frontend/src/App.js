@@ -73,8 +73,8 @@ class App extends Component {
               <Link to="/adminDashboard">Dashboard (Admin)</Link>
             </li>
             {loginForm}
-          </ul>
 
+          </ul>
           <hr />
 
           <Switch>
