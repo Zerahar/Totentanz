@@ -18,10 +18,16 @@ class OpenChat extends Component {
         }
         this.ws = new WebSocket('ws://127.0.0.1:1337');
     }
+    componentWillUnmount() {
+        this.ws.close()
+    }
     componentDidMount() {
         this.ws.onopen = () => {
             // on connecting, do nothing but log it to the console
             console.log('connected')
+            console.log("Sending username: ", this.props.user.name)
+            this.ws.send(JSON.stringify({ text: this.props.user.name, type: 'name', chat: this.props.chat._id }))
+            this.setState({ nameSent: true })
         }
         this.ws.onmessage = evt => {
             // listen to data sent from the websocket server
@@ -49,42 +55,9 @@ class OpenChat extends Component {
         }
         this.ws.onclose = () => {
             console.log('disconnected')
-            // automatically try to reconnect on connection loss
-
         }
 
-        // function (message) {
-        //     try {
-        //         var json = JSON.parse(message.data);
-        //         console.log(json)
 
-        //         if (json.type === 'history') { // entire message history
-        //             // insert every single message to the chat window
-        //             json.data.map(msg => this.setState(prevState => ({
-        //                 history: [...prevState.history, {
-        //                     time: new Date(msg.time).toString(),
-        //                     text: msg.text,
-        //                     user: msg.author
-        //                 }]
-        //             })))
-
-        //         } else if (json.type === 'message') { // it's a single message
-
-        //             const newMessage = {
-        //                 time: new Date(json.data.time).toString(),
-        //                 text: json.data.text,
-        //                 user: json.data.author
-        //             }
-        //             addMessage(newMessage)
-
-        //         } else {
-        //             console.log('Hmm..., I\'ve never seen JSON like this:', json);
-        //         }
-        //     } catch (e) {
-        //         console.log("Error: " + e);
-        //         return;
-        //     }
-        // }
     }
     opened() {
 
@@ -99,12 +72,8 @@ class OpenChat extends Component {
             }))
     }
     sendMessage() {
-        if (!this.state.nameSent) {
-            console.log("Sending username: ", this.props.user.name)
-            this.ws.send(this.props.user.name)
-        }
         console.log("Sent ", this.state.input)
-        this.ws.send(this.state.input)
+        this.ws.send(JSON.stringify({ text: this.state.input, chat: this.props.chat._id, type: 'message' }))
         this.setState({
             input: ''
         })

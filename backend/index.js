@@ -12,8 +12,8 @@ app.listen(port, () => {
 })
 
 var mongo = require('mongodb')
-
-mongo.MongoClient.connect(`mongodb+srv://dbAdmin:${pass}@oppari.q4dhm.mongodb.net/data?retryWrites=true&w=majority`, function (err, client) {
+const url = `mongodb+srv://dbAdmin:${pass}@oppari.q4dhm.mongodb.net/data?retryWrites=true&w=majority`
+mongo.MongoClient.connect(url, function (err, client) {
   if (err) throw err
 
   const db = client.db('data')
@@ -199,62 +199,66 @@ wsServer = new WebSocketServer({
 var history = [];
 // list of currently connected clients (users)
 var clients = [];
-/**
- * Helper function for escaping input strings
- */
-function htmlEntities(str) {
-  return String(str)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
+
 // WebSocket server
 wsServer.on('request', function (request) {
   console.log((new Date()) + ' Connection from origin '
     + request.origin + '.');
   var connection = request.accept(null, request.origin);
   // we need to know client index to remove them on 'close' event
-  var index = clients.push(connection) - 1;
   var userName = false;
   // send back chat history
-  if (history.length > 0) {
-    connection.sendUTF(
-      JSON.stringify({ type: 'history', data: history }));
-  }
+  // if (history.length > 0) {
+  //   connection.sendUTF(
+  //     JSON.stringify({ type: 'history', data: history }));
+  // }
 
   // This is the most important callback for us, we'll handle
   // all messages from users here.
   connection.on('message', function (message) {
-    if (message.type === 'utf8') {
-      console.log(message)
-    }
-    if (userName === false) {
+    const data = JSON.parse(message.utf8Data)
+    console.log(data)
+    if (data.type === "name") {
       // remember user name
-      userName = htmlEntities(message.utf8Data);
+      userName = data.text
+      clients.push({ connection: connection, id: data.chat })
     } else { // log and broadcast the message
       console.log((new Date()) + ' Received Message from '
-        + userName + ': ' + message.utf8Data);
+        + userName + ': ' + data.text);
 
       // we want to keep history of all sent messages
       var obj = {
         time: (new Date()).getTime(),
-        text: htmlEntities(message.utf8Data),
-        author: userName
+        text: data.text,
+        author: userName,
+        chat: data.chat
       };
-      history.push(obj);
-      history = history.slice(-100);        // broadcast message to all connected clients
+      // history.push(obj);
+      // save message into database
+      // mongo.MongoClient.connect(url, function (err, client) {
+      //   if (err) throw err
+      //   const db = client.db('data')
+      //   db.collection('messages').insertOne(obj, function (err, result) {
+      //     if (err) throw err
+      //     db.close
+      //   })
+      // })
+
+      // history = history.slice(-100);        // broadcast message to all connected clients
       var json = JSON.stringify({ type: 'message', data: obj });
-      for (var i = 0; i < clients.length; i++) {
-        console.log("Broadcasting message to " + i)
-        clients[i].sendUTF(json);
-      }
+      const participants = clients.filter(client => client.id === data.chat)
+      participants.forEach(participant => {
+        console.log("Broadcasting to " + participant.id)
+        participant.connection.sendUTF(json)
+      });
     }
   });
 
   connection.on('close', function (connection) {
     if (userName !== false) {
       console.log((new Date()) + " Peer "
-        + connection.remoteAddress + " disconnected.");      // remove user from the list of connected clients
-      clients.splice(index, 1);
+        + userName + " disconnected.");      // remove user from the list of connected clients
+      clients.slice(clients.findIndex(client => client.connection === connection));
 
     }
   });
