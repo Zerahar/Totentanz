@@ -207,7 +207,7 @@ wsServer.on('request', function (request) {
   var connection = request.accept(null, request.origin);
   // we need to know client index to remove them on 'close' event
   var userName = false;
-  // send back chat history
+
   // if (history.length > 0) {
   //   connection.sendUTF(
   //     JSON.stringify({ type: 'history', data: history }));
@@ -222,6 +222,17 @@ wsServer.on('request', function (request) {
       // remember user name
       userName = data.text
       clients.push({ connection: connection, id: data.chat })
+      // send back chat history
+      mongo.MongoClient.connect(url, function (err, client) {
+        if (err) throw err
+        const db = client.db('data')
+        db.collection('messages').find({ chat: data.chat }).toArray(function (err, result) {
+          if (err) throw err
+          connection.sendUTF(
+            JSON.stringify({ type: 'history', data: result }));
+          db.close
+        })
+      })
     } else { // log and broadcast the message
       console.log((new Date()) + ' Received Message from '
         + userName + ': ' + data.text);
@@ -235,14 +246,14 @@ wsServer.on('request', function (request) {
       };
       // history.push(obj);
       // save message into database
-      // mongo.MongoClient.connect(url, function (err, client) {
-      //   if (err) throw err
-      //   const db = client.db('data')
-      //   db.collection('messages').insertOne(obj, function (err, result) {
-      //     if (err) throw err
-      //     db.close
-      //   })
-      // })
+      mongo.MongoClient.connect(url, function (err, client) {
+        if (err) throw err
+        const db = client.db('data')
+        db.collection('messages').insertOne(obj, function (err, result) {
+          if (err) throw err
+          db.close
+        })
+      })
 
       // history = history.slice(-100);        // broadcast message to all connected clients
       var json = JSON.stringify({ type: 'message', data: obj });

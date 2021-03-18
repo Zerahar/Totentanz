@@ -6,7 +6,8 @@ class OpenChat extends Component {
         this.state = {
             input: '',
             nameSent: false,
-            history: []
+            history: [],
+            ready: false
         }
         this.sendMessage = this.sendMessage.bind(this)
         this.messageBeingWritten = this.messageBeingWritten.bind(this)
@@ -27,7 +28,7 @@ class OpenChat extends Component {
             console.log('connected')
             console.log("Sending username: ", this.props.user.name)
             this.ws.send(JSON.stringify({ text: this.props.user.name, type: 'name', chat: this.props.chat._id }))
-            this.setState({ nameSent: true })
+            this.setState({ nameSent: true, ready: true })
         }
         this.ws.onmessage = evt => {
             // listen to data sent from the websocket server
@@ -72,11 +73,15 @@ class OpenChat extends Component {
             }))
     }
     sendMessage() {
-        console.log("Sent ", this.state.input)
-        this.ws.send(JSON.stringify({ text: this.state.input, chat: this.props.chat._id, type: 'message' }))
-        this.setState({
-            input: ''
-        })
+        if (this.state.ready) {
+            console.log("Sent ", this.state.input)
+            this.ws.send(JSON.stringify({ text: this.state.input, chat: this.props.chat._id, type: 'message' }))
+            this.setState({
+                input: ''
+            })
+        }
+        else
+            console.log("WS was not ready")
     }
     messageBeingWritten(event) {
         this.setState({ input: event.target.value })
