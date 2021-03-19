@@ -1,9 +1,8 @@
 // Import React dependencies.
-import React, { Component, useMemo, useState, useEffect } from 'react'
-// Import the Slate editor factory.
-import { createEditor } from 'slate'
-// Import the Slate components and React plugin.
-import { Slate, Editable, withReact } from 'slate-react'
+import React, { Component } from 'react'
+import { init } from 'pell';
+
+import 'pell/dist/pell.css'
 import OpenChat from './OpenChat.js'
 
 class CharacterMenu extends Component {
@@ -74,30 +73,21 @@ class CharacterMenu extends Component {
   }
 }
 
-function Editor(props) {
-  const editor = useMemo(() => withReact(createEditor()), [])
-  const [value, setValue] = useState([
-    {
-      type: 'paragraph',
-      children: [{ text: props.content }],
-    },
-  ])
-  useEffect(() => {
-    if (value !== props.content)
-      props.onChange(value)
-  });
-
-  return (
-    <Slate
-      editor={editor}
-      value={value}
-      onChange={value => setValue(value)}
-    >
-      <Editable />
-    </Slate>
-  );
+class Editor extends Component {
+  editor = null
+  componentDidMount() {
+    this.editor = init({
+      element: document.getElementById('editor'),
+      onChange: html => this.props.changeEditor(html),
+      actions: ['bold', 'underline', 'italic'],
+    })
+  }
+  render() {
+    return (
+      <div id="editor" className="pell" />
+    )
+  }
 }
-
 
 class NewCharacter extends Component {
   constructor(props) {
@@ -108,15 +98,12 @@ class NewCharacter extends Component {
       gender: '',
       player: '',
       saldo: '',
-      description: 'Hahmon kuvaus',
-      mechanics: 'Pelimekaniikat',
-      plots: 'Juonet'
+      description: '',
+      mechanics: '',
+      plots: ''
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.onDescriptionChange = this.onDescriptionChange.bind(this);
-    this.onPlotsChange = this.onPlotsChange.bind(this);
-    this.onMechanicsChange = this.onMechanicsChange.bind(this);
     this.resetForm = this.resetForm.bind(this)
   }
   componentDidMount() {
@@ -144,24 +131,19 @@ class NewCharacter extends Component {
       [name]: value
     });
   }
-  onDescriptionChange(content) {
-    this.setState({
-      description: content
-    });
-  }
-  onPlotsChange(content) {
-    this.setState({
-      plots: content
-    });
-  }
-  onMechanicsChange(content) {
-    this.setState({
-      mechanics: content
-    });
-  }
   handleSubmit(event) {
     event.preventDefault();
-    const data = JSON.stringify(this.state)
+    const data = JSON.stringify({
+      name: this.state.name,
+      age: this.state.age,
+      gender: this.state.gender,
+      player: this.state.player,
+      saldo: this.state.saldo,
+      description: this.state.description,
+      mechanics: this.state.mechanics,
+      plots: this.state.plots
+    })
+    console.log(data)
     let xhttp = new XMLHttpRequest();
     let url = "http://localhost:3002/character/"
     if (this.props.selectedCharacter)
@@ -195,12 +177,12 @@ class NewCharacter extends Component {
           <label>Pelaaja:</label> <select value={this.state.player} onChange={this.handleChange} name="player">
             <option value="" >-</option>{players}</select><br />
           <label>Saldo:</label> <input type="text" value={this.state.saldo} onChange={this.handleChange} name="saldo"></input><br />
-          <label>Kuvaus: </label>
-          <Editor content={this.state.description} onChange={this.onDescriptionChange} />
-          <label>Juonet: </label>
-          <Editor content={this.state.plots} onChange={this.onPlotsChange} />
-          <label>Pelimekaniikat: </label>
-          <Editor content={this.state.mechanics} onChange={this.onMechanicsChange} />
+          <label>Kuvaus: </label><br />
+          <Editor changeEditor={(data) => this.setState({ description: data })} html={this.state.description} />
+          <label>Juonet: </label><br />
+          <Editor changeEditor={(data) => this.setState({ plots: data })} html={this.state.plots} />
+          <label>Pelimekaniikat: </label><br />
+          <Editor changeEditor={(data) => this.setState({ mechanics: data })} html={this.state.mechanics} />
           <button type="submit" onClick={this.handleSubmit}>Tallenna</button>
           <button type="reset" onClick={this.resetForm}>Poistu tallentamatta</button>
         </form>
