@@ -74,6 +74,12 @@ class CharacterMenu extends Component {
 }
 
 class Editor extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      something: ''
+    }
+  }
   editor = null
   componentDidMount() {
     this.editor = init({
@@ -81,6 +87,7 @@ class Editor extends Component {
       onChange: html => this.props.changeEditor(html),
       actions: ['bold', 'underline', 'italic'],
     })
+    this.editor.content.innerHTML = this.props.html
   }
   render() {
     return (
@@ -93,35 +100,18 @@ class NewCharacter extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      name: '',
-      age: '',
-      gender: '',
-      player: '',
-      saldo: '',
-      description: '',
-      mechanics: '',
-      plots: ''
+      name: this.props.character.name,
+      age: this.props.character.age,
+      gender: this.props.character.gender,
+      player: this.props.character.player,
+      saldo: this.props.character.saldo,
+      description: this.props.character.description,
+      mechanics: this.props.character.mechanics,
+      plots: this.props.character.plots
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.resetForm = this.resetForm.bind(this)
-  }
-  componentDidMount() {
-    if (this.props.selectedCharacter) {
-      fetch('http://localhost:3002/character/' + this.props.selectedCharacter)
-        .then(response => response.json())
-        .then(blob => this.fillFields(blob))
-    }
-  }
-  fillFields(data) {
-    this.setState({ name: data.name })
-    this.setState({ age: data.age })
-    this.setState({ gender: data.gender })
-    this.setState({ player: data.player })
-    this.setState({ saldo: data.saldo })
-    this.setState({ description: data.description })
-    this.setState({ plots: data.plots })
-    this.setState({ mechanics: data.mechanics })
   }
   handleChange(event) {
     const target = event.target;
@@ -390,7 +380,7 @@ class AdminDashboard extends Component {
   render() {
     let tab
     switch (this.state.mode) {
-      case "new": tab = <NewCharacter selectedCharacter={this.state.selectedCharacter} fetchCharacters={this.props.fetchCharacters} return={this.return} players={this.state.players} />; break;
+      case "new": tab = <NewCharacter character={this.props.characters.find(character => character._id === this.state.selectedCharacter)} fetchCharacters={this.props.fetchCharacters} return={this.return} players={this.state.players} />; break;
       case "messages": tab = <Messages return={this.return} characters={this.props.characters} />; break;
       case "user": tab = <NewUser characters={this.props.characters} existingUser={this.state.selectedUser} />; break;
       default: tab = <CharacterMenu
