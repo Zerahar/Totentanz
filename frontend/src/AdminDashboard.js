@@ -133,15 +133,15 @@ class NewCharacter extends Component {
       mechanics: this.state.mechanics,
       plots: this.state.plots
     })
-    console.log(data)
     let xhttp = new XMLHttpRequest();
     let url = "http://localhost:3002/character/"
-    if (this.props.selectedCharacter)
-      url += this.props.selectedCharacter
+    if (this.props.character)
+      url += this.props.character._id
     xhttp.open("POST", url, true);
     xhttp.setRequestHeader("Content-type", "application/json");
+    xhttp.onreadystatechange = (e) => { this.props.fetchCharacters(); this.props.return() }
     xhttp.send(data);
-    this.props.fetchCharacters()
+
   }
   resetForm() {
     this.setState({ name: '' })
