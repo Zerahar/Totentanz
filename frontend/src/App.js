@@ -14,26 +14,36 @@ class App extends Component {
       userName: '',
       userType: 'guest',
       userCharacter: '',
-      characters: []
+      characters: [],
+      warning: ''
     }
     this.login = this.login.bind(this)
     this.logout = this.logout.bind(this)
     this.loginSuccess = this.loginSuccess.bind(this)
     this.handleChange = this.handleChange.bind(this)
     this.fetchCharacters = this.fetchCharacters.bind(this)
+    this.handleError = this.handleError.bind(this)
   }
   login(event) {
     event.preventDefault()
-    fetch('http://localhost:3002/user/' + this.state.userName)
-      .then(response => response.json())
-      .then(data => this.loginSuccess(data))
-      .catch(e => console.log(e))
+    if (this.state.userName)
+      fetch('http://localhost:3002/user/' + this.state.userName)
+        // .then(response => response.json())
+        // .then(data => this.loginSuccess(data))
+        // .catch(e => this.handleError(e))
+        .then(response => {
+          response.ok ? response.json().then(data => this.loginSuccess(data)) : this.handleError(response.status)
+        })
   }
   loginSuccess(data) {
-    this.setState({ userId: data._id })
-    this.setState({ userName: data.userName })
-    this.setState({ userType: data.userType })
-    this.setState({ userCharacter: data.character })
+    console.log(data)
+    this.setState({
+      userId: data._id,
+      userName: data.userName,
+      userType: data.userType,
+      userCharacter: data.character,
+      warning: ''
+    })
   }
   logout() {
     this.setState({ userId: '' })
@@ -41,6 +51,12 @@ class App extends Component {
   }
   handleChange(event) {
     this.setState({ userName: event.target.value })
+  }
+  handleError(error) {
+    if (error === 404)
+      this.setState({ warning: "Väärä tunnus" })
+    if (error === 500)
+      this.setState({ warning: "Palvelimella on ongelma. Ota yhteys ylläpitäjään." })
   }
   fetchCharacters() {
     fetch('http://localhost:3002/character/')
@@ -53,7 +69,8 @@ class App extends Component {
         })
   }
   render() {
-    let loginForm = <li><form onSubmit={this.login}><input type="text" value={this.state.userName} onChange={this.handleChange}></input> <button type="submit">Kirjaudu</button></form></li>
+    let loginForm = <li><form onSubmit={this.login}><input type="text" value={this.state.userName} onChange={this.handleChange}></input> <button type="submit">Kirjaudu</button><br />
+    </form><span color="red">{this.state.warning}</span></li>
     if (this.state.userId)
       loginForm = <li><button type="submit" onClick={this.logout}>Kirjaudu ulos</button></li>
     return (

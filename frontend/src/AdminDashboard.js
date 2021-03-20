@@ -20,12 +20,18 @@ class CharacterMenu extends Component {
     this.props.changeUser(e.target.id)
   }
   deleteUser(e) {
-    fetch('http://localhost:3002/user/delete/' + e.target.id)
-    this.props.fetchPlayers()
+    let c = window.confirm("Haluatko varmasti poistaa käyttäjän " + this.props.players.find(player => player._id === e.target.id).userName + "?")
+    if (c) {
+      fetch('http://localhost:3002/user/delete/' + e.target.id)
+        .then(this.props.fetchPlayers())
+    }
   }
   deleteCharacter(e) {
-    fetch('http://localhost:3002/character/delete/' + e.target.id)
-    this.props.fetchCharacters()
+    let c = window.confirm("Haluatko varmasti poistaa hahmon " + this.props.characters.find(character => character._id === e.target.id).name + "?")
+    if (c) {
+      fetch('http://localhost:3002/character/delete/' + e.target.id)
+        .then(this.props.fetchCharacters())
+    }
   }
   componentDidMount() {
     if (this.props.characters.length === 0)
@@ -85,7 +91,7 @@ class Editor extends Component {
     this.editor = init({
       element: document.getElementById('editor'),
       onChange: html => this.props.changeEditor(html),
-      actions: ['bold', 'underline', 'italic'],
+      actions: ['bold', 'underline', 'italic', 'heading1', 'heading2', 'ulist'],
     })
     this.editor.content.innerHTML = this.props.html
   }
@@ -111,6 +117,7 @@ class NewCharacter extends Component {
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.checkInput = this.checkInput.bind(this)
     this.resetForm = this.resetForm.bind(this)
   }
   handleChange(event) {
@@ -123,25 +130,34 @@ class NewCharacter extends Component {
   }
   handleSubmit(event) {
     event.preventDefault();
-    const data = JSON.stringify({
-      name: this.state.name,
-      age: this.state.age,
-      gender: this.state.gender,
-      player: this.state.player,
-      saldo: this.state.saldo,
-      description: this.state.description,
-      mechanics: this.state.mechanics,
-      plots: this.state.plots
-    })
-    let xhttp = new XMLHttpRequest();
-    let url = "http://localhost:3002/character/"
-    if (this.props.character)
-      url += this.props.character._id
-    xhttp.open("POST", url, true);
-    xhttp.setRequestHeader("Content-type", "application/json");
-    xhttp.onreadystatechange = (e) => { this.props.fetchCharacters(); this.props.return() }
-    xhttp.send(data);
-
+    if (this.checkInput()) {
+      const data = JSON.stringify({
+        name: this.state.name,
+        age: this.state.age,
+        gender: this.state.gender,
+        player: this.state.player,
+        saldo: this.state.saldo,
+        description: this.state.description,
+        mechanics: this.state.mechanics,
+        plots: this.state.plots
+      })
+      let xhttp = new XMLHttpRequest();
+      let url = "http://localhost:3002/character/"
+      if (this.props.character._id)
+        url += this.props.character._id
+      xhttp.open("POST", url, true);
+      xhttp.setRequestHeader("Content-type", "application/json");
+      xhttp.onreadystatechange = (e) => { this.props.fetchCharacters(e); this.props.return("character") }
+      xhttp.send(data);
+    }
+  }
+  checkInput() {
+    let valid = true
+    if (!this.state.name)
+      valid = false
+    if (isNaN(this.state.saldo))
+      valid = false
+    return valid
   }
   resetForm() {
     this.setState({ name: '' })
@@ -159,14 +175,13 @@ class NewCharacter extends Component {
     const players = this.props.players.map(player => <option value={player._id}>{player.userName}</option>)
     return (
       <div>
-        <button onClick={this.resetForm}>Takaisin</button>
         <form onSubmit={this.handleSubmit}>
-          <label>Nimi:</label> <input type="text" value={this.state.name} onChange={this.handleChange} name="name"></input><br />
+          <label>Nimi:</label> <input required type="text" value={this.state.name} onChange={this.handleChange} name="name"></input><br />
           <label>Ikä:</label> <input type="text" value={this.state.age} onChange={this.handleChange} name="age"></input><br />
           <label>Sukupuoli:</label> <input type="text" value={this.state.gender} onChange={this.handleChange} name="gender"></input><br />
           <label>Pelaaja:</label> <select value={this.state.player} onChange={this.handleChange} name="player">
             <option value="" >-</option>{players}</select><br />
-          <label>Saldo:</label> <input type="text" value={this.state.saldo} onChange={this.handleChange} name="saldo"></input><br />
+          <label>Saldo:</label> <input placeholder="0" type="text" value={this.state.saldo} onChange={this.handleChange} name="saldo"></input><br />
           <label>Kuvaus: </label><br />
           <Editor changeEditor={(data) => this.setState({ description: data })} html={this.state.description} />
           <label>Juonet: </label><br />
@@ -199,8 +214,7 @@ class Messages extends Component {
   componentDidMount() {
     this.fetchChats()
   }
-  fetchChats(e) {
-    console.log("Fetching chats")
+  fetchChats() {
     fetch('http://localhost:3002/chat/')
       .then(res => res.json())
       .then(
@@ -210,8 +224,10 @@ class Messages extends Component {
       )
   }
   deleteChat(e) {
-    fetch('http://localhost:3002/chat/delete/' + e.target.id)
-      .then(response => this.fetchChats())
+    let c = window.confirm("Haluatko varmasti poistaa keskustelun?")
+    if (c)
+      fetch('http://localhost:3002/chat/delete/' + e.target.id)
+        .then(this.fetchChats())
   }
   createChat() {
     const data = { participants: this.state.selectedCharacters }
@@ -272,6 +288,7 @@ class NewUser extends Component {
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.resetForm = this.resetForm.bind(this)
   }
   handleChange(event) {
     const target = event.target;
@@ -304,18 +321,19 @@ class NewUser extends Component {
             userId = existingUser._id
 
           // Check that character has player as well
-
           if (!selectedCharacter.player) {
             xhttp.open("POST", "http://localhost:3002/character/user/" + characterId, true);
             xhttp.setRequestHeader("Content-type", "application/json");
             xhttp.send(JSON.stringify({ player: userId }));
           }
+          this.props.return("user")
         }
       }
-
+    }
+    else {
+      xhttp.onreadystatechange = () => this.props.return("user")
     }
     xhttp.send(JSON.stringify(data))
-
   }
   fillFields() {
     this.setState({
@@ -323,6 +341,15 @@ class NewUser extends Component {
       playerName: this.props.existingUser.userName,
       selectedCharacter: this.props.existingUser.character
     })
+  }
+  resetForm(e) {
+    e.preventDefault()
+    this.setState({
+      login: '',
+      playerName: '',
+      selectedCharacter: ''
+    })
+    this.props.return()
   }
   componentDidMount() {
     if (this.props.existingUser)
@@ -332,7 +359,8 @@ class NewUser extends Component {
     const characters = this.props.characters.map((character) => <option value={character._id}>{character.name}</option>)
     return (
       <div>
-        <form onSubmit={this.handleSubmit}>
+        <form onSubmit={this.handleSubmit}><br />
+          <button type="reset" onClick={this.resetForm}>Takaisin</button>
           <label>Kirjautumistunnus</label><input type="text" name="login" value={this.state.login} onChange={this.handleChange}></input><br />
           <label>Pelaajan nimi</label><input type="text" name="playerName" value={this.state.playerName} onChange={this.handleChange}></input><br />
           <label>Hahmo</label><select name="selectedCharacter" value={this.state.selectedCharacter} onChange={this.handleChange}><option value="-">-</option>{characters}</select><br />
@@ -373,16 +401,34 @@ class AdminDashboard extends Component {
     this.setState({ selectedUser: this.state.players.find(player => player._id === id) })
     this.setState({ mode: "user" })
   }
-  return() {
-    this.setState({ mode: null })
-    this.setState({ selectedCharacter: null })
+  return(type) {
+    this.setState({
+      mode: '',
+      selectedCharacter: ''
+    })
+    if (type === "user")
+      this.fetchPlayers()
+    if (type === "character")
+      this.props.fetchCharacters()
   }
   render() {
     let tab
+    let returnCharacter = {
+      name: '',
+      age: '',
+      gender: '',
+      player: '',
+      saldo: '',
+      description: '',
+      mechanics: '',
+      plots: ''
+    }
+    if (this.state.selectedCharacter)
+      returnCharacter = this.props.characters.find(character => character._id === this.state.selectedCharacter)
     switch (this.state.mode) {
-      case "new": tab = <NewCharacter character={this.props.characters.find(character => character._id === this.state.selectedCharacter)} fetchCharacters={this.props.fetchCharacters} return={this.return} players={this.state.players} />; break;
+      case "new": tab = <NewCharacter character={returnCharacter} return={this.return} players={this.state.players} />; break;
       case "messages": tab = <Messages return={this.return} characters={this.props.characters} />; break;
-      case "user": tab = <NewUser characters={this.props.characters} existingUser={this.state.selectedUser} />; break;
+      case "user": tab = <NewUser characters={this.props.characters} existingUser={this.state.selectedUser} return={this.return} />; break;
       default: tab = <CharacterMenu
         players={this.state.players}
         fetchPlayers={this.fetchPlayers}
