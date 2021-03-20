@@ -1,6 +1,6 @@
 // Import React dependencies.
 import React, { Component } from 'react'
-import { init } from 'pell';
+import { init, formatBlock, exec } from 'pell';
 
 import 'pell/dist/pell.css'
 import OpenChat from './OpenChat.js'
@@ -91,7 +91,20 @@ class Editor extends Component {
     this.editor = init({
       element: document.getElementById('editor'),
       onChange: html => this.props.changeEditor(html),
-      actions: ['bold', 'underline', 'italic', 'heading1', 'heading2', 'ulist'],
+      actions: ['bold', 'underline', 'italic', 'heading1', 'heading2', 'ulist', {
+        name: 'erase',
+        icon: 'X',
+        title: 'Poista muotoilut',
+        result: () => {
+          if (window.getSelection().toString()) {
+            let linesToDelete = window.getSelection().toString().split('\n').join('<br>');
+            exec(formatBlock, '<div>');
+            document.execCommand('insertHTML', false, '<div>' + linesToDelete + '</div>');
+          } else {
+            exec(formatBlock, '<div>')
+          }
+        }
+      },],
     })
     this.editor.content.innerHTML = this.props.html
   }
