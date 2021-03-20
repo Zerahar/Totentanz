@@ -49,27 +49,85 @@ class Pay extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            characters: []
+            amount: 0,
+            warning: '',
+            selectedCharacter: ''
+        }
+        this.submit = this.submit.bind(this)
+        this.handleChange = this.handleChange.bind(this)
+    }
+    submit(e) {
+        e.preventDefault()
+        if (this.state.amount < 0)
+            this.setState({ warning: "Virheellinen summa" })
+        else if (this.state.amount > this.props.character.saldo)
+            this.setState({ warning: "Tililläsi ei ole tarpeeksi saldoa" })
+        else if (!this.state.selectedCharacter)
+            this.setState({ warning: "Valitse maksun saaja" })
+        else {
+            let c = window.confirm("Haluatko maksaa " + this.state.amount + " eurodollaria kohteelle " +
+                this.props.characters.find(character => character._id === this.state.selectedCharacter).name + "?")
+            if (c) {
+                const transaction = JSON.stringify({
+                    time: Date.now(),
+                    user: this.props.character._id,
+                    recipient: this.state.selectedCharacter,
+                    amount: this.state.amount
+                })
+                fetch('http://localhost:3002/pay/', {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: transaction
+                })
+                    .then(
+                        fetch('http://localhost:3002/character/saldo/' + this.state.selectedCharacter, {
+                            method: 'POST',
+                            mode: 'cors',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ saldo: this.state.amount })
+                        })
+                            .then(
+                                fetch('http://localhost:3002/character/saldo/' + this.props.character._id, {
+                                    method: 'POST',
+                                    mode: 'cors',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({ saldo: -this.state.amount })
+                                })
+                                    .then(response => response.ok ? this.props.return() : this.setState({ warning: response.statusText }))
+                            )
+                    )
+            }
         }
     }
-    componentDidMount() {
+    handleChange(event) {
+        const target = event.target;
+        const value = target.value;
+        const name = target.name;
         this.setState({
-            characters: [{ name: "John" }, { name: "Ellis" }]
-        })
+            [name]: value
+        });
     }
     render() {
-        const options = this.state.characters.map((character) => <option>{character.name}</option>);
-        const saldo = 345
+        const options = this.props.characters.map((character) => { if (character._id !== this.props.character._id) return <option value={character._id}>{character.name}</option> });
         return (
             <div>
                 <h2>Pay</h2>
-                <p>Sinulla on {saldo} eurodollaria.</p>
-                <form>
+                <p>Sinulla on {this.props.character.saldo} eurodollaria.</p>
+                <form onSubmit={this.submit}>
                     <label>Vastaanottaja</label><br />
-                    <select>{options}</select><br />
+                    <select name="selectedCharacter" value={this.state.selectedCharacter} onChange={this.handleChange}>
+                        <option>-</option>{options}</select><br />
                     <label>Summa</label><br />
-                    <input type="number"></input>
-                    <button>Maksa</button>
+                    <input name="amount" required value={this.state.amount} onChange={this.handleChange}></input>
+                    <span>{this.state.warning}</span>
+                    <button type="submit">Maksa</button>
                 </form>
             </div>
         )
@@ -157,18 +215,23 @@ class Tabs extends Component {
         this.state = {
             mode: null
         }
+        this.return = this.return.bind(this)
+    }
+    return() {
+        this.setState({ mode: null })
+        this.props.fetchCharacters()
     }
     render() {
         let backbutton, otherButtons
         if (this.state.mode != null)
-            backbutton = <button onClick={() => { this.setState({ mode: null }) }}>Back</button>
+            backbutton = <button onClick={this.return}>Back</button>
         else
             otherButtons = <div><button onClick={() => { this.setState({ mode: "pay" }) }}>Maksa</button>
                 <button onClick={() => { this.setState({ mode: "info" }) }}>Tiedot</button>
                 <button onClick={() => { this.setState({ mode: "message" }) }}>Viestit</button></div>;
         let tab
         switch (this.state.mode) {
-            case "pay": tab = <Pay />; break;
+            case "pay": tab = <Pay characters={this.props.characters} character={this.props.characters.find(character => character._id === this.props.loggedCharacter)} return={this.return} />; break;
             case "info": tab = <Info character={this.props.characters.find(character => character._id === this.props.loggedCharacter)} />; break;
             case "message": tab = <Message characters={this.props.characters} loggedCharacter={this.props.loggedCharacter} />; break;
             default: tab = null
@@ -194,7 +257,7 @@ class PlayerDashboard extends Component {
         return (
             <div>
                 <h2>Player Dashboard</h2>
-                <Tabs loggedCharacter={this.props.loggedCharacter} characters={this.props.characters} />
+                <Tabs loggedCharacter={this.props.loggedCharacter} characters={this.props.characters} fetchCharacters={this.props.fetchCharacters} />
             </div>
         )
     }

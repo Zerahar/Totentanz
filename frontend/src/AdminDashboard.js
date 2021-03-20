@@ -136,7 +136,7 @@ class NewCharacter extends Component {
         age: this.state.age,
         gender: this.state.gender,
         player: this.state.player,
-        saldo: this.state.saldo,
+        saldo: parseFloat(this.state.saldo),
         description: this.state.description,
         mechanics: this.state.mechanics,
         plots: this.state.plots

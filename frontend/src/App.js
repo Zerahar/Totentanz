@@ -28,15 +28,11 @@ class App extends Component {
     event.preventDefault()
     if (this.state.userName)
       fetch('http://localhost:3002/user/' + this.state.userName)
-        // .then(response => response.json())
-        // .then(data => this.loginSuccess(data))
-        // .catch(e => this.handleError(e))
         .then(response => {
           response.ok ? response.json().then(data => this.loginSuccess(data)) : this.handleError(response.status)
         })
   }
   loginSuccess(data) {
-    console.log(data)
     this.setState({
       userId: data._id,
       userName: data.userName,

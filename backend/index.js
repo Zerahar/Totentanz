@@ -55,10 +55,9 @@ mongo.MongoClient.connect(url, function (err, client) {
         age: req.body.age,
         player: req.body.player,
         gender: req.body.gender,
-        history: req.body.history,
         description: req.body.description,
         mechanics: req.body.mechanics,
-        saldo: req.body.saldo,
+        saldo: mongo.Double(req.body.saldo),
         plots: req.body.plots,
       }
     }
@@ -69,12 +68,28 @@ mongo.MongoClient.connect(url, function (err, client) {
     })
   })
 
-  // Update character
+  // Update character's player
   app.post('/character/user/:charId', (req, res) => {
     const query = { _id: new mongo.ObjectId(req.params.charId) }
     const document = {
       $set: {
         player: req.body.player
+      }
+    }
+    db.collection('characters').updateOne(query, document, function (err, result) {
+      if (err) throw err
+      res.send(result)
+      db.close
+    })
+  })
+
+  // Update character's saldo
+  app.post('/character/saldo/:charId', (req, res) => {
+    console.log(req.body.saldo, req.params.charId)
+    const query = { _id: new mongo.ObjectId(req.params.charId) }
+    const document = {
+      $inc: {
+        saldo: mongo.Double(req.body.saldo)
       }
     }
     db.collection('characters').updateOne(query, document, function (err, result) {
@@ -184,6 +199,15 @@ mongo.MongoClient.connect(url, function (err, client) {
   app.get('/chat/delete/:chatId', (req, res) => {
     const query = { _id: new mongo.ObjectId(req.params.chatId) }
     db.collection('chats').deleteOne(query, function (err, result) {
+      if (err) throw err
+      res.send(result)
+      db.close
+    })
+  })
+
+  // Add payment
+  app.post('/pay', (req, res) => {
+    db.collection('transactions').insertOne(req.body, function (err, result) {
       if (err) throw err
       res.send(result)
       db.close
