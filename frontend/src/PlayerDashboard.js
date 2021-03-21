@@ -53,7 +53,8 @@ export class Pay extends Component {
         this.state = {
             amount: 0,
             warning: '',
-            selectedCharacter: ''
+            selectedCharacter: '',
+            success: ''
         }
         this.submit = this.submit.bind(this)
         this.handleChange = this.handleChange.bind(this)
@@ -102,7 +103,7 @@ export class Pay extends Component {
                                     },
                                     body: JSON.stringify({ saldo: -this.state.amount })
                                 })
-                                    .then(response => response.ok ? this.props.return() : this.setState({ warning: response.statusText }))
+                                    .then(response => response.ok ? this.success() : this.setState({ warning: response.statusText }))
                             )
                     )
             }
@@ -116,17 +117,27 @@ export class Pay extends Component {
             [name]: value
         });
     }
+    success() {
+        this.props.fetchCharacters()
+        this.setState({
+            amount: 0,
+            selectedCharacter: '',
+            warning: '',
+            success: <span>Maksu onnistui!</span>
+        })
+    }
     render() {
         const options = this.props.characters.map((character) => { if (character._id !== this.props.character._id) return <option value={character._id}>{character.name}</option> });
         return (
             <div>
                 <Link to="/dashboard">Takaisin</Link>
                 <h2>Pay</h2>
+                {this.state.success}
                 <p>Sinulla on {this.props.character.saldo} eurodollaria.</p>
                 <form onSubmit={this.submit}>
                     <label>Vastaanottaja</label><br />
                     <select name="selectedCharacter" value={this.state.selectedCharacter} onChange={this.handleChange}>
-                        <option>-</option>{options}</select><br />
+                        <option value="">-</option>{options}</select><br />
                     <label>Summa</label><br />
                     <input name="amount" required value={this.state.amount} onChange={this.handleChange}></input>
                     <span>{this.state.warning}</span>

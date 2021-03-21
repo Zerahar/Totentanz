@@ -127,7 +127,7 @@ class App extends Component {
               <PlayerInfo character={this.state.characters.find(character => character._id === this.state.userCharacter)} />
             </Route>
             <Route exact path="/dashboard/pay">
-              <Pay characters={this.state.characters} character={this.state.characters.find(character => character._id === this.state.userCharacter)} return={this.return} />
+              <Pay characters={this.state.characters} character={this.state.characters.find(character => character._id === this.state.userCharacter)} fetchCharacters={this.fetchCharacters} />
             </Route>
             <Route exact path="/dashboard/chat">
               <Message characters={this.state.characters} loggedCharacter={this.state.userCharacter} />
