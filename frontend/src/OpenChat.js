@@ -1,3 +1,5 @@
+
+import { Link } from 'react-router-dom'
 const { Component } = require("react");
 
 class OpenChat extends Component {
@@ -97,6 +99,7 @@ class OpenChat extends Component {
             history = this.state.history.map(message => <p>({message.time}) {message.user}: {message.text}</p>)
         return (
             <div>
+                <Link to="/dashboard">Takaisin</Link>
                 <h2>{this.props.chat.participants.map((participant) => participant.name + ", ")}</h2>
                 <div>{history}</div>
                 <input type="text" value={this.state.input} onChange={this.messageBeingWritten}></input><button onClick={this.sendMessage}>Lähetä</button>

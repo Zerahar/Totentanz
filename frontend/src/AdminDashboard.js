@@ -115,7 +115,7 @@ class Editor extends Component {
   }
 }
 
-class NewCharacter extends Component {
+export class NewCharacter extends Component {
   constructor(props) {
     super(props);
     this.state = {

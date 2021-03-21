@@ -3,8 +3,9 @@ import { Component } from 'react'
 import { BrowserRouter as Router, Route, Link, Switch, Redirect } from "react-router-dom";
 import Home from './Home.js'
 import Info from './Info.js'
-import PlayerDashboard from './PlayerDashboard.js'
 import AdminDashboard from './AdminDashboard.js'
+import { Pay, PlayerInfo, Message, PlayerDashboard } from './PlayerDashboard.js'
+import { NewCharacter } from './AdminDashboard.js'
 
 class App extends Component {
   constructor(props) {
@@ -80,10 +81,10 @@ class App extends Component {
               <Link to="/info">Info</Link>
             </li>
             <li>
-              <Link to="/playerDashboard">Dashboard</Link>
+              <Link to="/dashboard">Dashboard</Link>
             </li>
             <li>
-              <Link to="/adminDashboard">Dashboard (Admin)</Link>
+              <Link to="/admin">Dashboard (Admin)</Link>
             </li>
             {loginForm}
 
@@ -97,10 +98,19 @@ class App extends Component {
             <Route path="/info">
               <Info />
             </Route>
-            <Route path="/playerDashboard">
+            <Route exact path="/dashboard/info">
+              <PlayerInfo character={this.state.characters.find(character => character._id === this.state.userCharacter)} />
+            </Route>
+            <Route exact path="/dashboard/pay">
+              <Pay characters={this.state.characters} character={this.state.characters.find(character => character._id === this.state.userCharacter)} return={this.return} />
+            </Route>
+            <Route exact path="/dashboard/chat">
+              <Message characters={this.state.characters} loggedCharacter={this.state.userCharacter} />
+            </Route>
+            <Route path="/dashboard">
               <PlayerDashboard loggedCharacter={this.state.userCharacter} characters={this.state.characters} fetchCharacters={this.fetchCharacters} />
             </Route>
-            <Route path="/adminDashboard">
+            <Route path="/admin">
               <AdminDashboard characters={this.state.characters} fetchCharacters={this.fetchCharacters} />
             </Route>
           </Switch>

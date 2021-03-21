@@ -1,6 +1,7 @@
 import { Component } from "react";
+import { Link } from "react-router-dom"
 import OpenChat from './OpenChat.js'
-class Info extends Component {
+export class PlayerInfo extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -27,6 +28,7 @@ class Info extends Component {
     render() {
         return (
             <div>
+                <Link to="/dashboard">Takaisin</Link>
                 <h2>Info</h2>
                 <ul>
                     <li>Nimi: {this.state.name}</li>
@@ -45,7 +47,7 @@ class Info extends Component {
     }
 }
 
-class Pay extends Component {
+export class Pay extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -118,6 +120,7 @@ class Pay extends Component {
         const options = this.props.characters.map((character) => { if (character._id !== this.props.character._id) return <option value={character._id}>{character.name}</option> });
         return (
             <div>
+                <Link to="/dashboard">Takaisin</Link>
                 <h2>Pay</h2>
                 <p>Sinulla on {this.props.character.saldo} eurodollaria.</p>
                 <form onSubmit={this.submit}>
@@ -134,7 +137,7 @@ class Pay extends Component {
     }
 }
 
-class Message extends Component {
+export class Message extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -185,6 +188,7 @@ class Message extends Component {
         </li>);
         if (this.state.mode === "new") {
             return (<div>
+                <Link to="/dashboard">Takaisin</Link>
                 <label>Valitse keskustelun jäsenet</label>
                 <ul>
                     {characters}
@@ -200,6 +204,7 @@ class Message extends Component {
         else {
             return (
                 <div>
+                    <Link to="/dashboard">Takaisin</Link>
                     <h2>Message</h2>
                     <button onClick={() => this.setState({ mode: "new" })}>Uusi keskustelu</button>
                     <ul>{chats}</ul>
@@ -209,58 +214,74 @@ class Message extends Component {
     }
 }
 
-class Tabs extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            mode: null
-        }
-        this.return = this.return.bind(this)
-    }
-    return() {
-        this.setState({ mode: null })
-        this.props.fetchCharacters()
-    }
-    render() {
-        let backbutton, otherButtons
-        if (this.state.mode != null)
-            backbutton = <button onClick={this.return}>Back</button>
-        else
-            otherButtons = <div><button onClick={() => { this.setState({ mode: "pay" }) }}>Maksa</button>
-                <button onClick={() => { this.setState({ mode: "info" }) }}>Tiedot</button>
-                <button onClick={() => { this.setState({ mode: "message" }) }}>Viestit</button></div>;
-        let tab
-        switch (this.state.mode) {
-            case "pay": tab = <Pay characters={this.props.characters} character={this.props.characters.find(character => character._id === this.props.loggedCharacter)} return={this.return} />; break;
-            case "info": tab = <Info character={this.props.characters.find(character => character._id === this.props.loggedCharacter)} />; break;
-            case "message": tab = <Message characters={this.props.characters} loggedCharacter={this.props.loggedCharacter} />; break;
-            default: tab = null
-        }
-        return (
-            <div>
-                <h2>Dashboard</h2>
-                <div>
-                    {otherButtons}
-                    {backbutton}
-                    {tab}
-                </div>
-            </div>
-        );
-    }
-}
+// class Tabs extends Component {
+//     constructor(props) {
+//         super(props);
+//         this.state = {
+//             mode: null
+//         }
+//         this.return = this.return.bind(this)
+//     }
+//     return() {
+//         this.setState({ mode: null })
+//         this.props.fetchCharacters()
+//     }
+//     render() {
+//         let backbutton, otherButtons
+//         if (this.state.mode != null)
+//             backbutton = <a href="dashboard/">Takaisin</a>
+//         else
+//             otherButtons = <div><a href="dashboard/pay">Maksa</a>
+//                 <a href="dashboard/info">Info</a>
+//                 <a href="dashboard/chat">Viestit</a></div>;
+//         // let redirect
+//         // switch (this.state.mode) {
+//         //     case "pay": redirect = <Pay characters={this.props.characters} character={this.props.characters.find(character => character._id === this.props.loggedCharacter)} return={this.return} />; break;
+//         //     case "info": redirect = <Info character={this.props.characters.find(character => character._id === this.props.loggedCharacter)} />; break;
+//         //     case "message": redirect = <Message characters={this.props.characters} loggedCharacter={this.props.loggedCharacter} />; break;
+//         //     default: redirect = null
+//         // }
+//         return (
+//             <div>
+//                 <h2>Dashboard</h2>
+//                 <div>
+//                     {otherButtons}
+//                     {backbutton}
+//                     {/* {redirect} */}
+//                     <Switch>
+//                         <Route path="/dashboard/pay">
+//                             <Pay characters={this.props.characters} character={this.props.characters.find(character => character._id === this.props.loggedCharacter)} return={this.return} />; break;
+//                         </Route>
+//                         <Route path="/dashboard/info">
+//                             <Info character={this.props.characters.find(character => character._id === this.props.loggedCharacter)} />
+//                         </Route>
+//                         <Route path="/dashboard/chat">
+//                             <Message characters={this.props.characters} loggedCharacter={this.props.loggedCharacter} />
+//                         </Route>
+//                     </Switch>
+//                 </div>
+//             </div>
+//         );
+//     }
+// }
 
-class PlayerDashboard extends Component {
+export class PlayerDashboard extends Component {
     componentDidMount() {
         this.props.fetchCharacters()
     }
     render() {
+        let access = <p>Kirjaudu sisään nähdäksesi hahmotietosi</p>
+        if (this.props.loggedCharacter)
+            access = <div><Link to="dashboard/pay">Maksa</Link>
+                <Link to="dashboard/info">Info</Link>
+                <Link to="dashboard/chat">Viestit</Link></div>
         return (
             <div>
                 <h2>Player Dashboard</h2>
-                <Tabs loggedCharacter={this.props.loggedCharacter} characters={this.props.characters} fetchCharacters={this.props.fetchCharacters} />
+                {access}
             </div>
         )
     }
 }
 
-export default PlayerDashboard
+export default PlayerInfo;
