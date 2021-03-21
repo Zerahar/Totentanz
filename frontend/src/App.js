@@ -13,6 +13,7 @@ class App extends Component {
     this.state = {
       userId: '',
       userName: '',
+      login: '',
       userType: 'guest',
       userCharacter: '',
       characters: [],
@@ -25,13 +26,28 @@ class App extends Component {
     this.fetchCharacters = this.fetchCharacters.bind(this)
     this.handleError = this.handleError.bind(this)
   }
+  componentDidMount() {
+    // Check if login cookie
+    const cookies = decodeURIComponent(document.cookie)
+    const cookieArray = cookies.split(';')
+    cookieArray.forEach(cookie => {
+      while (cookie.charAt(0) === ' ') {
+        cookie = cookie.substring(1);
+      }
+      if (cookie.indexOf("login") === 0) {
+        this.setState({ login: cookie.substring(6) }, () => this.login())
+      }
+    });
+  }
   login(event) {
-    event.preventDefault()
-    if (this.state.userName)
-      fetch('http://localhost:3002/user/' + this.state.userName)
+    if (event)
+      event.preventDefault()
+    if (this.state.login) {
+      fetch('http://localhost:3002/user/' + this.state.login)
         .then(response => {
           response.ok ? response.json().then(data => this.loginSuccess(data)) : this.handleError(response.status)
         })
+    }
   }
   loginSuccess(data) {
     this.setState({
@@ -41,13 +57,22 @@ class App extends Component {
       userCharacter: data.character,
       warning: ''
     })
+    // create a cookie
+    document.cookie = "login=" + this.state.login
   }
   logout() {
-    this.setState({ userId: '' })
-    this.setState({ userType: 'guest' })
+    this.setState({
+      userId: '',
+      userType: 'guest',
+      userCharacter: '',
+      login: '',
+      userId: ''
+    })
+    // Remove login cookie
+    document.cookie = "login="
   }
   handleChange(event) {
-    this.setState({ userName: event.target.value })
+    this.setState({ login: event.target.value })
   }
   handleError(error) {
     if (error === 404)
@@ -66,7 +91,7 @@ class App extends Component {
         })
   }
   render() {
-    let loginForm = <li><form onSubmit={this.login}><input type="text" value={this.state.userName} onChange={this.handleChange}></input> <button type="submit">Kirjaudu</button><br />
+    let loginForm = <li><form onSubmit={this.login}><input type="text" value={this.state.login} onChange={this.handleChange}></input> <button type="submit">Kirjaudu</button><br />
     </form><span color="red">{this.state.warning}</span></li>
     if (this.state.userId)
       loginForm = <li><button type="submit" onClick={this.logout}>Kirjaudu ulos</button></li>
