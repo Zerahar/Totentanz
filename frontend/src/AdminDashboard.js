@@ -1,11 +1,11 @@
 // Import React dependencies.
 import React, { Component } from 'react'
 import { init, formatBlock, exec } from 'pell';
-
+import { Link } from "react-router-dom"
 import 'pell/dist/pell.css'
 import OpenChat from './OpenChat.js'
 
-class CharacterMenu extends Component {
+class AdminDashboard extends Component {
   constructor(props) {
     super(props);
     this.editCharacter = this.editCharacter.bind(this);
@@ -14,7 +14,7 @@ class CharacterMenu extends Component {
     this.deleteUser = this.deleteUser.bind(this)
   }
   editCharacter(e) {
-    this.props.changeCharacter(e.target.id)
+    this.props.changeCharacter(this.props.characters.find(character => character._id === e.target.id))
   }
   editUser(e) {
     this.props.changeUser(e.target.id)
@@ -36,13 +36,15 @@ class CharacterMenu extends Component {
   componentDidMount() {
     if (this.props.characters.length === 0)
       this.props.fetchCharacters()
+    if (this.props.players.length === 0)
+      this.props.fetchPlayers()
   }
   render() {
     const characterName = (characters, id) => { if (id) { try { return characters.find(character => character._id === id).name } catch { return "-" } } else { return "-" } }
     const playerName = (players, id) => { if (id) { try { return players.find(player => player._id === id).userName } catch { return "-" } } else { return "-" } }
     const characters = this.props.characters.map((character) => <tr>
       <td>{character.name}</td><td>{playerName(this.props.players, character.player)}</td>
-      <td><button id={character._id} onClick={this.editCharacter}>Muokkaa</button><button id={character._id} onClick={this.deleteCharacter}>Poista</button></td>
+      <td><Link id={character._id} onClick={this.editCharacter} to="admin/newCharacter">Muokkaa</Link><button id={character._id} onClick={this.deleteCharacter}>Poista</button></td>
     </tr>);
     let players = ''
     if (this.props.players)
@@ -50,11 +52,13 @@ class CharacterMenu extends Component {
         <td>{player.userName}</td>
         <td>{characterName(this.props.characters, player.character)}</td>
         <td>{player.login}</td>
-        <td><button id={player._id} onClick={this.editUser}>Muokkaa</button><button id={player._id} onClick={this.deleteUser}>Poista</button></td>
+        <td><Link id={player._id} onClick={this.editUser} to="admin/newUser">Muokkaa</Link><button id={player._id} onClick={this.deleteUser}>Poista</button></td>
       </tr>);
     return (
       <div>
-        <button onClick={this.props.switchMessages}>Keskustelut</button><button onClick={this.props.switchCharacter}>Uusi hahmo</button><button onClick={this.props.newUser}>Uusi käyttäjä</button>
+        <Link to="admin/messages">Keskustelut</Link>
+        <Link to="admin/newUser">Uusi käyttäjä</Link>
+        <Link to="admin/newCharacter">Uusi hahmo</Link>
         <h2>Hahmot</h2>
         <table>
           <thead>
@@ -131,7 +135,6 @@ export class NewCharacter extends Component {
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.checkInput = this.checkInput.bind(this)
-    this.resetForm = this.resetForm.bind(this)
   }
   handleChange(event) {
     const target = event.target;
@@ -172,18 +175,13 @@ export class NewCharacter extends Component {
       valid = false
     return valid
   }
-  resetForm() {
-    this.setState({ name: '' })
-    this.setState({ age: '' })
-    this.setState({ gender: '' })
-    this.setState({ player: '' })
-    this.setState({ saldo: '' })
-    this.setState({ description: '' })
-    this.setState({ plots: '' })
-    this.setState({ mechanics: '' })
-    this.props.return()
+  componentDidMount() {
+    if (this.props.players.length === 0)
+      this.props.fetchPlayers()
   }
-
+  componentWillUnmount() {
+    this.props.clearSelectedCharacter()
+  }
   render() {
     const players = this.props.players.map(player => <option value={player._id}>{player.userName}</option>)
     return (
@@ -202,14 +200,14 @@ export class NewCharacter extends Component {
           <label>Pelimekaniikat: </label><br />
           <Editor changeEditor={(data) => this.setState({ mechanics: data })} html={this.state.mechanics} />
           <button type="submit" onClick={this.handleSubmit}>Tallenna</button>
-          <button type="reset" onClick={this.resetForm}>Poistu tallentamatta</button>
+          <Link to="/admin">Poistu tallentamatta</Link>
         </form>
       </div>
     );
   }
 }
 
-class Messages extends Component {
+export class MessageAdmin extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -290,7 +288,7 @@ class Messages extends Component {
     }
   }
 }
-class NewUser extends Component {
+export class NewUser extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -301,7 +299,6 @@ class NewUser extends Component {
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.resetForm = this.resetForm.bind(this)
   }
   handleChange(event) {
     const target = event.target;
@@ -355,25 +352,19 @@ class NewUser extends Component {
       selectedCharacter: this.props.existingUser.character
     })
   }
-  resetForm(e) {
-    e.preventDefault()
-    this.setState({
-      login: '',
-      playerName: '',
-      selectedCharacter: ''
-    })
-    this.props.return()
-  }
   componentDidMount() {
     if (this.props.existingUser)
       this.fillFields()
+  }
+  componentWillUnmount() {
+    this.props.clearSelectedUser()
   }
   render() {
     const characters = this.props.characters.map((character) => <option value={character._id}>{character.name}</option>)
     return (
       <div>
         <form onSubmit={this.handleSubmit}><br />
-          <button type="reset" onClick={this.resetForm}>Takaisin</button>
+          <Link to="/admin">Takaisin</Link>
           <label>Kirjautumistunnus</label><input type="text" name="login" value={this.state.login} onChange={this.handleChange}></input><br />
           <label>Pelaajan nimi</label><input type="text" name="playerName" value={this.state.playerName} onChange={this.handleChange}></input><br />
           <label>Hahmo</label><select name="selectedCharacter" value={this.state.selectedCharacter} onChange={this.handleChange}><option value="-">-</option>{characters}</select><br />
@@ -381,86 +372,6 @@ class NewUser extends Component {
         </form>
       </div>
     )
-  }
-}
-
-class AdminDashboard extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      mode: null,
-      selectedCharacter: null,
-      selectedUser: null,
-      players: []
-    }
-    this.changeCharacter = this.changeCharacter.bind(this);
-    this.fetchPlayers = this.fetchPlayers.bind(this)
-    this.changeUser = this.changeUser.bind(this)
-    this.return = this.return.bind(this)
-  }
-  componentDidMount() {
-    this.fetchPlayers()
-  }
-  fetchPlayers() {
-    fetch('http://localhost:3002/user/')
-      .then(res => res.json())
-      .then(data => this.setState({ players: data }))
-  }
-  changeCharacter(id) {
-    this.setState({ selectedCharacter: id })
-    this.setState({ mode: "new" })
-  }
-  changeUser(id) {
-    this.setState({ selectedUser: this.state.players.find(player => player._id === id) })
-    this.setState({ mode: "user" })
-  }
-  return(type) {
-    this.setState({
-      mode: '',
-      selectedCharacter: ''
-    })
-    if (type === "user")
-      this.fetchPlayers()
-    if (type === "character")
-      this.props.fetchCharacters()
-  }
-  render() {
-    let tab
-    let returnCharacter = {
-      name: '',
-      age: '',
-      gender: '',
-      player: '',
-      saldo: '',
-      description: '',
-      mechanics: '',
-      plots: ''
-    }
-    if (this.state.selectedCharacter)
-      returnCharacter = this.props.characters.find(character => character._id === this.state.selectedCharacter)
-    switch (this.state.mode) {
-      case "new": tab = <NewCharacter character={returnCharacter} return={this.return} players={this.state.players} />; break;
-      case "messages": tab = <Messages return={this.return} characters={this.props.characters} />; break;
-      case "user": tab = <NewUser characters={this.props.characters} existingUser={this.state.selectedUser} return={this.return} />; break;
-      default: tab = <CharacterMenu
-        players={this.state.players}
-        fetchPlayers={this.fetchPlayers}
-        characters={this.props.characters}
-        fetchCharacters={this.props.fetchCharacters}
-        selectedCharacter={this.state.selectedCharacter}
-        changeCharacter={this.changeCharacter}
-        newUser={() => this.setState({ mode: 'user' })}
-        switchCharacter={() => this.setState({ mode: "new" })}
-        switchMessages={() => this.setState({ mode: "messages" })}
-        changeUser={this.changeUser} />
-    }
-    return (
-      <div>
-        <h2>Dashboard</h2>
-
-        {tab}
-      </div>
-    );
   }
 }
 

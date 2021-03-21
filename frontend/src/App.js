@@ -5,7 +5,7 @@ import Home from './Home.js'
 import Info from './Info.js'
 import AdminDashboard from './AdminDashboard.js'
 import { Pay, PlayerInfo, Message, PlayerDashboard } from './PlayerDashboard.js'
-import { NewCharacter } from './AdminDashboard.js'
+import { NewCharacter, NewUser, MessageAdmin } from './AdminDashboard.js'
 
 class App extends Component {
   constructor(props) {
@@ -17,14 +17,38 @@ class App extends Component {
       userType: 'guest',
       userCharacter: '',
       characters: [],
-      warning: ''
+      warning: '',
+      selectedCharacter: {
+        name: '',
+        age: '',
+        gender: '',
+        player: '',
+        saldo: '',
+        description: '',
+        mechanics: '',
+        plots: ''
+      },
+      selectedUser: '',
+      players: [],
+      defaultCharacter: {
+        name: '',
+        age: '',
+        gender: '',
+        player: '',
+        saldo: '',
+        description: '',
+        mechanics: '',
+        plots: ''
+      }
     }
+
     this.login = this.login.bind(this)
     this.logout = this.logout.bind(this)
     this.loginSuccess = this.loginSuccess.bind(this)
     this.handleChange = this.handleChange.bind(this)
     this.fetchCharacters = this.fetchCharacters.bind(this)
     this.handleError = this.handleError.bind(this)
+    this.fetchPlayers = this.fetchPlayers.bind(this)
   }
   componentDidMount() {
     // Check if login cookie
@@ -38,6 +62,16 @@ class App extends Component {
         this.setState({ login: cookie.substring(6) }, () => this.login())
       }
     });
+  }
+  fetchPlayers() {
+    fetch('http://localhost:3002/user/')
+      .then(res => res.json())
+      .then(
+        (result) => {
+          this.setState({
+            players: result
+          });
+        })
   }
   login(event) {
     if (event)
@@ -135,9 +169,36 @@ class App extends Component {
             <Route path="/dashboard">
               <PlayerDashboard loggedCharacter={this.state.userCharacter} characters={this.state.characters} fetchCharacters={this.fetchCharacters} />
             </Route>
-            <Route path="/admin">
-              <AdminDashboard characters={this.state.characters} fetchCharacters={this.fetchCharacters} />
+            <Route exact path="/admin/newCharacter">
+              <NewCharacter
+                character={this.state.selectedCharacter}
+                players={this.state.players}
+                fetchPlayers={this.fetchPlayers}
+                clearSelectedCharacter={() => this.setState({ selectedCharacter: this.state.defaultCharacter })}
+              />
             </Route>
+            <Route exact path="/admin/newUser">
+              <NewUser
+                characters={this.state.characters}
+                existingUser={this.state.players.find(player => player._id === this.state.selectedUser)}
+                clearSelectedUser={() => this.setState({ selectedUser: '' })}
+              />
+            </Route>
+            <Route exact path="/admin/messages">
+              <MessageAdmin characters={this.state.characters} />
+            </Route>
+            <Route path="/admin">
+              <AdminDashboard
+                characters={this.state.characters}
+                fetchCharacters={this.fetchCharacters}
+                selectCharacter={e => this.setState({ selectedCharacter: e.target.id })}
+                selectUser={e => this.setState({ selectedUser: e.target.id })}
+                players={this.state.players}
+                fetchPlayers={this.fetchPlayers}
+                changeCharacter={e => this.setState({ selectedCharacter: e })}
+                changeUser={e => this.setState({ selectedUser: e })} />
+            </Route>
+
           </Switch>
         </div>
       </Router>
