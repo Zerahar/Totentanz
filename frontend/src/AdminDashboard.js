@@ -347,7 +347,6 @@ export class NewUser extends Component {
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.clear = this.clear.bind(this)
   }
   handleChange(event) {
     const target = event.target;
@@ -400,7 +399,7 @@ export class NewUser extends Component {
       })
     }
     Promise.all([promise1, promise2])
-      .then(response => this.clear(response.ok))
+      .then(results => this.setState({ redirect: <Redirect to="/admin" /> }))
 
   }
   handleSubmit(event) {
@@ -432,15 +431,7 @@ export class NewUser extends Component {
       this.fillFields()
   }
   componentWillUnmount() {
-    this.clear(true)
-  }
-  clear(ok) {
-    if (ok) {
-      this.props.clearSelectedUser()
-      this.setState({ redirect: <Redirect to="/admin" /> })
-    }
-    else
-      window.alert("Jokin meni pieleen")
+    this.props.clearSelectedUser()
   }
   render() {
     const characters = this.props.characters.map((character) => <option value={character._id}>{character.name}</option>)

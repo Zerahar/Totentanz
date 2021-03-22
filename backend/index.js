@@ -132,7 +132,6 @@ mongo.MongoClient.connect(url, function (err, client) {
         userType: req.body.userType
       }
     }
-    console.log("User " + req.params.userId + " updated, query: ", document)
     db.collection('users').updateOne(query, document, function (err, result) {
       if (err) throw err
       res.send(result)
