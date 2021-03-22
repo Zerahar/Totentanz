@@ -39,6 +39,7 @@ mongo.MongoClient.connect(url, function (err, client) {
 
   // Fetch all characters
   app.get('/character/', (req, res) => {
+    console.log("Fetching all characters")
     db.collection('characters').find().toArray(function (err, result) {
       if (err) throw err
       res.send(result)
@@ -48,6 +49,7 @@ mongo.MongoClient.connect(url, function (err, client) {
 
   // Update character
   app.post('/character/:charId', (req, res) => {
+    console.log("Character " + req.params.charId + " updated")
     const query = { _id: new mongo.ObjectId(req.params.charId) }
     const document = {
       $set: {
@@ -70,6 +72,7 @@ mongo.MongoClient.connect(url, function (err, client) {
 
   // Update character's player
   app.post('/character/user/:charId', (req, res) => {
+    console.log("Player for character " + req.params.charId + " updated")
     const query = { _id: new mongo.ObjectId(req.params.charId) }
     const document = {
       $set: {
@@ -119,6 +122,7 @@ mongo.MongoClient.connect(url, function (err, client) {
 
   // Update user
   app.post('/user/:userId', (req, res) => {
+    console.log("User " + req.params.userId + " updated")
     const query = { _id: new mongo.ObjectId(req.params.userId) }
     const document = {
       $set: {
@@ -151,6 +155,7 @@ mongo.MongoClient.connect(url, function (err, client) {
 
   // Fetch all users
   app.get('/user/', (req, res) => {
+    console.log("Fetching all users")
     db.collection('users').find().toArray(function (err, result) {
       if (err) throw err
       res.send(result)

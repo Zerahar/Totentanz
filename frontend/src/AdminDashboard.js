@@ -34,10 +34,9 @@ class AdminDashboard extends Component {
     }
   }
   componentDidMount() {
-    if (this.props.characters.length === 0)
-      this.props.fetchCharacters()
-    if (this.props.players.length === 0)
-      this.props.fetchPlayers()
+    console.log("Admindashboard mounted")
+    this.props.fetchCharacters()
+    this.props.fetchPlayers()
   }
   render() {
     const characterName = (characters, id) => { if (id) { try { return characters.find(character => character._id === id).name } catch { return "-" } } else { return "-" } }
@@ -136,7 +135,6 @@ export class NewCharacter extends Component {
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.checkInput = this.checkInput.bind(this)
-    this.clear = this.clear.bind(this)
   }
   handleChange(event) {
     const target = event.target;
@@ -159,18 +157,57 @@ export class NewCharacter extends Component {
         mechanics: this.state.mechanics,
         plots: this.state.plots
       })
+      let newCharacterId
+      let promise1, promise2 = null
       let url = "http://localhost:3002/character/"
-      if (this.props.character._id)
+      //Define later callbacks
+      if (this.props.character.player !== this.state.player) {
+        // Update selected user as well
+        if (this.state.player) {
+          const newPlayer = this.props.players.find(player => player._id === this.state.player)
+          console.log("newPlayer ", newPlayer)
+          promise1 = fetch('http://localhost:3002/user/' + this.state.player, {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ login: newPlayer.login, userName: newPlayer.userName, character: newCharacterId, userType: newPlayer.userType })
+          })
+        }
+        if (this.props.character.player) {
+          const oldPlayer = this.props.players.find(player => player._id === this.props.character.player)
+          console.log("oldPlayer ", oldPlayer)
+          //Remove character from old player
+          promise2 = fetch('http://localhost:3002/user/' + oldPlayer._id, {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ login: oldPlayer.login, userName: oldPlayer.userName, character: '', userType: oldPlayer.userType })
+          })
+        }
+
+      }
+      if (this.props.character._id) {
         url += this.props.character._id
-      fetch(url, {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: data
-      })
-        .then(this.clear())
+        // Insert/update character
+        fetch(url, {
+          method: 'POST',
+          mode: 'cors',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: data
+        })
+          .then(response => response.json())
+          .then(parsed => parsed.insertedId)
+          .then(id => newCharacterId = id)
+          .then(Promise.all([promise1, promise2])
+            .then(results => this.setState({ redirect: <Redirect to="/admin" /> }))
+          )
+      }
     }
   }
   checkInput() {
@@ -186,16 +223,10 @@ export class NewCharacter extends Component {
       this.props.fetchPlayers()
   }
   componentWillUnmount() {
-    this.clear()
-  }
-  clear() {
     this.props.clearSelectedCharacter()
-    this.props.fetchCharacters()
-    this.props.fetchPlayers()
-    this.setState({ redirect: <Redirect to="/admin" /> })
   }
   render() {
-    const players = this.props.players.map(player => <option value={player._id}>{player.userName}</option>)
+    const players = this.props.players.map(player => <option value={player._id} key={player._id}>{player.userName}</option>)
     return (
       <div>
         <form onSubmit={this.handleSubmit}>
@@ -326,51 +357,50 @@ export class NewUser extends Component {
     });
   }
   updateCharacter(response) {
-    if (this.state.selectedCharacter) {
-      const existingUser = this.props.existingUser
-      const characterId = this.state.selectedCharacter
-      const selectedCharacter = this.props.characters.find(character => character._id === characterId)
-      let oldCharacter
-      let oldCharacterId = 0
-      let userId
-      if (!existingUser)
-        userId = JSON.parse(response).insertedId
-      else {
-        userId = existingUser._id
-        oldCharacter = this.props.characters.find(character => character.player === userId)
-        if (oldCharacter)
-          oldCharacterId = oldCharacter._id
-      }
-
-      // Check that character has player as well
-      if (selectedCharacter.player !== userId) {
-        fetch("http://localhost:3002/character/user/" + characterId, {
-          method: 'POST',
-          mode: 'cors',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ player: userId })
-        })
-          // Remove player from previous character
-          .then(fetch("http://localhost:3002/character/user/" + oldCharacterId, {
-            method: 'POST',
-            mode: 'cors',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ player: '' })
-          }).then(response => this.clear(response.ok)))
-
-      }
-      else {
-        this.clear(true)
-      }
-    }
+    const existingUser = this.props.existingUser
+    const characterId = this.state.selectedCharacter
+    const selectedCharacter = this.props.characters.find(character => character._id === characterId)
+    let oldCharacter
+    let oldCharacterId = 0
+    let userId
+    let promise1, promise2 = null
+    if (!existingUser)
+      userId = JSON.parse(response).insertedId
     else {
-      this.props.fetchPlayers()
-      this.setState({ redirect: <Redirect to="/admin" /> })
+      userId = existingUser._id
+      oldCharacter = this.props.characters.find(character => character.player === userId)
+      if (oldCharacter && oldCharacterId !== characterId)
+        // Prevent removing current character
+        oldCharacterId = oldCharacter._id
     }
+
+    // If a character is chosen and it is not the same as before
+    if (selectedCharacter && selectedCharacter.player !== userId) {
+      //Update new character
+      promise1 = fetch("http://localhost:3002/character/user/" + characterId, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ player: userId })
+      })
+    }
+    // If there is a previous character and it is not the same as current or current is empty
+    if (oldCharacterId) {
+      // Remove player from previous character
+      promise2 = fetch("http://localhost:3002/character/user/" + oldCharacterId, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ player: '' })
+      })
+    }
+    Promise.all([promise1, promise2])
+      .then(response => this.clear(response.ok))
+
   }
   handleSubmit(event) {
     event.preventDefault();
@@ -406,8 +436,6 @@ export class NewUser extends Component {
   clear(ok) {
     if (ok) {
       this.props.clearSelectedUser()
-      this.props.fetchCharacters()
-      this.props.fetchPlayers()
       this.setState({ redirect: <Redirect to="/admin" /> })
     }
     else

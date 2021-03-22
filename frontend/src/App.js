@@ -64,6 +64,7 @@ class App extends Component {
     });
   }
   fetchPlayers() {
+    console.log("Fetching players")
     fetch('http://localhost:3002/user/')
       .then(res => res.json())
       .then(
@@ -115,6 +116,7 @@ class App extends Component {
       this.setState({ warning: "Palvelimella on ongelma. Ota yhteys ylläpitäjään." })
   }
   fetchCharacters() {
+    console.log("Fetch characters")
     fetch('http://localhost:3002/character/')
       .then(res => res.json())
       .then(
