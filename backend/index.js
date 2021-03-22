@@ -122,7 +122,7 @@ mongo.MongoClient.connect(url, function (err, client) {
 
   // Update user
   app.post('/user/:userId', (req, res) => {
-    console.log("User " + req.params.userId + " updated")
+
     const query = { _id: new mongo.ObjectId(req.params.userId) }
     const document = {
       $set: {
@@ -132,6 +132,7 @@ mongo.MongoClient.connect(url, function (err, client) {
         userType: req.body.userType
       }
     }
+    console.log("User " + req.params.userId + " updated, query: ", document)
     db.collection('users').updateOne(query, document, function (err, result) {
       if (err) throw err
       res.send(result)

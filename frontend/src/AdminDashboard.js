@@ -172,7 +172,7 @@ export class NewCharacter extends Component {
             headers: {
               'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ login: newPlayer.login, userName: newPlayer.userName, character: newCharacterId, userType: newPlayer.userType })
+            body: JSON.stringify({ login: newPlayer.login, userName: newPlayer.userName, character: newCharacterId || this.props.character._id, userType: newPlayer.userType })
           })
         }
         if (this.props.character.player) {
@@ -204,6 +204,7 @@ export class NewCharacter extends Component {
           .then(response => response.json())
           .then(parsed => parsed.insertedId)
           .then(id => newCharacterId = id)
+          .then(console.log("NewCharacterID " + newCharacterId))
           .then(Promise.all([promise1, promise2])
             .then(results => this.setState({ redirect: <Redirect to="/admin" /> }))
           )
