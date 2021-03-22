@@ -20,18 +20,51 @@ class AdminDashboard extends Component {
     this.props.changeUser(e.target.id)
   }
   deleteUser(e) {
-    let c = window.confirm("Haluatko varmasti poistaa käyttäjän " + this.props.players.find(player => player._id === e.target.id).userName + "?")
+    const player = this.props.players.find(player => player._id === e.target.id)
+    const character = this.props.characters.find(character => character.player === player._id)
+    let c = window.confirm("Haluatko varmasti poistaa käyttäjän " + player.userName + "?")
     if (c) {
-      fetch('http://localhost:3002/user/delete/' + e.target.id)
-        .then(this.props.fetchPlayers())
+      const promise1 = fetch('http://localhost:3002/user/delete/' + e.target.id)
+      let promise2
+      if (character) {
+        character.player = ""
+        promise2 = fetch('http://localhost:3002/character/' + character._id, {
+          method: 'POST',
+          mode: 'cors',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(character)
+        })
+      }
+      Promise.all([promise1, promise2])
+        .then(responses => this.props.fetchPlayers())
+        .then(this.props.fetchCharacters())
     }
   }
   deleteCharacter(e) {
-    let c = window.confirm("Haluatko varmasti poistaa hahmon " + this.props.characters.find(character => character._id === e.target.id).name + "?")
+    const character = this.props.characters.find(character => character._id === e.target.id)
+    const player = this.props.players.find(player => player._id === character.player)
+    let c = window.confirm("Haluatko varmasti poistaa hahmon " + character.name + "?")
     if (c) {
-      fetch('http://localhost:3002/character/delete/' + e.target.id)
+      const promise1 = fetch('http://localhost:3002/character/delete/' + e.target.id)
+      let promise2
+      if (player) {
+        player.character = ""
+        promise2 = fetch('http://localhost:3002/user/' + player._id, {
+          method: 'POST',
+          mode: 'cors',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(player)
+        })
+      }
+      Promise.all([promise1, promise2])
+        .then(responses => this.props.fetchPlayers())
         .then(this.props.fetchCharacters())
     }
+
   }
   componentDidMount() {
     console.log("Admindashboard mounted")
@@ -190,25 +223,25 @@ export class NewCharacter extends Component {
         }
 
       }
-      if (this.props.character._id) {
+      if (this.props.character._id)
         url += this.props.character._id
-        // Insert/update character
-        fetch(url, {
-          method: 'POST',
-          mode: 'cors',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: data
-        })
-          .then(response => response.json())
-          .then(parsed => parsed.insertedId)
-          .then(id => newCharacterId = id)
-          .then(console.log("NewCharacterID " + newCharacterId))
-          .then(Promise.all([promise1, promise2])
-            .then(results => this.setState({ redirect: <Redirect to="/admin" /> }))
-          )
-      }
+      // Insert/update character
+      fetch(url, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: data
+      })
+        .then(response => response.json())
+        .then(parsed => parsed.insertedId)
+        .then(id => newCharacterId = id)
+        .then(console.log("NewCharacterID " + newCharacterId))
+        .then(Promise.all([promise1, promise2])
+          .then(results => this.setState({ redirect: <Redirect to="/admin" /> }))
+        )
+
     }
   }
   checkInput() {
@@ -365,7 +398,7 @@ export class NewUser extends Component {
     let userId
     let promise1, promise2 = null
     if (!existingUser)
-      userId = JSON.parse(response).insertedId
+      userId = response.insertedId
     else {
       userId = existingUser._id
       oldCharacter = this.props.characters.find(character => character.player === userId)
@@ -417,6 +450,7 @@ export class NewUser extends Component {
       },
       body: JSON.stringify(data)
     })
+      .then(response => response.json())
       .then(response => this.updateCharacter(response))
   }
   fillFields() {
