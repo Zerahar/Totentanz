@@ -161,9 +161,12 @@ export class Message extends Component {
         }
         this.handleChange = this.handleChange.bind(this)
         this.createChat = this.createChat.bind(this)
+        this.fetchChats = this.fetchChats.bind(this)
     }
     componentDidMount() {
-        console.log("Fetching chats")
+        this.fetchChats()
+    }
+    fetchChats() {
         fetch('http://localhost:3002/chat/' + this.props.loggedCharacter)
             .then(res => res.json())
             .then(
@@ -188,6 +191,7 @@ export class Message extends Component {
         let xhttp = new XMLHttpRequest();
         xhttp.open("POST", "http://localhost:3002/chat/", true);
         xhttp.setRequestHeader("Content-type", "application/json");
+        xhttp.onreadystatechange = (e) => this.fetchChats(e)
         xhttp.send(JSON.stringify(data));
         this.setState({ mode: '', selectedCharacters: [] })
     }

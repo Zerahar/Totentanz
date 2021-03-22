@@ -97,9 +97,12 @@ class OpenChat extends Component {
         let history = ''
         if (this.state.history.length !== 0)
             history = this.state.history.map(message => <p>({message.time}) {message.user}: {message.text}</p>)
+        let backbutton = <Link to="/dashboard">Takaisin</Link>
+        if (this.props.user === "admin")
+            backbutton = <Link to="/admin">Takaisin</Link>
         return (
             <div>
-                <Link to="/dashboard">Takaisin</Link>
+                {backbutton}
                 <h2>{this.props.chat.participants.map((participant) => participant.name + ", ")}</h2>
                 <div>{history}</div>
                 <input type="text" value={this.state.input} onChange={this.messageBeingWritten}></input><button onClick={this.sendMessage}>Lähetä</button>

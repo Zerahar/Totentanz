@@ -1,7 +1,7 @@
 // Import React dependencies.
 import React, { Component } from 'react'
 import { init, formatBlock, exec } from 'pell';
-import { Link } from "react-router-dom"
+import { Link, Redirect } from "react-router-dom"
 import 'pell/dist/pell.css'
 import OpenChat from './OpenChat.js'
 
@@ -163,7 +163,7 @@ export class NewCharacter extends Component {
         url += this.props.character._id
       xhttp.open("POST", url, true);
       xhttp.setRequestHeader("Content-type", "application/json");
-      xhttp.onreadystatechange = (e) => { this.props.fetchCharacters(e); this.props.return("character") }
+      // xhttp.onreadystatechange = () => { this.props.fetchCharacters() }
       xhttp.send(data);
     }
   }
@@ -221,6 +221,7 @@ export class MessageAdmin extends Component {
     this.deleteChat = this.deleteChat.bind(this)
     this.handleChange = this.handleChange.bind(this)
     this.createChat = this.createChat.bind(this)
+    this.updateCharacter = this.updateCharacter.bind(this)
   }
   componentDidMount() {
     this.fetchChats()
@@ -266,6 +267,7 @@ export class MessageAdmin extends Component {
     </li>);
     if (this.state.mode === "new") {
       return (<div>
+        <button onClick={() => this.setState({ mode: "" })}>Takaisin</button>
         <label>Valitse keskustelun jäsenet</label>
         <ul>
           {characters}
@@ -281,7 +283,7 @@ export class MessageAdmin extends Component {
     else {
       return (
         <div>
-          <button onClick={this.props.return}>Takaisin</button><button onClick={() => this.setState({ mode: "new" })}>Uusi keskustelu</button>
+          <Link to="/admin">Takaisin</Link><button onClick={() => this.setState({ mode: "new" })}>Uusi keskustelu</button>
           <ul>{chats}</ul>
         </div>
       )
@@ -295,10 +297,12 @@ export class NewUser extends Component {
       login: '',
       playerName: '',
       selectedCharacter: '',
-      isLoaded: true
+      isLoaded: true,
+      redirect: ''
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.clear = this.clear.bind(this)
   }
   handleChange(event) {
     const target = event.target;
@@ -308,42 +312,69 @@ export class NewUser extends Component {
       [name]: value
     });
   }
-  handleSubmit(event) {
-    event.preventDefault();
-    const data = { login: this.state.login, userName: this.state.playerName, character: this.state.selectedCharacter, userType: 'player' }
-    let xhttp = new XMLHttpRequest();
-    let url = "http://localhost:3002/user/"
-    if (this.props.existingUser)
-      url += this.props.existingUser._id
-    xhttp.open("POST", url, true);
-    xhttp.setRequestHeader("Content-type", "application/json");
+  updateCharacter(response) {
     if (this.state.selectedCharacter) {
       const existingUser = this.props.existingUser
       const characterId = this.state.selectedCharacter
       const selectedCharacter = this.props.characters.find(character => character._id === characterId)
+      let oldCharacter
+      let oldCharacterId = 0
+      let userId
+      if (!existingUser)
+        userId = JSON.parse(response).insertedId
+      else {
+        userId = existingUser._id
+        oldCharacter = this.props.characters.find(character => character.player === userId)
+        if (oldCharacter)
+          oldCharacterId = oldCharacter._id
+      }
 
-      xhttp.onreadystatechange = function () {
-        let userId
-        if (this.readyState == 4 && this.status == 200) {
-          if (!existingUser)
-            userId = JSON.parse(this.response).insertedId
-          else
-            userId = existingUser._id
+      // Check that character has player as well
+      if (selectedCharacter.player !== userId) {
+        fetch("http://localhost:3002/character/user/" + characterId, {
+          method: 'POST',
+          mode: 'cors',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ player: userId })
+        })
+          // Remove player from previous character
+          .then(fetch("http://localhost:3002/character/user/" + oldCharacterId, {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ player: '' })
+          }).then(response => this.clear(response.ok)))
 
-          // Check that character has player as well
-          if (!selectedCharacter.player) {
-            xhttp.open("POST", "http://localhost:3002/character/user/" + characterId, true);
-            xhttp.setRequestHeader("Content-type", "application/json");
-            xhttp.send(JSON.stringify({ player: userId }));
-          }
-          this.props.return("user")
-        }
+      }
+      else {
+        this.clear(true)
       }
     }
     else {
-      xhttp.onreadystatechange = () => this.props.return("user")
+      this.props.fetchPlayers()
+      this.setState({ redirect: <Redirect to="/admin" /> })
     }
-    xhttp.send(JSON.stringify(data))
+  }
+  handleSubmit(event) {
+    event.preventDefault();
+    const data = { login: this.state.login, userName: this.state.playerName, character: this.state.selectedCharacter, userType: 'player' }
+    let url = "http://localhost:3002/user/"
+    if (this.props.existingUser)
+      url += this.props.existingUser._id
+
+    fetch(url, {
+      method: 'POST',
+      mode: 'cors',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    })
+      .then(response => this.updateCharacter(response))
   }
   fillFields() {
     this.setState({
@@ -357,7 +388,17 @@ export class NewUser extends Component {
       this.fillFields()
   }
   componentWillUnmount() {
-    this.props.clearSelectedUser()
+    this.clear(true)
+  }
+  clear(ok) {
+    if (ok) {
+      this.props.clearSelectedUser()
+      this.props.fetchCharacters()
+      this.props.fetchPlayers()
+      this.setState({ redirect: <Redirect to="/admin" /> })
+    }
+    else
+      window.alert("Jokin meni pieleen")
   }
   render() {
     const characters = this.props.characters.map((character) => <option value={character._id}>{character.name}</option>)
@@ -370,6 +411,7 @@ export class NewUser extends Component {
           <label>Hahmo</label><select name="selectedCharacter" value={this.state.selectedCharacter} onChange={this.handleChange}><option value="-">-</option>{characters}</select><br />
           <button type="submit">Tallenna</button>
         </form>
+        {this.state.redirect}
       </div>
     )
   }

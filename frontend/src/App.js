@@ -182,6 +182,8 @@ class App extends Component {
                 characters={this.state.characters}
                 existingUser={this.state.players.find(player => player._id === this.state.selectedUser)}
                 clearSelectedUser={() => this.setState({ selectedUser: '' })}
+                fetchCharacters={this.fetchCharacters}
+                fetchPlayers={this.fetchPlayers}
               />
             </Route>
             <Route exact path="/admin/messages">
