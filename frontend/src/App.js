@@ -174,6 +174,7 @@ class App extends Component {
                 character={this.state.selectedCharacter}
                 players={this.state.players}
                 fetchPlayers={this.fetchPlayers}
+                fetchCharacters={this.fetchCharacters}
                 clearSelectedCharacter={() => this.setState({ selectedCharacter: this.state.defaultCharacter })}
               />
             </Route>

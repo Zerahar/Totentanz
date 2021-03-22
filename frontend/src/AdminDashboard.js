@@ -130,11 +130,13 @@ export class NewCharacter extends Component {
       saldo: this.props.character.saldo,
       description: this.props.character.description,
       mechanics: this.props.character.mechanics,
-      plots: this.props.character.plots
+      plots: this.props.character.plots,
+      redirect: ''
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.checkInput = this.checkInput.bind(this)
+    this.clear = this.clear.bind(this)
   }
   handleChange(event) {
     const target = event.target;
@@ -157,14 +159,18 @@ export class NewCharacter extends Component {
         mechanics: this.state.mechanics,
         plots: this.state.plots
       })
-      let xhttp = new XMLHttpRequest();
       let url = "http://localhost:3002/character/"
       if (this.props.character._id)
         url += this.props.character._id
-      xhttp.open("POST", url, true);
-      xhttp.setRequestHeader("Content-type", "application/json");
-      // xhttp.onreadystatechange = () => { this.props.fetchCharacters() }
-      xhttp.send(data);
+      fetch(url, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: data
+      })
+        .then(this.clear())
     }
   }
   checkInput() {
@@ -180,7 +186,13 @@ export class NewCharacter extends Component {
       this.props.fetchPlayers()
   }
   componentWillUnmount() {
+    this.clear()
+  }
+  clear() {
     this.props.clearSelectedCharacter()
+    this.props.fetchCharacters()
+    this.props.fetchPlayers()
+    this.setState({ redirect: <Redirect to="/admin" /> })
   }
   render() {
     const players = this.props.players.map(player => <option value={player._id}>{player.userName}</option>)
@@ -202,6 +214,7 @@ export class NewCharacter extends Component {
           <button type="submit" onClick={this.handleSubmit}>Tallenna</button>
           <Link to="/admin">Poistu tallentamatta</Link>
         </form>
+        {this.state.redirect}
       </div>
     );
   }
