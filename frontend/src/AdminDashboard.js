@@ -86,32 +86,37 @@ class AdminDashboard extends Component {
         <td>{player.login}</td>
         <td><Link id={player._id} onClick={this.editUser} to="admin/newUser">Muokkaa</Link><button id={player._id} onClick={this.deleteUser}>Poista</button></td>
       </tr>);
-    return (
-      <div>
-        <Link to="admin/messages">Keskustelut</Link>
-        <Link to="admin/newUser">Uusi käyttäjä</Link>
-        <Link to="admin/newCharacter">Uusi hahmo</Link>
-        <h2>Hahmot</h2>
-        <table>
-          <thead>
-            <tr><th>Nimi</th><th>Pelaaja</th><th>Operaatiot</th></tr>
-          </thead>
-          <tbody>
-            {characters}
-          </tbody>
-        </table>
+    if (this.props.admin === "admin")
+      return (
+        <div>
+          <Link to="admin/messages">Keskustelut</Link>
+          <Link to="admin/newUser">Uusi käyttäjä</Link>
+          <Link to="admin/newCharacter">Uusi hahmo</Link>
+          <h2>Hahmot</h2>
+          <table>
+            <thead>
+              <tr><th>Nimi</th><th>Pelaaja</th><th>Operaatiot</th></tr>
+            </thead>
+            <tbody>
+              {characters}
+            </tbody>
+          </table>
 
-        <h2>Pelaajat</h2>
-        <table>
-          <thead>
-            <tr><th>Oikea nimi</th><th>Hahmon nimi</th><th>Kirjautumistunnus</th><th>Operaatiot</th></tr>
-          </thead>
-          <tbody>
-            {players}
-          </tbody>
-        </table>
-      </div>
-    );
+          <h2>Pelaajat</h2>
+          <table>
+            <thead>
+              <tr><th>Oikea nimi</th><th>Hahmon nimi</th><th>Kirjautumistunnus</th><th>Operaatiot</th></tr>
+            </thead>
+            <tbody>
+              {players}
+            </tbody>
+          </table>
+        </div>
+      )
+    else
+      return (
+        <div><p>Kirjaudu sisään nähdäksesi adminin työkalut.</p></div>
+      )
   }
 }
 
@@ -300,10 +305,11 @@ export class MessageAdmin extends Component {
     this.deleteChat = this.deleteChat.bind(this)
     this.handleChange = this.handleChange.bind(this)
     this.createChat = this.createChat.bind(this)
-    this.updateCharacter = this.updateCharacter.bind(this)
   }
   componentDidMount() {
     this.fetchChats()
+    if (this.props.characters.length === 0)
+      this.props.fetchCharacters()
   }
   fetchChats() {
     fetch('http://localhost:3002/chat/')
@@ -318,7 +324,8 @@ export class MessageAdmin extends Component {
     let c = window.confirm("Haluatko varmasti poistaa keskustelun?")
     if (c)
       fetch('http://localhost:3002/chat/delete/' + e.target.id)
-        .then(this.fetchChats())
+        .then(response => response.json())
+        .then(data => this.fetchChats())
   }
   createChat() {
     const data = { participants: this.state.selectedCharacters }

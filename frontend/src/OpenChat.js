@@ -43,7 +43,7 @@ class OpenChat extends Component {
             console.log(message)
             if (message.type === 'message') {
                 const newMessage = {
-                    time: new Date(message.data.time).toString(),
+                    time: new Date(message.data.time).toUTCString(),
                     text: message.data.text,
                     user: message.data.author
                 }
@@ -54,7 +54,7 @@ class OpenChat extends Component {
             if (message.type === 'history') {
                 message.data.map(msg => this.setState(prevState => ({
                     history: [...prevState.history, {
-                        time: new Date(msg.time).toString(),
+                        time: new Date(msg.time).toUTCString(),
                         text: msg.text,
                         user: msg.author
                     }]
@@ -96,7 +96,7 @@ class OpenChat extends Component {
     render() {
         let history = ''
         if (this.state.history.length !== 0)
-            history = this.state.history.map(message => <p>({message.time}) {message.user}: {message.text}</p>)
+            history = this.state.history.map(message => <p><i>{message.time}</i> <b>{message.user}</b>: {message.text}</p>)
         let backbutton = <Link to="/dashboard">Takaisin</Link>
         if (this.props.user === "admin")
             backbutton = <Link to="/admin">Takaisin</Link>

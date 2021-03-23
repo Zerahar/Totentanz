@@ -1,6 +1,6 @@
 import './App.css';
 import { Component } from 'react'
-import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
+import { BrowserRouter as Router, Route, Link, Switch, Redirect } from "react-router-dom";
 import Home from './Home.js'
 import Info from './Info.js'
 import AdminDashboard from './AdminDashboard.js'
@@ -100,7 +100,8 @@ class App extends Component {
       userId: '',
       userType: 'guest',
       userCharacter: '',
-      login: ''
+      login: '',
+      redirect: <Redirect to="/" />
     })
     // Remove login cookie
     document.cookie = "login="
@@ -189,7 +190,9 @@ class App extends Component {
               />
             </Route>
             <Route exact path="/admin/messages">
-              <MessageAdmin characters={this.state.characters} />
+              <MessageAdmin
+                characters={this.state.characters}
+                fetchCharacters={this.fetchCharacters} />
             </Route>
             <Route path="/admin">
               <AdminDashboard
@@ -200,11 +203,14 @@ class App extends Component {
                 players={this.state.players}
                 fetchPlayers={this.fetchPlayers}
                 changeCharacter={e => this.setState({ selectedCharacter: e })}
-                changeUser={e => this.setState({ selectedUser: e })} />
+                changeUser={e => this.setState({ selectedUser: e })}
+                admin={this.state.userType}
+              />
             </Route>
 
           </Switch>
         </div>
+        {this.state.redirect}
       </Router>
     );
   }
