@@ -191,7 +191,8 @@ export class NewCharacter extends Component {
         mechanics: this.state.mechanics,
         plots: this.state.plots
       })
-      let promise1, promise2 = null
+      let promise1 = () => null
+      let promise2 = undefined
       let url = "http://localhost:3002/character/"
       //Define later callbacks
       if (this.props.character.player !== this.state.player) {
@@ -199,15 +200,16 @@ export class NewCharacter extends Component {
         if (this.state.player) {
           const newPlayer = this.props.players.find(player => player._id === this.state.player)
           console.log("newPlayer ", newPlayer)
-          console.log({ login: newPlayer.login, userName: newPlayer.userName, character: this.state.newId, userType: newPlayer.userType })
-          promise1 = (newid) => fetch('http://localhost:3002/user/' + this.state.player, {
-            method: 'POST',
-            mode: 'cors',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ login: newPlayer.login, userName: newPlayer.userName, character: newid, userType: newPlayer.userType })
-          })
+          promise1 = (newid) => {
+            console.log("Newid: " + newid); fetch('http://localhost:3002/user/' + this.state.player, {
+              method: 'POST',
+              mode: 'cors',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ login: newPlayer.login, userName: newPlayer.userName, character: newid || this.props.character._id, userType: newPlayer.userType })
+            })
+          }
         }
         if (this.props.character.player) {
           const oldPlayer = this.props.players.find(player => player._id === this.props.character.player)
