@@ -62,7 +62,7 @@ class AdminDashboard extends Component {
       }
       Promise.all([promise1, promise2])
         .then(responses => this.props.fetchPlayers())
-        .then(this.props.fetchCharacters())
+        .then(responses => this.props.fetchCharacters())
     }
 
   }
@@ -163,7 +163,8 @@ export class NewCharacter extends Component {
       description: this.props.character.description,
       mechanics: this.props.character.mechanics,
       plots: this.props.character.plots,
-      redirect: ''
+      redirect: '',
+      newId: ''
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -190,7 +191,6 @@ export class NewCharacter extends Component {
         mechanics: this.state.mechanics,
         plots: this.state.plots
       })
-      let newCharacterId
       let promise1, promise2 = null
       let url = "http://localhost:3002/character/"
       //Define later callbacks
@@ -199,13 +199,14 @@ export class NewCharacter extends Component {
         if (this.state.player) {
           const newPlayer = this.props.players.find(player => player._id === this.state.player)
           console.log("newPlayer ", newPlayer)
-          promise1 = fetch('http://localhost:3002/user/' + this.state.player, {
+          console.log({ login: newPlayer.login, userName: newPlayer.userName, character: this.state.newId, userType: newPlayer.userType })
+          promise1 = (newid) => fetch('http://localhost:3002/user/' + this.state.player, {
             method: 'POST',
             mode: 'cors',
             headers: {
               'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ login: newPlayer.login, userName: newPlayer.userName, character: newCharacterId || this.props.character._id, userType: newPlayer.userType })
+            body: JSON.stringify({ login: newPlayer.login, userName: newPlayer.userName, character: newid, userType: newPlayer.userType })
           })
         }
         if (this.props.character.player) {
@@ -236,9 +237,7 @@ export class NewCharacter extends Component {
       })
         .then(response => response.json())
         .then(parsed => parsed.insertedId)
-        .then(id => newCharacterId = id)
-        .then(console.log("NewCharacterID " + newCharacterId))
-        .then(Promise.all([promise1, promise2])
+        .then(id => Promise.all([promise1(id), promise2])
           .then(results => this.setState({ redirect: <Redirect to="/admin" /> }))
         )
 
@@ -468,14 +467,14 @@ export class NewUser extends Component {
     this.props.clearSelectedUser()
   }
   render() {
-    const characters = this.props.characters.map((character) => <option value={character._id}>{character.name}</option>)
+    const characters = this.props.characters.map((character) => <option value={character._id} key={character._id}>{character.name}</option>)
     return (
       <div>
         <form onSubmit={this.handleSubmit}><br />
           <Link to="/admin">Takaisin</Link>
           <label>Kirjautumistunnus</label><input type="text" name="login" value={this.state.login} onChange={this.handleChange}></input><br />
           <label>Pelaajan nimi</label><input type="text" name="playerName" value={this.state.playerName} onChange={this.handleChange}></input><br />
-          <label>Hahmo</label><select name="selectedCharacter" value={this.state.selectedCharacter} onChange={this.handleChange}><option value="-">-</option>{characters}</select><br />
+          <label>Hahmo</label><select name="selectedCharacter" value={this.state.selectedCharacter} onChange={this.handleChange}><option value="" key="none">-</option>{characters}</select><br />
           <button type="submit">Tallenna</button>
         </form>
         {this.state.redirect}

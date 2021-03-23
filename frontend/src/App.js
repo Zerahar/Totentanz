@@ -1,6 +1,6 @@
 import './App.css';
 import { Component } from 'react'
-import { BrowserRouter as Router, Route, Link, Switch, Redirect } from "react-router-dom";
+import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
 import Home from './Home.js'
 import Info from './Info.js'
 import AdminDashboard from './AdminDashboard.js'
@@ -100,8 +100,7 @@ class App extends Component {
       userId: '',
       userType: 'guest',
       userCharacter: '',
-      login: '',
-      userId: ''
+      login: ''
     })
     // Remove login cookie
     document.cookie = "login="

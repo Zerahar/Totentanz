@@ -104,6 +104,7 @@ mongo.MongoClient.connect(url, function (err, client) {
 
   // Add character
   app.post('/character', (req, res) => {
+    console.log("Added a new character")
     db.collection('characters').insertOne(req.body, function (err, result) {
       if (err) throw err
       res.send(result)
@@ -113,6 +114,7 @@ mongo.MongoClient.connect(url, function (err, client) {
 
   // Add user
   app.post('/user', (req, res) => {
+    console.log("Added a new user")
     db.collection('users').insertOne(req.body, function (err, result) {
       if (err) throw err
       res.send(result)
