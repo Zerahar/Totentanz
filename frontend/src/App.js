@@ -94,6 +94,8 @@ class App extends Component {
     })
     // create a cookie
     document.cookie = "login=" + this.state.login
+    if (data.userType === "player")
+      this.setState({ redirect: <Redirect to="/dashboard" /> })
   }
   logout() {
     this.setState({

@@ -43,7 +43,7 @@ class OpenChat extends Component {
             console.log(message)
             if (message.type === 'message') {
                 const newMessage = {
-                    time: new Date(message.data.time).toUTCString(),
+                    time: new Date(message.data.time).toLocaleString("fi-FI", { timeStyle: "short", dateStyle: "medium" }),
                     text: message.data.text,
                     user: message.data.author
                 }
@@ -54,7 +54,7 @@ class OpenChat extends Component {
             if (message.type === 'history') {
                 message.data.map(msg => this.setState(prevState => ({
                     history: [...prevState.history, {
-                        time: new Date(msg.time).toUTCString(),
+                        time: new Date(msg.time).toLocaleString("fi-FI", { timeStyle: "short", dateStyle: "medium" }),
                         text: msg.text,
                         user: msg.author
                     }]
