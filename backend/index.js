@@ -50,6 +50,7 @@ mongo.MongoClient.connect(url, function (err, client) {
   // Update character
   app.post('/character/:charId', (req, res) => {
     console.log("Character " + req.params.charId + " updated")
+    let promise2, promise3
     const query = { _id: new mongo.ObjectId(req.params.charId) }
     const document = {
       $set: {
@@ -63,11 +64,53 @@ mongo.MongoClient.connect(url, function (err, client) {
         plots: req.body.plots,
       }
     }
-    db.collection('characters').updateOne(query, document, function (err, result) {
-      if (err) throw err
-      res.send(result)
-      db.close
+    // Update character
+    const promise1 = new Promise(function (resolve, reject) {
+      db.collection('characters').updateOne(query, document, function (err, result) {
+        if (err) reject(err)
+        console.log("Update 1")
+        db.close
+        resolve(result)
+      })
     })
+
+    // If player changed, update new player
+    if (req.body.newPlayer) {
+      const query2 = { _id: new mongo.ObjectId(req.body.player) }
+      const document2 = {
+        $set: {
+          character: req.params.charId
+        }
+      }
+      promise2 = new Promise(function (resolve, reject) {
+        db.collection('users').updateOne(query2, document2, function (err, result) {
+          if (err) reject(err)
+          console.log("Update 2")
+          db.close
+          resolve(result)
+        })
+      })
+    }
+    // If there was a previous player, update that as well
+    if (req.body.oldPlayer) {
+      const query3 = { _id: new mongo.ObjectId(req.body.oldPlayer) }
+      const document3 = {
+        $set: {
+          character: ''
+        }
+      }
+      promise3 = new Promise(function (resolve, reject) {
+        db.collection('users').updateOne(query3, document3, function (err, result) {
+          if (err) reject(err)
+          console.log("Update 3")
+          db.close
+          resolve(result)
+        })
+      }
+      )
+    }
+    Promise.all([promise1, promise2, promise3])
+      .then(responses => res.send(responses))
   })
 
   // Update character's player

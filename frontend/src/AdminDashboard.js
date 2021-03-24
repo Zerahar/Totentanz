@@ -186,6 +186,12 @@ export class NewCharacter extends Component {
   handleSubmit(event) {
     event.preventDefault();
     if (this.checkInput()) {
+      let newPlayer = false
+      let oldPlayer
+      if (this.props.character.player !== this.state.player && this.state.player)
+        newPlayer = true
+      if (this.props.character.player && this.props.character.player !== this.state.player)
+        oldPlayer = this.props.players.find(player => player._id === this.props.character.player)._id
       const data = JSON.stringify({
         name: this.state.name,
         age: this.state.age,
@@ -194,43 +200,11 @@ export class NewCharacter extends Component {
         saldo: parseFloat(this.state.saldo),
         description: this.state.description,
         mechanics: this.state.mechanics,
-        plots: this.state.plots
+        plots: this.state.plots,
+        newPlayer: newPlayer,
+        oldPlayer: oldPlayer
       })
-      let promise1 = () => null
-      let promise2 = undefined
       let url = "http://localhost:3002/character/"
-      //Define later callbacks
-      if (this.props.character.player !== this.state.player) {
-        // Update selected user as well
-        if (this.state.player) {
-          const newPlayer = this.props.players.find(player => player._id === this.state.player)
-          console.log("newPlayer ", newPlayer)
-          promise1 = (newid) => {
-            console.log("Newid: " + newid); fetch('http://localhost:3002/user/' + this.state.player, {
-              method: 'POST',
-              mode: 'cors',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({ login: newPlayer.login, userName: newPlayer.userName, character: newid || this.props.character._id, userType: newPlayer.userType })
-            })
-          }
-        }
-        if (this.props.character.player) {
-          const oldPlayer = this.props.players.find(player => player._id === this.props.character.player)
-          console.log("oldPlayer ", oldPlayer)
-          //Remove character from old player
-          promise2 = fetch('http://localhost:3002/user/' + oldPlayer._id, {
-            method: 'POST',
-            mode: 'cors',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ login: oldPlayer.login, userName: oldPlayer.userName, character: '', userType: oldPlayer.userType })
-          })
-        }
-
-      }
       if (this.props.character._id)
         url += this.props.character._id
       // Insert/update character
@@ -243,11 +217,7 @@ export class NewCharacter extends Component {
         body: data
       })
         .then(response => response.json())
-        .then(parsed => parsed.insertedId)
-        .then(id => Promise.all([promise1(id), promise2])
-          .then(results => this.setState({ redirect: <Redirect to="/admin" /> }))
-        )
-
+        .then(parsed => this.setState({ redirect: <Redirect to="/admin" /> }))
     }
   }
   checkInput() {
