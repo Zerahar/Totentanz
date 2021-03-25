@@ -148,11 +148,42 @@ mongo.MongoClient.connect(url, function (err, client) {
   // Add character
   app.post('/character', (req, res) => {
     console.log("Added a new character")
-    db.collection('characters').insertOne(req.body, function (err, result) {
-      if (err) throw err
-      res.send(result)
-      db.close
+    const document = {
+      name: req.body.name,
+      age: req.body.age,
+      player: req.body.player,
+      gender: req.body.gender,
+      description: req.body.description,
+      mechanics: req.body.mechanics,
+      saldo: mongo.Double(req.body.saldo),
+      plots: req.body.plots
+    }
+    let promise2 = (id) => null
+    const promise1 = new Promise(function (resolve, reject) {
+      db.collection('characters').insertOne(document, function (err, result) {
+        if (err) reject(err)
+        resolve(result)
+        db.close
+      })
     })
+    if (req.body.player) {
+      const query2 = { _id: new mongo.ObjectId(req.body.player) }
+      promise2 = (id) => new Promise(function (resolve, reject) {
+        db.collection('users').updateOne(query2, {
+          $set: {
+            character: id
+          }
+        }, function (err, result) {
+          if (err) reject(err)
+          resolve(result)
+          db.close
+        })
+      })
+    }
+    promise1
+      .then(result => result.insertedId)
+      .then(id => promise2(id))
+      .then(result => res.send(result))
   })
 
   // Add user
