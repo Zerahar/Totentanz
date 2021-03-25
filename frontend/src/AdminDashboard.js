@@ -76,7 +76,8 @@ class AdminDashboard extends Component {
     const playerName = (players, id) => { if (id) { try { return players.find(player => player._id === id).userName } catch { return "-" } } else { return "-" } }
     const characters = this.props.characters.map((character) => <tr>
       <td>{character.name}</td><td>{playerName(this.props.players, character.player)}</td>
-      <td><Link id={character._id} onClick={this.editCharacter} to="admin/newCharacter">Muokkaa</Link><button id={character._id} onClick={this.deleteCharacter}>Poista</button></td>
+      <td class="table-operations"><Link id={character._id} onClick={this.editCharacter} to="admin/newCharacter" class="btn btn-primary flex-fill m-2 w-100">Muokkaa</Link>
+        <button id={character._id} onClick={this.deleteCharacter} class="btn btn-danger flex-fill m-2 w-100">Poista</button></td>
     </tr>);
     let players = ''
     if (this.props.players)
@@ -84,18 +85,21 @@ class AdminDashboard extends Component {
         <td>{player.userName}</td>
         <td>{characterName(this.props.characters, player.character)}</td>
         <td>{player.login}</td>
-        <td><Link id={player._id} onClick={this.editUser} to="admin/newUser">Muokkaa</Link><button id={player._id} onClick={this.deleteUser}>Poista</button></td>
+        <td class="table-operations"><Link id={player._id} onClick={this.editUser} to="admin/newUser" class="btn btn-primary flex-fill m-2 w-100">Muokkaa</Link>
+          <button id={player._id} onClick={this.deleteUser} class="btn btn-danger flex-fill m-2 w-100">Poista</button></td>
       </tr>);
     if (this.props.admin === "admin")
       return (
         <div>
-          <Link to="admin/messages">Keskustelut</Link>
-          <Link to="admin/newUser">Uusi käyttäjä</Link>
-          <Link to="admin/newCharacter">Uusi hahmo</Link>
+          <nav class="nav justify-content-center">
+            <Link to="admin/messages" class="nav-item">Keskustelut</Link>
+            <Link to="admin/newUser" class="nav-item">Uusi käyttäjä</Link>
+            <Link to="admin/newCharacter" class="nav-item">Uusi hahmo</Link>
+          </nav>
           <h2>Hahmot</h2>
-          <table>
+          <table class="table">
             <thead>
-              <tr><th>Nimi</th><th>Pelaaja</th><th>Operaatiot</th></tr>
+              <tr><th>Nimi</th><th>Pelaaja</th><th class="w-25">Operaatiot</th></tr>
             </thead>
             <tbody>
               {characters}
@@ -103,9 +107,9 @@ class AdminDashboard extends Component {
           </table>
 
           <h2>Pelaajat</h2>
-          <table>
+          <table class="table">
             <thead>
-              <tr><th>Oikea nimi</th><th>Hahmon nimi</th><th>Kirjautumistunnus</th><th>Operaatiot</th></tr>
+              <tr><th>Oikea nimi</th><th>Hahmon nimi</th><th>Tunnus</th><th class="w-25">Operaatiot</th></tr>
             </thead>
             <tbody>
               {players}
@@ -240,18 +244,34 @@ export class NewCharacter extends Component {
     return (
       <div>
         <form onSubmit={this.handleSubmit}>
-          <label>Nimi:</label> <input required type="text" value={this.state.name} onChange={this.handleChange} name="name"></input><br />
-          <label>Ikä:</label> <input type="text" value={this.state.age} onChange={this.handleChange} name="age"></input><br />
-          <label>Sukupuoli:</label> <input type="text" value={this.state.gender} onChange={this.handleChange} name="gender"></input><br />
-          <label>Pelaaja:</label> <select value={this.state.player} onChange={this.handleChange} name="player">
-            <option value="" >-</option>{players}</select><br />
-          <label>Saldo:</label> <input placeholder="0" type="text" value={this.state.saldo} onChange={this.handleChange} name="saldo"></input><br />
-          <label>Kuvaus: </label><br />
-          <Editor changeEditor={(data) => this.setState({ description: data })} html={this.state.description} />
-          <label>Juonet: </label><br />
-          <Editor changeEditor={(data) => this.setState({ plots: data })} html={this.state.plots} />
-          <label>Pelimekaniikat: </label><br />
-          <Editor changeEditor={(data) => this.setState({ mechanics: data })} html={this.state.mechanics} />
+          <div class="mb-3">
+            <label class="form-label">Nimi:</label> <input class="form-control" required type="text" value={this.state.name} onChange={this.handleChange} name="name"></input>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Ikä:</label> <input class="form-control" type="text" value={this.state.age} onChange={this.handleChange} name="age"></input>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Sukupuoli:</label> <input class="form-control" type="text" value={this.state.gender} onChange={this.handleChange} name="gender"></input>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Pelaaja:</label> <select class="form-select" value={this.state.player} onChange={this.handleChange} name="player">
+              <option value="" >-</option>{players}</select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Saldo:</label> <input class="form-control" placeholder="0" type="text" value={this.state.saldo} onChange={this.handleChange} name="saldo"></input>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Kuvaus: </label>
+            <Editor changeEditor={(data) => this.setState({ description: data })} html={this.state.description} />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Juonet: </label>
+            <Editor changeEditor={(data) => this.setState({ plots: data })} html={this.state.plots} />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Pelimekaniikat: </label>
+            <Editor changeEditor={(data) => this.setState({ mechanics: data })} html={this.state.mechanics} />
+          </div>
           <button type="submit" onClick={this.handleSubmit}>Tallenna</button>
           <Link to="/admin">Poistu tallentamatta</Link>
         </form>
@@ -315,7 +335,7 @@ export class MessageAdmin extends Component {
     }
   }
   render() {
-    const characters = this.props.characters.map((character) => <li><input type="checkbox" name={character._id} onChange={this.handleChange} />{character.name}</li>)
+    const characters = this.props.characters.map((character) => <li><input class="form-check-input" type="checkbox" name={character._id} onChange={this.handleChange} />{character.name}</li>)
     const chats = this.state.chats.map((chat) => <li>
       {chat.participants.map((participant) => participant.name + ", ")}
       <button onClick={() => this.setState({ mode: "open", selectedChat: chat })}>Avaa</button>
@@ -324,7 +344,7 @@ export class MessageAdmin extends Component {
     if (this.state.mode === "new") {
       return (<div>
         <button onClick={() => this.setState({ mode: "" })}>Takaisin</button>
-        <label>Valitse keskustelun jäsenet</label>
+        <label class="form-label">Valitse keskustelun jäsenet</label>
         <ul>
           {characters}
         </ul>
@@ -451,10 +471,14 @@ export class NewUser extends Component {
       <div>
         <form onSubmit={this.handleSubmit}><br />
           <Link to="/admin">Takaisin</Link>
-          <label>Kirjautumistunnus</label><input type="text" name="login" value={this.state.login} onChange={this.handleChange}></input><br />
-          <label>Pelaajan nimi</label><input type="text" name="playerName" value={this.state.playerName} onChange={this.handleChange}></input><br />
-          <label>Hahmo</label><select name="selectedCharacter" value={this.state.selectedCharacter} onChange={this.handleChange}><option value="" key="none">-</option>{characters}</select><br />
-          <button type="submit">Tallenna</button>
+          <div class="mb-3">
+            <label class="form-label">Kirjautumistunnus</label><input class="form-control" type="text" name="login" value={this.state.login} onChange={this.handleChange}></input>
+          </div><div class="mb-3">
+            <label class="form-label">Pelaajan nimi</label><input class="form-control" type="text" name="playerName" value={this.state.playerName} onChange={this.handleChange}></input>
+          </div><div class="mb-3">
+            <label class="form-label">Hahmo</label><select class="form-select" name="selectedCharacter" value={this.state.selectedCharacter} onChange={this.handleChange}><option value="" key="none">-</option>{characters}</select>
+          </div>
+          <button type="submit" class="btn btn-primary">Tallenna</button>
         </form>
         {this.state.redirect}
       </div>

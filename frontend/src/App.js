@@ -1,4 +1,4 @@
-import './App.css';
+
 import { Component } from 'react'
 import { BrowserRouter as Router, Route, Link, Switch, Redirect } from "react-router-dom";
 import Home from './Home.js'
@@ -6,6 +6,7 @@ import Info from './Info.js'
 import AdminDashboard from './AdminDashboard.js'
 import { Pay, PlayerInfo, Message, PlayerDashboard } from './PlayerDashboard.js'
 import { NewCharacter, NewUser, MessageAdmin } from './AdminDashboard.js'
+import './custom.scss'
 
 class App extends Component {
   constructor(props) {
@@ -129,30 +130,39 @@ class App extends Component {
         })
   }
   render() {
-    let loginForm = <li><form onSubmit={this.login}><input type="text" value={this.state.login} onChange={this.handleChange}></input> <button type="submit">Kirjaudu</button><br />
+    let loginForm = <li class="nav-item"><form onSubmit={this.login}><input type="text" value={this.state.login} onChange={this.handleChange} class="form-control"></input>
+      <button type="submit" class="btn btn-primary">Kirjaudu</button>
     </form><span color="red">{this.state.warning}</span></li>
     if (this.state.userId)
-      loginForm = <li><button type="submit" onClick={this.logout}>Kirjaudu ulos</button></li>
+      loginForm = <li class="nav-item"><button type="submit" onClick={this.logout} class="btn btn-primary">Kirjaudu ulos</button></li>
     return (
       <Router>
-        <div>
-          <ul>
-            <li>
-              <Link to="/">Home</Link>
-            </li>
-            <li>
-              <Link to="/info">Info</Link>
-            </li>
-            <li>
-              <Link to="/dashboard">Dashboard</Link>
-            </li>
-            <li>
-              <Link to="/admin">Dashboard (Admin)</Link>
-            </li>
-            {loginForm}
+        <div class="container">
+          <nav class="navbar navbar-expand-md">
+            <div class="container-fluid">
+              <a class="navbar-brand" href="/">Totentanz</a>
+              <div class="collapse navbar-collapse" id="navbar">
+                <ul class="navbar-nav">
+                  <li class="nav-item">
+                    <Link to="/">Home</Link>
+                  </li>
+                  <li class="nav-item">
+                    <Link to="/info">Info</Link>
+                  </li>
+                  <li class="nav-item">
+                    <Link to="/dashboard">Dashboard</Link>
+                  </li>
+                  <li class="nav-item">
+                    <Link to="/admin">Dashboard (Admin)</Link>
+                  </li>
+                  {loginForm}
 
-          </ul>
-          <hr />
+                </ul>
+              </div>
+              <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Valikko">
+                <span class="navbar-toggler-icon"></span>
+              </button></div>
+          </nav>
 
           <Switch>
             <Route exact path="/">
