@@ -135,13 +135,17 @@ export class Pay extends Component {
                 {this.state.success}
                 <p>Sinulla on {this.props.character.saldo} eurodollaria.</p>
                 <form onSubmit={this.submit}>
-                    <label>Vastaanottaja</label><br />
-                    <select name="selectedCharacter" value={this.state.selectedCharacter} onChange={this.handleChange}>
-                        <option value="">-</option>{options}</select><br />
-                    <label>Summa</label><br />
-                    <input name="amount" required value={this.state.amount} onChange={this.handleChange}></input>
+                    <div class="mb-3">
+                        <label class="form-label">Vastaanottaja</label>
+                        <select class="form-select" name="selectedCharacter" value={this.state.selectedCharacter} onChange={this.handleChange}>
+                            <option value="">-</option>{options}</select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Summa</label>
+                        <input class="form-control" name="amount" required value={this.state.amount} onChange={this.handleChange}></input>
+                    </div>
                     <span>{this.state.warning}</span>
-                    <button type="submit">Maksa</button>
+                    <button type="submit" class="btn btn-primary">Maksa</button>
                 </form>
             </div>
         )
@@ -196,18 +200,25 @@ export class Message extends Component {
         this.setState({ mode: '', selectedCharacters: [] })
     }
     render() {
-        const characters = this.props.characters.filter(character => character._id !== this.props.loggedCharacter).map((character) => <li><input type="checkbox" name={character._id} onChange={this.handleChange} />{character.name}</li>)
-        const chats = this.state.chats.map((chat) => <li>
-            {chat.participants.map((participant) => participant.name + ", ")}
-            <button onClick={() => this.setState({ mode: "open", selectedChat: chat })}>Avaa</button>
-        </li>);
+        const characters = this.props.characters.filter(character => character._id !== this.props.loggedCharacter).map((character) =>
+            <div class="row">
+                <div class="col-auto">
+                    <input type="checkbox" class="form-check" name={character._id} onChange={this.handleChange} />
+                </div>
+                <div class="col-auto">
+                    <label class="form-label">{character.name}</label>
+                </div>
+            </div>)
+        const chats = this.state.chats.map((chat) =>
+            <li class="list-group-item">
+                {chat.participants.map((participant) => participant.name + ", ")}
+                <button onClick={() => this.setState({ mode: "open", selectedChat: chat })}>Avaa</button>
+            </li>);
         if (this.state.mode === "new") {
             return (<div>
                 <Link to="/dashboard">Takaisin</Link>
                 <label>Valitse keskustelun jäsenet</label>
-                <ul>
-                    {characters}
-                </ul>
+                {characters}
                 <button onClick={this.createChat}>Luo keskustelu</button>
             </div>)
         }
@@ -222,7 +233,7 @@ export class Message extends Component {
                     <Link to="/dashboard">Takaisin</Link>
                     <h2>Message</h2>
                     <button onClick={() => this.setState({ mode: "new" })}>Uusi keskustelu</button>
-                    <ul>{chats}</ul>
+                    <ul class="list-group">{chats}</ul>
                 </div>
             )
         }

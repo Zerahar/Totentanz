@@ -1,5 +1,4 @@
 
-import { Link } from 'react-router-dom'
 const { Component } = require("react");
 
 class OpenChat extends Component {
@@ -96,16 +95,29 @@ class OpenChat extends Component {
     render() {
         let history = ''
         if (this.state.history.length !== 0)
-            history = this.state.history.map(message => <p><i>{message.time}</i> <b>{message.user}</b>: {message.text}</p>)
-        let backbutton = <Link to="/dashboard">Takaisin</Link>
-        if (this.props.user === "admin")
-            backbutton = <Link to="/admin">Takaisin</Link>
+            history = this.state.history.map(message =>
+                <div class={(message.user === this.props.user || message.user === this.props.user.name) ? "toast show my-message w-75" : "toast show mb-3 w-75"}>
+                    {/* Show user's own messages on right */}
+                    <div class="toast-header">
+                        <strong class="me-auto">{message.user}</strong>
+                        <small>{message.time}</small>
+                    </div>
+                    <div class="toast-body">
+                        {message.text}
+                    </div>
+                </div>
+            )
+        // let backbutton = <Link to="/dashboard">Takaisin</Link>
+        // if (this.props.user === "admin")
+        //     backbutton = <Link to="/admin">Takaisin</Link>
         return (
-            <div>
-                {backbutton}
-                <h2>{this.props.chat.participants.map((participant) => participant.name + ", ")}</h2>
-                <div>{history}</div>
-                <input type="text" value={this.state.input} onChange={this.messageBeingWritten}></input><button onClick={this.sendMessage}>Lähetä</button>
+            <div class="chat-container d-flex flex-column">
+                <h2>{this.props.chat.participants.map((participant, index, array) => index === array.length - 1 ? participant.name : participant.name + ", ")}</h2>
+                <div class="overflow-auto messages-container p-3 flex-grow-1">{history}</div>
+                <div class="input-group">
+                    <input class="form-control" type="text" value={this.state.input} onChange={this.messageBeingWritten}></input>
+                    <button class="btn btn-primary" onClick={this.sendMessage}>Lähetä</button>
+                </div>
             </div>
         )
     }

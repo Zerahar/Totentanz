@@ -19,10 +19,33 @@
     }
 }
 
+// Common styles
+html,
+body,
+#root {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+// Dashboard
 .table-operations {
     display: block;
 
     @include breakpoint(md) {
         display: flex;
     }
+}
+
+// Chat
+.my-message {
+    margin: auto 0 1rem auto;
+}
+
+.chat-container {
+    max-height: 89vh;
+}
+
+.main-nav {
+    height: 10vh;
 }

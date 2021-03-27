@@ -6,6 +6,7 @@ import Info from './Info.js'
 import AdminDashboard from './AdminDashboard.js'
 import { Pay, PlayerInfo, Message, PlayerDashboard } from './PlayerDashboard.js'
 import { NewCharacter, NewUser, MessageAdmin } from './AdminDashboard.js'
+import Transactions from './Transactions.js'
 import './custom.scss'
 
 class App extends Component {
@@ -137,8 +138,8 @@ class App extends Component {
       loginForm = <li class="nav-item"><button type="submit" onClick={this.logout} class="btn btn-primary">Kirjaudu ulos</button></li>
     return (
       <Router>
-        <div class="container">
-          <nav class="navbar navbar-expand-md">
+        <div class="container h-100">
+          <nav class="navbar navbar-expand-md main-nav">
             <div class="container-fluid">
               <a class="navbar-brand" href="/">Totentanz</a>
               <div class="collapse navbar-collapse" id="navbar">
@@ -205,6 +206,12 @@ class App extends Component {
               <MessageAdmin
                 characters={this.state.characters}
                 fetchCharacters={this.fetchCharacters} />
+            </Route>
+            <Route exact path="/admin/transactions">
+              <Transactions
+                characters={this.state.characters}
+                fetchCharacters={this.fetchCharacters}
+              />
             </Route>
             <Route path="/admin">
               <AdminDashboard

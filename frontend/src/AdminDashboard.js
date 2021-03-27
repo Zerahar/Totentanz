@@ -92,6 +92,7 @@ class AdminDashboard extends Component {
       return (
         <div>
           <nav class="nav justify-content-center">
+            <Link to="admin/transactions" class="nav-item">Maksutapahtumat</Link>
             <Link to="admin/messages" class="nav-item">Keskustelut</Link>
             <Link to="admin/newUser" class="nav-item">Uusi käyttäjä</Link>
             <Link to="admin/newCharacter" class="nav-item">Uusi hahmo</Link>
@@ -134,7 +135,7 @@ class Editor extends Component {
   editor = null
   componentDidMount() {
     this.editor = init({
-      element: document.getElementById('editor'),
+      element: document.getElementById('editor-' + this.props.type),
       onChange: html => this.props.changeEditor(html),
       actions: ['bold', 'underline', 'italic', 'heading1', 'heading2', 'ulist', {
         name: 'erase',
@@ -155,7 +156,7 @@ class Editor extends Component {
   }
   render() {
     return (
-      <div id="editor" className="pell" />
+      <div id={"editor-" + this.props.type} className="pell" />
     )
   }
 }
@@ -262,18 +263,18 @@ export class NewCharacter extends Component {
           </div>
           <div class="mb-3">
             <label class="form-label">Kuvaus: </label>
-            <Editor changeEditor={(data) => this.setState({ description: data })} html={this.state.description} />
+            <Editor changeEditor={(data) => this.setState({ description: data })} html={this.state.description} type="description" />
           </div>
           <div class="mb-3">
             <label class="form-label">Juonet: </label>
-            <Editor changeEditor={(data) => this.setState({ plots: data })} html={this.state.plots} />
+            <Editor changeEditor={(data) => this.setState({ plots: data })} html={this.state.plots} type="plots" />
           </div>
           <div class="mb-3">
             <label class="form-label">Pelimekaniikat: </label>
-            <Editor changeEditor={(data) => this.setState({ mechanics: data })} html={this.state.mechanics} />
+            <Editor changeEditor={(data) => this.setState({ mechanics: data })} html={this.state.mechanics} type="mechanics" />
           </div>
-          <button type="submit" onClick={this.handleSubmit}>Tallenna</button>
-          <Link to="/admin">Poistu tallentamatta</Link>
+          <button type="submit" onClick={this.handleSubmit} class="btn btn-primary">Tallenna</button>
+          <Link to="/admin" class="btn btn-warning">Poistu tallentamatta</Link>
         </form>
         {this.state.redirect}
       </div>

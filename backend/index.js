@@ -294,8 +294,17 @@ mongo.MongoClient.connect(url, function (err, client) {
       db.close
     })
   })
-})
 
+
+  // Fetch all payments
+  app.get('/transaction/', (req, res) => {
+    db.collection('transactions').find().sort({ "time": -1 }).toArray(function (err, result) {
+      if (err) throw err
+      res.send(result)
+      db.close
+    })
+  })
+})
 var WebSocketServer = require('websocket').server;
 var http = require('http');
 
