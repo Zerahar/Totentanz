@@ -286,6 +286,17 @@ mongo.MongoClient.connect(url, function (err, client) {
     })
   })
 
+  // Fetch a chat
+  app.get('/chat/:chatId', (req, res) => {
+    const query = { _id: new mongo.ObjectId(req.params.chatId) }
+    db.collection('chats').findOne(query, function (err, result) {
+      if (err) throw err
+      console.log("Fetchin a chat with id " + req.params.chatId)
+      res.send(result)
+      db.close
+    })
+  })
+
   // Add payment
   app.post('/pay', (req, res) => {
     db.collection('transactions').insertOne(req.body, function (err, result) {

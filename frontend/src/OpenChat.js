@@ -8,11 +8,11 @@ class OpenChat extends Component {
             input: '',
             nameSent: false,
             history: [],
-            ready: false
+            ready: false,
+            chat: ''
         }
         this.sendMessage = this.sendMessage.bind(this)
         this.messageBeingWritten = this.messageBeingWritten.bind(this)
-        this.opened = this.opened.bind(this)
         this.addMessage = this.addMessage.bind(this)
         window.WebSocket = window.WebSocket || window.MozWebSocket;
         if (!window.WebSocket) {
@@ -24,18 +24,25 @@ class OpenChat extends Component {
         this.ws.close()
     }
     componentDidMount() {
+        fetch('http://localhost:3002/chat/' + this.props.chat._id)
+            .then(res => res.json())
+            .then(
+                (result) => {
+                    this.setState({ chat: result });
+                }
+            )
         this.ws.onopen = () => {
-            // on connecting, do nothing but log it to the console
             console.log('connected')
-            let name
-            if (this.props.user === "admin")
-                name = "admin"
-            else
-                name = this.props.user.name
-            console.log("Sending username: ", name)
-            this.ws.send(JSON.stringify({ text: name, type: 'name', chat: this.props.chat._id }))
+            let user = this.props.characters.find(character => character._id === this.props.user)
+            let userName
+            if (user)
+                userName = user.name
+            else if (this.props.user === "admin")
+                userName = "admin"
+            this.ws.send(JSON.stringify({ text: userName, type: 'name', chat: this.props.chat._id }))
             this.setState({ nameSent: true, ready: true })
         }
+
         this.ws.onmessage = evt => {
             // listen to data sent from the websocket server
             const message = JSON.parse(evt.data)
@@ -48,7 +55,7 @@ class OpenChat extends Component {
                 }
                 this.setState(prevState => ({
                     history: [...prevState.history, newMessage]
-                }))
+                }), () => { document.getElementById("message-container").scrollTop = document.getElementById("message-container").scrollHeight; return null })
             }
             if (message.type === 'history') {
                 message.data.map(msg => this.setState(prevState => ({
@@ -63,11 +70,6 @@ class OpenChat extends Component {
         this.ws.onclose = () => {
             console.log('disconnected')
         }
-
-
-    }
-    opened() {
-
     }
     error(error) {
         console.log(error)
@@ -107,13 +109,11 @@ class OpenChat extends Component {
                     </div>
                 </div>
             )
-        // let backbutton = <Link to="/dashboard">Takaisin</Link>
-        // if (this.props.user === "admin")
-        //     backbutton = <Link to="/admin">Takaisin</Link>
+
         return (
             <div class="chat-container d-flex flex-column">
                 <h2>{this.props.chat.participants.map((participant, index, array) => index === array.length - 1 ? participant.name : participant.name + ", ")}</h2>
-                <div class="overflow-auto messages-container p-3 flex-grow-1">{history}</div>
+                <div class="overflow-auto messages-container p-3 flex-grow-1" id="message-container">{history}</div>
                 <div class="input-group">
                     <input class="form-control" type="text" value={this.state.input} onChange={this.messageBeingWritten}></input>
                     <button class="btn btn-primary" onClick={this.sendMessage}>Lähetä</button>

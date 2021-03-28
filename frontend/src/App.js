@@ -4,11 +4,14 @@ import { BrowserRouter as Router, Route, Link, Switch, Redirect } from "react-ro
 import Home from './Home.js'
 import Info from './Info.js'
 import AdminDashboard from './AdminDashboard.js'
-import { Pay, PlayerInfo, Message, PlayerDashboard } from './PlayerDashboard.js'
-import { NewCharacter, NewUser, MessageAdmin } from './AdminDashboard.js'
+import { Pay, PlayerInfo, PlayerDashboard } from './PlayerDashboard.js'
+import { NewCharacter, NewUser } from './AdminDashboard.js'
+import ChatList from './ChatList.js'
 import Transactions from './Transactions.js'
 import './custom.scss'
-
+import { List } from 'react-bootstrap-icons'
+import { Collapse, Dropdown } from 'bootstrap'
+import OpenChat from './OpenChat.js';
 class App extends Component {
   constructor(props) {
     super(props);
@@ -20,6 +23,7 @@ class App extends Component {
       userCharacter: '',
       characters: [],
       warning: '',
+      selectedChat: '',
       selectedCharacter: {
         name: '',
         age: '',
@@ -130,39 +134,45 @@ class App extends Component {
           });
         })
   }
+  changeChat(e) {
+    console.log(e)
+  }
   render() {
-    let loginForm = <li class="nav-item"><form onSubmit={this.login}><input type="text" value={this.state.login} onChange={this.handleChange} class="form-control"></input>
+    let loginForm = <li class="nav-item"><form onSubmit={this.login}><div class="input-group"><input type="text" value={this.state.login} onChange={this.handleChange} class="form-control"></input>
       <button type="submit" class="btn btn-primary">Kirjaudu</button>
-    </form><span color="red">{this.state.warning}</span></li>
+    </div></form><span color="red">{this.state.warning}</span></li>
     if (this.state.userId)
       loginForm = <li class="nav-item"><button type="submit" onClick={this.logout} class="btn btn-primary">Kirjaudu ulos</button></li>
+    let playerPage, adminPage = ""
+    if (this.state.userType === "player")
+      playerPage = <li class="nav-item">
+        <Link to="/dashboard">Pelaajan sivut</Link>
+      </li>
+    if (this.state.userType === "admin")
+      adminPage = <li class="nav-item">
+        <Link to="/admin">Hallintapaneeli</Link>
+      </li>
     return (
       <Router>
         <div class="container h-100">
-          <nav class="navbar navbar-expand-md main-nav">
+          <nav class="navbar navbar-expand-sm main-nav">
             <div class="container-fluid">
               <a class="navbar-brand" href="/">Totentanz</a>
-              <div class="collapse navbar-collapse" id="navbar">
+              <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Valikko">
+                <List />
+              </button>
+              <div class="collapse navbar-collapse justify-content-end" id="navbar">
                 <ul class="navbar-nav">
-                  <li class="nav-item">
-                    <Link to="/">Home</Link>
-                  </li>
                   <li class="nav-item">
                     <Link to="/info">Info</Link>
                   </li>
-                  <li class="nav-item">
-                    <Link to="/dashboard">Dashboard</Link>
-                  </li>
-                  <li class="nav-item">
-                    <Link to="/admin">Dashboard (Admin)</Link>
-                  </li>
+                  {playerPage}
+                  {adminPage}
                   {loginForm}
 
                 </ul>
               </div>
-              <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Valikko">
-                <span class="navbar-toggler-icon"></span>
-              </button></div>
+            </div>
           </nav>
 
           <Switch>
@@ -179,7 +189,13 @@ class App extends Component {
               <Pay characters={this.state.characters} character={this.state.characters.find(character => character._id === this.state.userCharacter)} fetchCharacters={this.fetchCharacters} />
             </Route>
             <Route exact path="/dashboard/chat">
-              <Message characters={this.state.characters} loggedCharacter={this.state.userCharacter} />
+              <ChatList
+                characters={this.state.characters}
+                changeChat={e => this.setState({ selectedChat: e })}
+                fetchCharacters={this.fetchCharacters}
+                loggedCharacter={this.state.userCharacter}
+                type={this.state.userType}
+              />
             </Route>
             <Route path="/dashboard">
               <PlayerDashboard loggedCharacter={this.state.userCharacter} characters={this.state.characters} fetchCharacters={this.fetchCharacters} />
@@ -203,9 +219,13 @@ class App extends Component {
               />
             </Route>
             <Route exact path="/admin/messages">
-              <MessageAdmin
+              <ChatList
                 characters={this.state.characters}
-                fetchCharacters={this.fetchCharacters} />
+                fetchCharacters={this.fetchCharacters}
+                changeChat={e => this.setState({ selectedChat: e })}
+                loggedCharacter={this.state.userCharacter}
+                type={this.state.userType}
+              />
             </Route>
             <Route exact path="/admin/transactions">
               <Transactions
@@ -224,6 +244,13 @@ class App extends Component {
                 changeCharacter={e => this.setState({ selectedCharacter: e })}
                 changeUser={e => this.setState({ selectedUser: e })}
                 admin={this.state.userType}
+              />
+            </Route>
+            <Route path="/chat">
+              <OpenChat
+                chat={this.state.selectedChat}
+                user={this.state.userCharacter || this.state.userType}
+                characters={this.state.characters}
               />
             </Route>
 

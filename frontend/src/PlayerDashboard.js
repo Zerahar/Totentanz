@@ -1,6 +1,6 @@
 import { Component } from "react";
 import { Link } from "react-router-dom"
-import OpenChat from './OpenChat.js'
+
 export class PlayerInfo extends Component {
     constructor(props) {
         super(props);
@@ -152,93 +152,7 @@ export class Pay extends Component {
     }
 }
 
-export class Message extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            chats: [],
-            mode: '',
-            isLoaded: false,
-            error: '',
-            selectedCharacters: [],
-            selectedChat: ''
-        }
-        this.handleChange = this.handleChange.bind(this)
-        this.createChat = this.createChat.bind(this)
-        this.fetchChats = this.fetchChats.bind(this)
-    }
-    componentDidMount() {
-        this.fetchChats()
-    }
-    fetchChats() {
-        fetch('http://localhost:3002/chat/' + this.props.loggedCharacter)
-            .then(res => res.json())
-            .then(
-                (result) => {
-                    this.setState({ chats: result, isLoaded: true });
-                }
-            )
-    }
-    handleChange(event) {
-        if (event.target.checked)
-            this.setState(prevState => ({ selectedCharacters: [...prevState.selectedCharacters, this.props.characters.find(character => character._id === event.target.name)] }))
-        else {
-            let filteredArray = this.state.selectedCharacters.filter(character => character._id !== event.target.name)
-            this.setState({ selectedCharacters: filteredArray })
-        }
-    }
-    createChat() {
-        const loggedCharacter = this.props.characters.find(character => character._id === this.props.loggedCharacter)
-        let characters = [{ _id: loggedCharacter._id, name: loggedCharacter.name, player: loggedCharacter.player }]
-        this.state.selectedCharacters.map(character => characters.push({ _id: character._id, name: character.name, player: character.player }))
-        const data = { participants: characters }
-        let xhttp = new XMLHttpRequest();
-        xhttp.open("POST", "http://localhost:3002/chat/", true);
-        xhttp.setRequestHeader("Content-type", "application/json");
-        xhttp.onreadystatechange = (e) => this.fetchChats(e)
-        xhttp.send(JSON.stringify(data));
-        this.setState({ mode: '', selectedCharacters: [] })
-    }
-    render() {
-        const characters = this.props.characters.filter(character => character._id !== this.props.loggedCharacter).map((character) =>
-            <div class="row">
-                <div class="col-auto">
-                    <input type="checkbox" class="form-check" name={character._id} onChange={this.handleChange} />
-                </div>
-                <div class="col-auto">
-                    <label class="form-label">{character.name}</label>
-                </div>
-            </div>)
-        const chats = this.state.chats.map((chat) =>
-            <li class="list-group-item">
-                {chat.participants.map((participant) => participant.name + ", ")}
-                <button onClick={() => this.setState({ mode: "open", selectedChat: chat })}>Avaa</button>
-            </li>);
-        if (this.state.mode === "new") {
-            return (<div>
-                <Link to="/dashboard">Takaisin</Link>
-                <label>Valitse keskustelun jäsenet</label>
-                {characters}
-                <button onClick={this.createChat}>Luo keskustelu</button>
-            </div>)
-        }
-        else if (this.state.mode === "open") {
-            return (
-                <OpenChat chat={this.state.selectedChat} user={this.props.characters.find(character => character._id === this.props.loggedCharacter)} />
-            )
-        }
-        else {
-            return (
-                <div>
-                    <Link to="/dashboard">Takaisin</Link>
-                    <h2>Message</h2>
-                    <button onClick={() => this.setState({ mode: "new" })}>Uusi keskustelu</button>
-                    <ul class="list-group">{chats}</ul>
-                </div>
-            )
-        }
-    }
-}
+
 export class PlayerDashboard extends Component {
     componentDidMount() {
         this.props.fetchCharacters()
@@ -246,12 +160,19 @@ export class PlayerDashboard extends Component {
     render() {
         let access = <p>Kirjaudu sisään nähdäksesi hahmotietosi</p>
         if (this.props.loggedCharacter)
-            access = <div><Link to="dashboard/pay">Maksa</Link>
-                <Link to="dashboard/info">Info</Link>
-                <Link to="dashboard/chat">Viestit</Link></div>
+            access = <div class="d-flex player-controls">
+                <div class="flex-fill d-flex p-3">
+                    <Link to="dashboard/pay" class="btn btn-primary flex-fill">Maksa</Link>
+                </div>
+                <div class="flex-fill d-flex p-3">
+                    <Link to="dashboard/info" class="btn btn-primary flex-fill">Info</Link>
+                </div>
+                <div class="flex-fill d-flex p-3">
+                    <Link to="dashboard/chat" class="btn btn-primary flex-fill">Viestit</Link>
+                </div></div>
         return (
             <div>
-                <h2>Player Dashboard</h2>
+                <h2>Omat tiedot</h2>
                 {access}
             </div>
         )

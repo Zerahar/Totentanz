@@ -35,7 +35,7 @@ class Transactions extends Component {
         })
         return (
             <div>
-                <h2>Transactions</h2>
+                <h2>Maksutapahtumat</h2>
                 <table class="table">
                     <thead>
                         <tr>

@@ -49,3 +49,32 @@ body,
 .main-nav {
     height: 10vh;
 }
+
+.chat-list-item {
+    &:hover {
+        background-color: grey;
+        cursor: pointer;
+    }
+}
+
+//Player pages
+.player-controls {
+    height: 80vh;
+    justify-content: space-around;
+    flex-direction: column;
+
+    a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    @include breakpoint(md) {
+        height: auto;
+        flex-direction: row;
+
+        a {
+            display: inline-block;
+        }
+    }
+}
