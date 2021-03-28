@@ -16,7 +16,7 @@ class OpenChat extends Component {
         this.addMessage = this.addMessage.bind(this)
         window.WebSocket = window.WebSocket || window.MozWebSocket;
         if (!window.WebSocket) {
-            this.error("Selain ei tue chat-teknologiaa")
+            this.props.error(new Error("Selain ei tue chat-teknologiaa"))
         }
         this.ws = new WebSocket('ws://127.0.0.1:1337');
     }
@@ -24,13 +24,6 @@ class OpenChat extends Component {
         this.ws.close()
     }
     componentDidMount() {
-        fetch('http://localhost:3002/chat/' + this.props.chat._id)
-            .then(res => res.json())
-            .then(
-                (result) => {
-                    this.setState({ chat: result });
-                }
-            )
         this.ws.onopen = () => {
             console.log('connected')
             let user = this.props.characters.find(character => character._id === this.props.user)
@@ -70,9 +63,6 @@ class OpenChat extends Component {
         this.ws.onclose = () => {
             console.log('disconnected')
         }
-    }
-    error(error) {
-        console.log(error)
     }
     addMessage(message) {
         if (message)
