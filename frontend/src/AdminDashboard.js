@@ -4,6 +4,7 @@ import { init, formatBlock, exec } from 'pell';
 import { Link, Redirect } from "react-router-dom"
 import 'pell/dist/pell.css'
 import OpenChat from './OpenChat.js'
+import { Alert } from 'bootstrap'
 
 class AdminDashboard extends Component {
   constructor(props) {
@@ -174,11 +175,13 @@ export class NewCharacter extends Component {
       mechanics: this.props.character.mechanics,
       plots: this.props.character.plots,
       redirect: '',
-      newId: ''
+      newId: '',
+      error: ''
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.checkInput = this.checkInput.bind(this)
+    this.showError = this.showError.bind(this)
   }
   handleChange(event) {
     const target = event.target;
@@ -223,7 +226,20 @@ export class NewCharacter extends Component {
       })
         .then(response => response.json())
         .then(parsed => this.setState({ redirect: <Redirect to="/admin" /> }))
+        .catch(error => this.showError(error))
     }
+  }
+  showError(error) {
+    // Translate the most common error
+    if (error.message === "NetworkError when attempting to fetch resource.")
+      this.setState({ error: "Yhteyttä palvelimeen ei saatu. Yritä hetken kuluttua uudelleen tai ota yhteys pelinjohtoon." })
+    // If the error is something else, show it anyway
+    else
+      this.setState({ error: error.message })
+    // Show alert element
+    const alert = document.getElementById("errorMessage")
+    alert.classList.add('show')
+    setTimeout(function () { alert.classList.remove('show') }, 7000);
   }
   checkInput() {
     let valid = true
@@ -242,8 +258,14 @@ export class NewCharacter extends Component {
   }
   render() {
     const players = this.props.players.map(player => <option value={player._id} key={player._id}>{player.userName}</option>)
+    let error = ''
+    if (this.state.error)
+      error = <div class="alert alert-danger position-fixed bottom-0 start-50 translate-middle-x fade" id="errorMessage" role="alert">
+        {this.state.error}
+      </div>
     return (
       <div>
+        {error}
         <form onSubmit={this.handleSubmit}>
           <div class="mb-3">
             <label class="form-label">Nimi:</label> <input class="form-control" required type="text" value={this.state.name} onChange={this.handleChange} name="name"></input>
