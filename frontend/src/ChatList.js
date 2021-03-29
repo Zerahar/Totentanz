@@ -35,6 +35,7 @@ class ChatList extends Component {
                         this.setState({ chats: result, isLoaded: true });
                     }
                 )
+                .catch(error => this.props.error(error))
         else if (this.props.type === "guest")
             this.setState({ warning: 'Kirjaudu sisään nähdäksesi keskustelut.' })
         else

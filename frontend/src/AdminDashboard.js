@@ -181,7 +181,6 @@ export class NewCharacter extends Component {
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.checkInput = this.checkInput.bind(this)
-    this.showError = this.showError.bind(this)
   }
   handleChange(event) {
     const target = event.target;
@@ -226,20 +225,8 @@ export class NewCharacter extends Component {
       })
         .then(response => response.json())
         .then(parsed => this.setState({ redirect: <Redirect to="/admin" /> }))
-        .catch(error => this.showError(error))
+        .catch(error => this.props.error(error))
     }
-  }
-  showError(error) {
-    // Translate the most common error
-    if (error.message === "NetworkError when attempting to fetch resource.")
-      this.setState({ error: "Yhteyttä palvelimeen ei saatu. Yritä hetken kuluttua uudelleen tai ota yhteys pelinjohtoon." })
-    // If the error is something else, show it anyway
-    else
-      this.setState({ error: error.message })
-    // Show alert element
-    const alert = document.getElementById("errorMessage")
-    alert.classList.add('show')
-    setTimeout(function () { alert.classList.remove('show') }, 7000);
   }
   checkInput() {
     let valid = true
@@ -259,13 +246,8 @@ export class NewCharacter extends Component {
   render() {
     const players = this.props.players.map(player => <option value={player._id} key={player._id}>{player.userName}</option>)
     let error = ''
-    if (this.state.error)
-      error = <div class="alert alert-danger position-fixed bottom-0 start-50 translate-middle-x fade" id="errorMessage" role="alert">
-        {this.state.error}
-      </div>
     return (
       <div>
-        {error}
         <form onSubmit={this.handleSubmit}>
           <div class="mb-3">
             <label class="form-label">Nimi:</label> <input class="form-control" required type="text" value={this.state.name} onChange={this.handleChange} name="name"></input>
@@ -332,6 +314,7 @@ export class MessageAdmin extends Component {
           this.setState({ chats: result, isLoaded: true });
         }
       )
+      .catch(error => this.props.error(error))
   }
   deleteChat(e) {
     let c = window.confirm("Haluatko varmasti poistaa keskustelun?")
@@ -339,6 +322,7 @@ export class MessageAdmin extends Component {
       fetch('http://localhost:3002/chat/delete/' + e.target.id)
         .then(response => response.json())
         .then(data => this.fetchChats())
+        .catch(error => this.props.error(error))
   }
   createChat() {
     const data = { participants: this.state.selectedCharacters }
@@ -401,6 +385,7 @@ export class NewUser extends Component {
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.validateForm = this.validateForm.bind(this)
   }
   handleChange(event) {
     const target = event.target;
@@ -458,21 +443,46 @@ export class NewUser extends Component {
   }
   handleSubmit(event) {
     event.preventDefault();
-    const data = { login: this.state.login, userName: this.state.playerName, character: this.state.selectedCharacter, userType: 'player' }
-    let url = "http://localhost:3002/user/"
-    if (this.props.existingUser)
-      url += this.props.existingUser._id
+    if (this.validateForm()) {
+      const data = { login: this.state.login, userName: this.state.playerName, character: this.state.selectedCharacter, userType: 'player' }
+      let url = "http://localhost:3002/user/"
+      if (this.props.existingUser)
+        url += this.props.existingUser._id
 
-    fetch(url, {
-      method: 'POST',
-      mode: 'cors',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data)
-    })
-      .then(response => response.json())
-      .then(response => this.updateCharacter(response))
+      fetch(url, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      })
+        .then(response => response.json())
+        .then(response => this.updateCharacter(response))
+        .catch(error => this.props.error(error))
+    }
+  }
+  validateForm() {
+    const form = document.getElementById('userForm')
+    let valid = true
+    form.classList.remove("was-validated")
+    if (!form.checkValidity()) {
+      valid = false
+    }
+    // let valid = true
+    // const loginRegEx = /[a-öA-Ö\d]/
+    // const nameRegEx = /[ .,\-'a-öA-Ö\d]/
+    // if (this.state.login.length < 7 || loginRegEx.test(this.state.login)) {
+    //   valid = false
+    //   document.getElementById('loginInput').attributes.add('invalid')
+    // }
+    // if (this.state.playerName.length < 4 || nameRegEx.test(this.state.playerName)) {
+    //   valid = false
+    //   document.getElementById('nameInput').attributes.add('invalid')
+    // }
+    form.classList.add("was-validated")
+    // return valid
+    return valid
   }
   fillFields() {
     this.setState({
@@ -492,12 +502,20 @@ export class NewUser extends Component {
     const characters = this.props.characters.map((character) => <option value={character._id} key={character._id}>{character.name}</option>)
     return (
       <div>
-        <form onSubmit={this.handleSubmit}><br />
+        <form onSubmit={this.handleSubmit} noValidate id="userForm"><br />
           <Link to="/admin">Takaisin</Link>
           <div class="mb-3">
-            <label class="form-label">Kirjautumistunnus</label><input class="form-control" type="text" name="login" value={this.state.login} onChange={this.handleChange}></input>
+            <label class="form-label">* Kirjautumistunnus</label>
+            <input minLength="6" maxLength="20" required pattern="[a-öA-Ö\d]*" id="loginInput" class="form-control" type="text" name="login" value={this.state.login} onChange={this.handleChange} placeholder="Käyttäjän kirjautumiseen käyttämä tunnus"></input>
+            <div class="invalid-feedback" id="loginFeedback">
+              Tarkista, että kirjautumistunnus on vähintään 6 merkkiä pitkä ja sisältää ainoastaan kirjaimia ja numeroita.
+      </div>
           </div><div class="mb-3">
-            <label class="form-label">Pelaajan nimi</label><input class="form-control" type="text" name="playerName" value={this.state.playerName} onChange={this.handleChange}></input>
+            <label class="form-label">* Pelaajan nimi</label>
+            <input minLength="3" maxLength="30" required pattern="[ .,\-'a-öA-Ö\d]*" id="nameInput" class="form-control" type="text" name="playerName" value={this.state.playerName} onChange={this.handleChange}></input>
+            <div class="invalid-feedback" id="nameFeedback">
+              Nimi on pakollinen tieto ja se voi sisältää ainoastaan kirjaimia ja seuraavia merkkejä: ,.'-
+      </div>
           </div><div class="mb-3">
             <label class="form-label">Hahmo</label><select class="form-select" name="selectedCharacter" value={this.state.selectedCharacter} onChange={this.handleChange}><option value="" key="none">-</option>{characters}</select>
           </div>

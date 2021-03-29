@@ -18,6 +18,7 @@ class Transactions extends Component {
                         history: result
                     });
                 })
+            .catch(error => this.props.error(error))
     }
     render() {
         const history = this.state.history.map(event => {

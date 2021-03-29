@@ -55,6 +55,7 @@ class App extends Component {
     this.fetchCharacters = this.fetchCharacters.bind(this)
     this.handleError = this.handleError.bind(this)
     this.fetchPlayers = this.fetchPlayers.bind(this)
+    this.showError = this.showError.bind(this)
   }
   componentDidMount() {
     // Check if login cookie
@@ -79,6 +80,7 @@ class App extends Component {
             players: result
           });
         })
+      .catch(error => this.showError(error))
   }
   login(event) {
     if (event)
@@ -88,6 +90,7 @@ class App extends Component {
         .then(response => {
           response.ok ? response.json().then(data => this.loginSuccess(data)) : this.handleError(response.status)
         })
+        .catch(error => this.showError(error))
     }
   }
   loginSuccess(data) {
@@ -133,6 +136,19 @@ class App extends Component {
             characters: result
           });
         })
+      .catch(error => this.showError(error))
+  }
+  showError(error) {
+    // Translate the most common error
+    if (error.message === "NetworkError when attempting to fetch resource.")
+      this.setState({ error: "Yhteyttä palvelimeen ei saatu. Yritä hetken kuluttua uudelleen tai ota yhteys pelinjohtoon." })
+    // If the error is something else, show it anyway
+    else
+      this.setState({ error: error.message })
+    // Show alert element
+    const alert = document.getElementById("errorMessage")
+    alert.classList.add('show')
+    setTimeout(function () { alert.classList.remove('show') }, 7000);
   }
   changeChat(e) {
     console.log(e)
@@ -152,9 +168,15 @@ class App extends Component {
       adminPage = <li class="nav-item">
         <Link to="/admin">Hallintapaneeli</Link>
       </li>
+    let error = ''
+    if (this.state.error)
+      error = <div class="alert alert-danger position-fixed bottom-0 start-50 translate-middle-x fade" id="errorMessage" role="alert">
+        {this.state.error}
+      </div>
     return (
       <Router>
         <div class="container h-100">
+          {error}
           <nav class="navbar navbar-expand-sm main-nav">
             <div class="container-fluid">
               <a class="navbar-brand" href="/">Totentanz</a>
@@ -195,6 +217,7 @@ class App extends Component {
                 fetchCharacters={this.fetchCharacters}
                 loggedCharacter={this.state.userCharacter}
                 type={this.state.userType}
+                error={this.showError}
               />
             </Route>
             <Route path="/dashboard">
@@ -207,6 +230,7 @@ class App extends Component {
                 fetchPlayers={this.fetchPlayers}
                 fetchCharacters={this.fetchCharacters}
                 clearSelectedCharacter={() => this.setState({ selectedCharacter: this.state.defaultCharacter })}
+                error={this.showError}
               />
             </Route>
             <Route exact path="/admin/newUser">
@@ -216,6 +240,7 @@ class App extends Component {
                 clearSelectedUser={() => this.setState({ selectedUser: '' })}
                 fetchCharacters={this.fetchCharacters}
                 fetchPlayers={this.fetchPlayers}
+                error={this.showError}
               />
             </Route>
             <Route exact path="/admin/messages">
@@ -225,12 +250,14 @@ class App extends Component {
                 changeChat={e => this.setState({ selectedChat: e })}
                 loggedCharacter={this.state.userCharacter}
                 type={this.state.userType}
+                error={this.showError}
               />
             </Route>
             <Route exact path="/admin/transactions">
               <Transactions
                 characters={this.state.characters}
                 fetchCharacters={this.fetchCharacters}
+                error={this.showError}
               />
             </Route>
             <Route path="/admin">
@@ -244,6 +271,7 @@ class App extends Component {
                 changeCharacter={e => this.setState({ selectedCharacter: e })}
                 changeUser={e => this.setState({ selectedUser: e })}
                 admin={this.state.userType}
+                error={this.showError}
               />
             </Route>
             <Route path="/chat">
@@ -251,6 +279,7 @@ class App extends Component {
                 chat={this.state.selectedChat}
                 user={this.state.userCharacter || this.state.userType}
                 characters={this.state.characters}
+                error={this.showError}
               />
             </Route>
 
