@@ -229,12 +229,11 @@ export class NewCharacter extends Component {
     }
   }
   checkInput() {
-    let valid = true
-    if (!this.state.name)
-      valid = false
-    if (isNaN(this.state.saldo))
-      valid = false
-    return valid
+    const form = document.getElementById('characterForm')
+    form.classList.add("was-validated")
+    if (!form.checkValidity())
+      this.props.error("Kentissä oli virheitä.", true)
+    return form.checkValidity()
   }
   componentDidMount() {
     if (this.props.players.length === 0)
@@ -245,25 +244,37 @@ export class NewCharacter extends Component {
   }
   render() {
     const players = this.props.players.map(player => <option value={player._id} key={player._id}>{player.userName}</option>)
-    let error = ''
     return (
       <div>
-        <form onSubmit={this.handleSubmit}>
+        <form onSubmit={this.handleSubmit} noValidate id="characterForm">
           <div class="mb-3">
-            <label class="form-label">Nimi:</label> <input class="form-control" required type="text" value={this.state.name} onChange={this.handleChange} name="name"></input>
+            <label class="form-label">Nimi:</label>
+            <input class="form-control" maxlength="30" required pattern="[ .,\-'a-öA-Ö\d]*" type="text" value={this.state.name} onChange={this.handleChange} name="name"></input>
+            <div class="invalid-feedback">
+              Hahmolla täytyy olla nimi, ja ainoat sallitut erikoismerkit ovat .,-' ja numerot.
+    </div>
           </div>
           <div class="mb-3">
-            <label class="form-label">Ikä:</label> <input class="form-control" type="text" value={this.state.age} onChange={this.handleChange} name="age"></input>
+            <label class="form-label">Ikä:</label> <input class="form-control" pattern="[\d]*" type="text" value={this.state.age} onChange={this.handleChange} name="age"></input>
+            <div class="invalid-feedback">
+              Iän täytyy olla numero.
+    </div>
           </div>
           <div class="mb-3">
-            <label class="form-label">Sukupuoli:</label> <input class="form-control" type="text" value={this.state.gender} onChange={this.handleChange} name="gender"></input>
+            <label class="form-label">Sukupuoli:</label> <input class="form-control" pattern="[a-öA-Ö]*" type="text" value={this.state.gender} onChange={this.handleChange} name="gender"></input>
+            <div class="invalid-feedback">
+              Sukupuoli ei voi sisältää numeroita tai erikoismerkkejä.
+    </div>
           </div>
           <div class="mb-3">
             <label class="form-label">Pelaaja:</label> <select class="form-select" value={this.state.player} onChange={this.handleChange} name="player">
               <option value="" >-</option>{players}</select>
           </div>
           <div class="mb-3">
-            <label class="form-label">Saldo:</label> <input class="form-control" placeholder="0" type="text" value={this.state.saldo} onChange={this.handleChange} name="saldo"></input>
+            <label class="form-label">Saldo:</label> <input class="form-control" pattern="^[\d]+(,\d\d)*" type="text" value={this.state.saldo} onChange={this.handleChange} name="saldo"></input>
+            <div class="invalid-feedback">
+              Saldon täytyy olla numero. Senttien erottimena käytetään pilkkua.
+    </div>
           </div>
           <div class="mb-3">
             <label class="form-label">Kuvaus: </label>
@@ -395,52 +406,6 @@ export class NewUser extends Component {
       [name]: value
     });
   }
-  updateCharacter(response) {
-    const existingUser = this.props.existingUser
-    const characterId = this.state.selectedCharacter
-    const selectedCharacter = this.props.characters.find(character => character._id === characterId)
-    let oldCharacter
-    let oldCharacterId = 0
-    let userId
-    let promise1, promise2 = null
-    if (!existingUser)
-      userId = response.insertedId
-    else {
-      userId = existingUser._id
-      oldCharacter = this.props.characters.find(character => character.player === userId)
-      if (oldCharacter && oldCharacterId !== characterId)
-        // Prevent removing current character
-        oldCharacterId = oldCharacter._id
-    }
-
-    // If a character is chosen and it is not the same as before
-    if (selectedCharacter && selectedCharacter.player !== userId) {
-      //Update new character
-      promise1 = fetch("http://localhost:3002/character/user/" + characterId, {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ player: userId })
-      })
-    }
-    // If there is a previous character and it is not the same as current or current is empty
-    if (oldCharacterId) {
-      // Remove player from previous character
-      promise2 = fetch("http://localhost:3002/character/user/" + oldCharacterId, {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ player: '' })
-      })
-    }
-    Promise.all([promise1, promise2])
-      .then(results => this.setState({ redirect: <Redirect to="/admin" /> }))
-
-  }
   handleSubmit(event) {
     event.preventDefault();
     if (this.validateForm()) {
@@ -457,32 +422,14 @@ export class NewUser extends Component {
         },
         body: JSON.stringify(data)
       })
-        .then(response => response.json())
-        .then(response => this.updateCharacter(response))
+        .then(response => this.setState({ redirect: <Redirect to="/admin" /> }))
         .catch(error => this.props.error(error))
     }
   }
   validateForm() {
     const form = document.getElementById('userForm')
-    let valid = true
-    form.classList.remove("was-validated")
-    if (!form.checkValidity()) {
-      valid = false
-    }
-    // let valid = true
-    // const loginRegEx = /[a-öA-Ö\d]/
-    // const nameRegEx = /[ .,\-'a-öA-Ö\d]/
-    // if (this.state.login.length < 7 || loginRegEx.test(this.state.login)) {
-    //   valid = false
-    //   document.getElementById('loginInput').attributes.add('invalid')
-    // }
-    // if (this.state.playerName.length < 4 || nameRegEx.test(this.state.playerName)) {
-    //   valid = false
-    //   document.getElementById('nameInput').attributes.add('invalid')
-    // }
     form.classList.add("was-validated")
-    // return valid
-    return valid
+    return form.checkValidity()
   }
   fillFields() {
     this.setState({

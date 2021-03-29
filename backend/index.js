@@ -188,12 +188,82 @@ mongo.MongoClient.connect(url, function (err, client) {
 
   // Add user
   app.post('/user', (req, res) => {
-    console.log("Added a new user")
-    db.collection('users').insertOne(req.body, function (err, result) {
-      if (err) throw err
-      res.send(result)
-      db.close
+    let newId, oldPlayer
+    let promise2 = () => null
+    let promise3 = () => null
+    let promise4 = () => null
+    // Insert new user
+    const promise1 = new Promise((resolve, reject) => {
+      db.collection('users').insertOne(req.body, function (err, result) {
+        console.log("Added new user")
+        if (err) reject(err)
+        db.close
+        newId = result.insertedId
+        resolve(result.insertedId)
+      })
     })
+
+    // Get character's old player
+    if (req.body.character) {
+      console.log("New user had a character, checking if it already had a player")
+      const query = { _id: new mongo.ObjectId(req.body.character) }
+      promise2 = new Promise((resolve, reject) => {
+        db.collection('characters').findOne(query, function (err, result) {
+          if (err) reject(err)
+          db.close
+          oldPlayer = result.player
+          if (oldPlayer)
+            console.log("It had")
+          resolve(result.player)
+        })
+      })
+
+
+      // Remove character from old player
+      promise3 = new Promise((resolve, reject) => {
+        if (oldPlayer) {
+          console.log("Character already had a player, id " + oldPlayer + ", updating player")
+          const query2 = { _id: new mongo.ObjectId(oldPlayer) }
+          const document = {
+            $set: {
+              character: ""
+            }
+          }
+
+          db.collection('users').updateOne(query2, document, function (err, result) {
+            if (err) reject(err)
+            db.close
+            resolve(result)
+          })
+        }
+      })
+
+
+      // Add new player to character
+      promise4 = new Promise((resolve, reject) => {
+        if (newId) {
+          console.log("Adding new player to character, player id " + newId)
+          const query = { _id: new mongo.ObjectId(req.body.character) }
+          const document = {
+            $set: {
+              player: newId
+            }
+          }
+
+          db.collection('characters').updateOne(query, document, function (err, result) {
+            if (err) reject(err)
+            db.close
+            resolve(result)
+          })
+        }
+      })
+    }
+
+    Promise.all([promise1, promise2])
+      .then(results => Promise.all([promise3, promise4])
+        .then(results => res.send(results)))
+    // .catch(res.status(500).send("Käyttäjää lisätessä tapahtui virhe. Yritä uudelleen tai ota yhteys pelinjohtoon."))
+
   })
 
   // Update user

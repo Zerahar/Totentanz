@@ -29,7 +29,7 @@ class App extends Component {
         age: '',
         gender: '',
         player: '',
-        saldo: '',
+        saldo: 0,
         description: '',
         mechanics: '',
         plots: ''
@@ -53,7 +53,6 @@ class App extends Component {
     this.loginSuccess = this.loginSuccess.bind(this)
     this.handleChange = this.handleChange.bind(this)
     this.fetchCharacters = this.fetchCharacters.bind(this)
-    this.handleError = this.handleError.bind(this)
     this.fetchPlayers = this.fetchPlayers.bind(this)
     this.showError = this.showError.bind(this)
   }
@@ -88,7 +87,7 @@ class App extends Component {
     if (this.state.login) {
       fetch('http://localhost:3002/user/' + this.state.login)
         .then(response => {
-          response.ok ? response.json().then(data => this.loginSuccess(data)) : this.handleError(response.status)
+          response.ok ? response.json().then(data => this.loginSuccess(data)) : this.showError(response.status)
         })
         .catch(error => this.showError(error))
     }
@@ -120,12 +119,6 @@ class App extends Component {
   handleChange(event) {
     this.setState({ login: event.target.value })
   }
-  handleError(error) {
-    if (error === 404)
-      this.setState({ warning: "Väärä tunnus" })
-    if (error === 500)
-      this.setState({ warning: "Palvelimella on ongelma. Ota yhteys ylläpitäjään." })
-  }
   fetchCharacters() {
     console.log("Fetch characters")
     fetch('http://localhost:3002/character/')
@@ -138,16 +131,24 @@ class App extends Component {
         })
       .catch(error => this.showError(error))
   }
-  showError(error) {
+  showError(error, warning) {
     // Translate the most common error
     if (error.message === "NetworkError when attempting to fetch resource.")
       this.setState({ error: "Yhteyttä palvelimeen ei saatu. Yritä hetken kuluttua uudelleen tai ota yhteys pelinjohtoon." })
     // If the error is something else, show it anyway
     else
-      this.setState({ error: error.message })
+      this.setState({ error: error.message || error })
     // Show alert element
     const alert = document.getElementById("errorMessage")
     alert.classList.add('show')
+    if (warning) {
+      alert.classList.add("alert-warning")
+      alert.classList.remove("alert-danger")
+    }
+    else {
+      alert.classList.remove("alert-warning")
+      alert.classList.add("alert-danger")
+    }
     setTimeout(function () { alert.classList.remove('show') }, 7000);
   }
   changeChat(e) {
@@ -168,15 +169,12 @@ class App extends Component {
       adminPage = <li class="nav-item">
         <Link to="/admin">Hallintapaneeli</Link>
       </li>
-    let error = ''
-    if (this.state.error)
-      error = <div class="alert alert-danger position-fixed bottom-0 start-50 translate-middle-x fade" id="errorMessage" role="alert">
-        {this.state.error}
-      </div>
     return (
       <Router>
         <div class="container h-100">
-          {error}
+          <div class="alert alert-danger position-fixed bottom-0 start-50 translate-middle-x fade" id="errorMessage" role="alert">
+            {this.state.error}
+          </div>
           <nav class="navbar navbar-expand-sm main-nav">
             <div class="container-fluid">
               <a class="navbar-brand" href="/">Totentanz</a>
