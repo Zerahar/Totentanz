@@ -9,8 +9,8 @@ import { NewCharacter, NewUser } from './AdminDashboard.js'
 import ChatList from './ChatList.js'
 import Transactions from './Transactions.js'
 import './custom.scss'
-import { List } from 'react-bootstrap-icons'
-import { Collapse, Dropdown } from 'bootstrap'
+import { List, ChatDots } from 'react-bootstrap-icons'
+import { Collapse, Dropdown, Toast } from 'bootstrap'
 import OpenChat from './OpenChat.js';
 class App extends Component {
   constructor(props) {
@@ -26,6 +26,8 @@ class App extends Component {
       selectedChat: '',
       nameSent: false,
       ready: false,
+      notifMsg: '',
+      notifSender: '',
       selectedCharacter: {
         name: '',
         age: '',
@@ -118,8 +120,15 @@ class App extends Component {
     }
     this.ws.onmessage = evt => {
       // listen to data sent from the websocket server
+
       const message = JSON.parse(evt.data)
-      console.log(message)
+      console.log("Got a message: ", message)
+      const toast = new Toast(document.getElementById("notifToast"))
+      this.setState({
+        notifMsg: message.data.text,
+        notifSender: message.data.author
+      }, toast.show())
+
     }
     this.ws.onopen = () => {
       console.log('connected')
@@ -204,10 +213,12 @@ class App extends Component {
       </li>
     return (
       <Router>
+
         <div class="container h-100">
           <div class="alert alert-danger position-fixed bottom-0 start-50 translate-middle-x fade" id="errorMessage" role="alert">
             {this.state.error}
           </div>
+
           <nav class="navbar navbar-expand-sm main-nav">
             <div class="container-fluid">
               <a class="navbar-brand" href="/">Totentanz</a>
@@ -319,6 +330,17 @@ class App extends Component {
           </Switch>
         </div>
         {this.state.redirect}
+        <div id="notifToast" class="toast position-fixed bottom-0 end-0" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="toast-header">
+            <ChatDots />
+            <strong class="me-auto">{this.state.notifSender}</strong>
+            {/* <small>11 mins ago</small> */}
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+          <div class="toast-body">
+            {this.state.notifMsg}
+          </div>
+        </div>
       </Router>
     );
   }
