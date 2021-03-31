@@ -9,7 +9,8 @@ class OpenChat extends Component {
             nameSent: false,
             history: [],
             ready: false,
-            chat: ''
+            chat: '',
+            currentName: this.props.name
         }
         this.sendMessage = this.sendMessage.bind(this)
         this.messageBeingWritten = this.messageBeingWritten.bind(this)
@@ -18,33 +19,24 @@ class OpenChat extends Component {
         if (!window.WebSocket) {
             this.props.error(new Error("Selain ei tue chat-teknologiaa"))
         }
-        this.ws = new WebSocket('ws://127.0.0.1:1337');
-    }
-    componentWillUnmount() {
-        this.ws.close()
+        this.ws = this.props.ws
     }
     componentDidMount() {
-        this.ws.onopen = () => {
-            console.log('connected')
-            let user = this.props.characters.find(character => character._id === this.props.user)
-            let userName
-            if (user)
-                userName = user.name
-            else if (this.props.user === "admin")
-                userName = "admin"
-            this.ws.send(JSON.stringify({ text: userName, type: 'name', chat: this.props.chat._id }))
-            this.setState({ nameSent: true, ready: true })
-        }
+        // Fill character name if undefined
+        if (!this.state.currentName)
+            this.setState({ currentName: this.props.characters.find(character => character._id === this.props.characterId).name })
+        // Tell server that chat is open
+        this.ws.send(JSON.stringify({ chat: this.props.chat._id, type: 'openChat' }))
 
         this.ws.onmessage = evt => {
             // listen to data sent from the websocket server
             const message = JSON.parse(evt.data)
-            console.log(message)
             if (message.type === 'message') {
                 const newMessage = {
                     time: new Date(message.data.time).toLocaleString("fi-FI", { timeStyle: "short", dateStyle: "medium" }),
                     text: message.data.text,
-                    user: message.data.author
+                    author: message.data.author,
+                    authorId: message.data.authorId
                 }
                 this.setState(prevState => ({
                     history: [...prevState.history, newMessage]
@@ -55,14 +47,13 @@ class OpenChat extends Component {
                     history: [...prevState.history, {
                         time: new Date(msg.time).toLocaleString("fi-FI", { timeStyle: "short", dateStyle: "medium" }),
                         text: msg.text,
-                        user: msg.author
+                        author: msg.author,
+                        authorId: msg.authorId
                     }]
                 })))
             }
         }
-        this.ws.onclose = () => {
-            console.log('disconnected')
-        }
+
     }
     addMessage(message) {
         if (message)
@@ -71,15 +62,13 @@ class OpenChat extends Component {
             }))
     }
     sendMessage() {
-        if (this.state.ready) {
-            console.log("Sent ", this.state.input)
-            this.ws.send(JSON.stringify({ text: this.state.input, chat: this.props.chat._id, type: 'message' }))
-            this.setState({
-                input: ''
-            })
-        }
-        else
-            console.log("WS was not ready")
+
+        console.log("Sent ", this.state.input)
+        this.ws.send(JSON.stringify({ text: this.state.input, chat: this.props.chat._id, characterId: this.props.characterId, name: this.state.currentName, type: 'message' }))
+        this.setState({
+            input: ''
+        })
+
     }
     messageBeingWritten(event) {
         this.setState({ input: event.target.value })
@@ -88,10 +77,10 @@ class OpenChat extends Component {
         let history = ''
         if (this.state.history.length !== 0)
             history = this.state.history.map(message =>
-                <div class={(message.user === this.props.user || message.user === this.props.user.name) ? "toast show my-message w-75" : "toast show mb-3 w-75"}>
+                <div key={message._id} class={(message.author === this.state.currentName) ? "toast show my-message w-75" : "toast show mb-3 w-75"}>
                     {/* Show user's own messages on right */}
                     <div class="toast-header">
-                        <strong class="me-auto">{message.user}</strong>
+                        <strong class="me-auto">{message.author}</strong>
                         <small>{message.time}</small>
                     </div>
                     <div class="toast-body">

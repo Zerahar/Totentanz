@@ -386,62 +386,58 @@ mongo.MongoClient.connect(url, function (err, client) {
     })
   })
 })
-var WebSocketServer = require('websocket').server;
-var http = require('http');
 
-var server = http.createServer(function (request, response) {
-  // process HTTP request. Since we're writing just WebSockets
-  // server we don't have to implement anything.
-});
-server.listen(1337, function () { });
+const WebSocket = require('ws');
 
-// create the server
-wsServer = new WebSocketServer({
-  httpServer: server
-});
+const wss = new WebSocket.Server({ port: 1337 });
 
-// list of currently connected clients (users)
-var clients = [];
+// Fetch all chats
+let chats
+mongo.MongoClient.connect(url, function (err, client) {
+  if (err) throw err
+  const db = client.db('data')
+  db.collection('chats').find().toArray(function (err, result) {
+    if (err) throw err
+    chats = result
+    db.close
+  })
+})
 
-// WebSocket server
-wsServer.on('request', function (request) {
-  console.log((new Date()) + ' Connection from origin '
-    + request.origin + '.');
-  var connection = request.accept(null, request.origin);
-  // we need to know client index to remove them on 'close' event
-  var userName = false;
-  // This is the most important callback for us, we'll handle
-  // all messages from users here.
-  connection.on('message', function (message) {
-    const data = JSON.parse(message.utf8Data)
-    console.log(data)
-    if (data.type === "name") {
-      // remember user name
-      userName = data.text
-      clients.push({ connection: connection, id: data.chat })
-      // send back chat history
-      mongo.MongoClient.connect(url, function (err, client) {
+wss.on('connection', function connection(ws) {
+  console.log("New connection")
+  ws.on('message', function incoming(rawdata) {
+    const data = JSON.parse(rawdata)
+    // The new connection sent its identifications
+    if (data.type === "new") {
+      console.log("New connection identity: ", data)
+      ws.characterId = data.id || "admin"
+    }
+    // User opened a chat
+    if (data.type === "openChat") {
+      console.log("Chat was opened, id: ", data.chat)
+      // send back chat history when chat is opened
+      mongo.MongoClient.connect(url, function (err, dbclient) {
         if (err) throw err
-        const db = client.db('data')
+        const db = dbclient.db('data')
         db.collection('messages').find({ chat: data.chat }).toArray(function (err, result) {
           if (err) throw err
-          connection.sendUTF(
-            JSON.stringify({ type: 'history', data: result }));
+          console.log("Sent chat history")
+          ws.send(JSON.stringify({ type: 'history', data: result }));
           db.close
         })
       })
-    } else { // log and broadcast the message
-      console.log((new Date()) + ' Received Message from '
-        + userName + ': ' + data.text);
-
-      // we want to keep history of all sent messages
+    }
+    // User sent a message in chat
+    if (data.type === "message") {
+      console.log("Received a message: ", data)
+      // Modify for database saving
       var obj = {
         time: (new Date()).getTime(),
         text: data.text,
-        author: userName,
+        author: data.name,
+        authorId: data.id,
         chat: data.chat
       };
-      // save message into database
       mongo.MongoClient.connect(url, function (err, client) {
         if (err) throw err
         const db = client.db('data')
@@ -450,22 +446,131 @@ wsServer.on('request', function (request) {
           db.close
         })
       })
-      // broadcast message to all connected clients
-      var json = JSON.stringify({ type: 'message', data: obj });
-      const participants = clients.filter(client => client.id === data.chat)
-      participants.forEach(participant => {
-        console.log("Broadcasting to " + participant.id)
-        participant.connection.sendUTF(json)
-      });
+      console.log("Saved message to database")
     }
-  });
+    wss.clients.forEach(function each(client) {
 
-  connection.on('close', function (connection) {
-    if (userName !== false) {
-      console.log((new Date()) + " Peer "
-        + userName + " disconnected.");      // remove user from the list of connected clients
-      clients.slice(clients.findIndex(client => client.connection === connection));
-
-    }
+      // User sent a message in chat
+      if (data.type === "message") {
+        // Modify for database saving
+        var obj = {
+          time: (new Date()).getTime(),
+          text: data.text,
+          author: data.name,
+          authorId: data.id,
+          chat: data.chat
+        };
+        // Broadcast if part of the chat
+        const currentChat = chats.find(chat => chat._id == data.chat)
+        if ((client.characterId === "admin" || currentChat.participants.find(participant => participant._id === client.characterId)) && client.readyState === WebSocket.OPEN) {
+          console.log("Broadcasted to " + data.name)
+          const packet = { type: "message", data: obj }
+          client.send(JSON.stringify(packet));
+        }
+      }
+    });
   });
 });
+
+
+
+// var WebSocketServer = require('websocket').server;
+// var http = require('http');
+
+// var server = http.createServer(function (request, response) {
+//   // process HTTP request. Since we're writing just WebSockets
+//   // server we don't have to implement anything.
+// });
+// server.listen(1337, function () { });
+
+// // create the server
+// wsServer = new WebSocketServer({
+//   httpServer: server
+// });
+
+// // list of currently connected clients (users)
+// var clients = [];
+
+// // WebSocket server
+// wsServer.on('request', function (request) {
+//   console.log((new Date()) + ' Connection from origin '
+//     + request.origin + '.');
+//   console.log(request)
+//   var connection = request.accept(null, request.origin);
+//   // Save currently opened chat
+//   let currentChat
+//   // This is the most important callback for us, we'll handle
+//   // all messages from users here.
+//   connection.on('message', function (message) {
+//     const data = JSON.parse(message.utf8Data)
+//     console.log(data)
+//     if (data.type === "new") {
+//       // new connection
+//       clients.push({ connection: connection, id: data.id, name: data.text })
+//     }
+//     else if (data.type === "openChat") {
+//       // send back chat history when chat is opened
+//       mongo.MongoClient.connect(url, function (err, client) {
+//         if (err) throw err
+//         const db = client.db('data')
+//         db.collection('messages').find({ chat: data.chat }).toArray(function (err, result) {
+//           if (err) throw err
+//           connection.sendUTF(
+//             JSON.stringify({ type: 'history', data: result }));
+//           db.close
+//         })
+//         // Save currently opened chat
+//         db.collection('chats').findOne({ _id: new mongo.ObjectId(data.chat) }, function (err, result) {
+//           if (err) throw err
+//           currentChat = result
+//           db.close
+//         })
+//       })
+//     }
+//     else { // log and broadcast the message
+//       console.log((new Date()) + ' Received Message from '
+//         + data.name + ': ' + data.text);
+
+//       // we want to keep history of all sent messages
+//       var obj = {
+//         time: (new Date()).getTime(),
+//         text: data.text,
+//         author: data.name,
+//         authorId: data.id,
+//         chat: data.chat
+//       };
+//       // save message into database
+//       mongo.MongoClient.connect(url, function (err, client) {
+//         if (err) throw err
+//         const db = client.db('data')
+//         db.collection('messages').insertOne(obj, function (err, result) {
+//           if (err) throw err
+//           db.close
+//         })
+//       })
+//       // broadcast message to all connected clients
+//       var json = JSON.stringify({ type: 'message', data: obj });
+//       // const participants = clients.filter(client => client.id === data.chat)
+
+//       //   let participants = currentChat.participants.filter(player => clients.find(client => client.id === player))
+//       //   participants.forEach(participant => {
+//       //     console.log("Participant ", participant)
+//       //     // console.log("Broadcasting to " + participant.id)
+//       //     // participant.connection.sendUTF(json)
+//       //   });
+//     }
+//   });
+
+//   connection.on('close', (connection) => {
+//     const leavingId = clients.findIndex(client => client.connection === connection)
+//     let name
+//     console.log(connection.remoteAddress)
+//     if (clients[leavingId])
+//       name = clients[leavingId].name
+//     console.log((new Date()) + " Peer "
+//       + name + " disconnected.");      // remove user from the list of connected clients
+//     clients.slice(leavingId);
+
+//   }
+//   )
+// })

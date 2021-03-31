@@ -24,6 +24,8 @@ class App extends Component {
       characters: [],
       warning: '',
       selectedChat: '',
+      nameSent: false,
+      ready: false,
       selectedCharacter: {
         name: '',
         age: '',
@@ -55,6 +57,7 @@ class App extends Component {
     this.fetchCharacters = this.fetchCharacters.bind(this)
     this.fetchPlayers = this.fetchPlayers.bind(this)
     this.showError = this.showError.bind(this)
+    this.ws = null
   }
   componentDidMount() {
     // Check if login cookie
@@ -68,6 +71,7 @@ class App extends Component {
         this.setState({ login: cookie.substring(6) }, () => this.login())
       }
     });
+
   }
   fetchPlayers() {
     console.log("Fetching players")
@@ -102,8 +106,32 @@ class App extends Component {
     })
     // create a cookie
     document.cookie = "login=" + this.state.login
-    if (data.userType === "player")
+    if (data.userType === "player") {
       this.setState({ redirect: <Redirect to="/dashboard" /> })
+    }
+    else {
+      this.setState({ redirect: <Redirect to="/admin" /> })
+    }
+    this.ws = new WebSocket('ws://127.0.0.1:1337');
+    this.ws.onclose = () => {
+      console.log('disconnected')
+    }
+    this.ws.onmessage = evt => {
+      // listen to data sent from the websocket server
+      const message = JSON.parse(evt.data)
+      console.log(message)
+    }
+    this.ws.onopen = () => {
+      console.log('connected')
+      let user = this.state.characters.find(character => character._id === this.state.userCharacter)
+      let userName
+      if (user)
+        userName = user.name
+      else if (this.state.userType === "admin")
+        userName = "admin"
+      this.ws.send(JSON.stringify({ text: userName, type: 'new', id: this.state.userCharacter }))
+      this.setState({ nameSent: true, ready: true })
+    }
   }
   logout() {
     this.setState({
@@ -115,6 +143,7 @@ class App extends Component {
     })
     // Remove login cookie
     document.cookie = "login="
+    this.ws.close()
   }
   handleChange(event) {
     this.setState({ login: event.target.value })
@@ -153,6 +182,10 @@ class App extends Component {
   }
   changeChat(e) {
     console.log(e)
+  }
+  componentWillUnmount() {
+    if (this.ws)
+      this.ws.close()
   }
   render() {
     let loginForm = <li class="nav-item"><form onSubmit={this.login}><div class="input-group"><input type="text" value={this.state.login} onChange={this.handleChange} class="form-control"></input>
@@ -275,9 +308,11 @@ class App extends Component {
             <Route path="/chat">
               <OpenChat
                 chat={this.state.selectedChat}
-                user={this.state.userCharacter || this.state.userType}
+                characterId={this.state.userCharacter}
+                name={this.state.userType === "admin" ? "admin" : undefined}
                 characters={this.state.characters}
                 error={this.showError}
+                ws={this.ws}
               />
             </Route>
 
