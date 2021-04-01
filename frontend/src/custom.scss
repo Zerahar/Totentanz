@@ -19,6 +19,16 @@
     }
 }
 
+// Color variables
+$black: #000000ff;
+$yellow: #fee342ff;
+$blue: #16e1b6ff;
+$darkgrey: #454c4eff;
+$lightgrey: #c8cecfff;
+
+// Fonts
+@import url('https://fonts.googleapis.com/css2?family=Nunito&family=Roboto+Condensed&display=swap');
+
 // Common styles
 html,
 body,
@@ -26,6 +36,39 @@ body,
     margin: 0;
     padding: 0;
     height: 100%;
+    background-color: $black;
+}
+
+.container {
+    font-family: 'Nunito', sans-serif;
+}
+
+.btn-primary {
+    background-color: $black !important;
+    color: $yellow !important;
+    border: none !important;
+}
+
+h1,
+h2,
+h3 {
+    font-family: 'Roboto Condensed', sans-serif;
+}
+
+.text-container {
+    padding: 1em;
+    background-color: $lightgrey;
+    color: $black;
+}
+
+// Navbar
+.navbar {
+    background-color: $black;
+    color: $yellow;
+
+    a {
+        color: $yellow;
+    }
 }
 
 // Dashboard

@@ -91,7 +91,7 @@ class AdminDashboard extends Component {
       </tr>);
     if (this.props.admin === "admin")
       return (
-        <div>
+        <div class="text-container">
           <nav class="nav justify-content-center">
             <Link to="admin/transactions" class="nav-item">Maksutapahtumat</Link>
             <Link to="admin/messages" class="nav-item">Keskustelut</Link>
@@ -121,7 +121,7 @@ class AdminDashboard extends Component {
       )
     else
       return (
-        <div><p>Kirjaudu sisään nähdäksesi adminin työkalut.</p></div>
+        <div class="text-container"><p>Kirjaudu sisään nähdäksesi adminin työkalut.</p></div>
       )
   }
 }

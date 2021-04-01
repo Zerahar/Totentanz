@@ -27,7 +27,7 @@ export class PlayerInfo extends Component {
     }
     render() {
         return (
-            <div>
+            <div class="text-container">
                 <Link to="/dashboard">Takaisin</Link>
                 <h2>Info</h2>
                 <ul>
@@ -129,7 +129,7 @@ export class Pay extends Component {
     render() {
         const options = this.props.characters.map((character) => { if (character._id !== this.props.character._id) return <option value={character._id}>{character.name}</option>; else return null });
         return (
-            <div>
+            <div class="text-container">
                 <Link to="/dashboard">Takaisin</Link>
                 <h2>Pay</h2>
                 {this.state.success}
@@ -171,7 +171,7 @@ export class PlayerDashboard extends Component {
                     <Link to="dashboard/chat" class="btn btn-primary flex-fill">Viestit</Link>
                 </div></div>
         return (
-            <div>
+            <div class="text-container">
                 <h2>Omat tiedot</h2>
                 {access}
             </div>

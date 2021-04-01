@@ -8,9 +8,9 @@ import { Pay, PlayerInfo, PlayerDashboard } from './PlayerDashboard.js'
 import { NewCharacter, NewUser } from './AdminDashboard.js'
 import ChatList from './ChatList.js'
 import Transactions from './Transactions.js'
-import './custom.scss'
 import { List, ChatDots } from 'react-bootstrap-icons'
 import { Collapse, Dropdown, Toast } from 'bootstrap'
+import './custom.scss'
 import OpenChat from './OpenChat.js';
 class App extends Component {
   constructor(props) {
@@ -214,7 +214,7 @@ class App extends Component {
     return (
       <Router>
 
-        <div class="container h-100">
+        <div class="container h-100 p-0">
           <div class="alert alert-danger position-fixed bottom-0 start-50 translate-middle-x fade" id="errorMessage" role="alert">
             {this.state.error}
           </div>

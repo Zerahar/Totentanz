@@ -87,7 +87,7 @@ class ChatList extends Component {
         }
         else {
             return (
-                <div>
+                <div class="text-container">
                     <h2>Keskustelut</h2>
                     <p>{this.state.warning}</p>
                     <button onClick={() => this.setState({ mode: "new" })} class="btn btn-primary">Uusi keskustelu</button>
