@@ -21,10 +21,13 @@
 
 // Color variables
 $black: #000000ff;
+$blackTransparent: rgba(0, 0, 0, 0.4);
 $yellow: #fee342ff;
+$yellowTransparent: rgba(254, 226, 66, 0.4);
 $blue: #16e1b6ff;
+$blueTransparent: rgba(22, 225, 181, 0.4);
 $darkgrey: #454c4eff;
-$lightgrey: #c8cecfff;
+$lightgrey: rgb(225, 233, 235);
 
 // Fonts
 @import url('https://fonts.googleapis.com/css2?family=Nunito&family=Roboto+Condensed&display=swap');
@@ -43,10 +46,34 @@ body,
     font-family: 'Nunito', sans-serif;
 }
 
+.btn {
+    text-transform: uppercase;
+    font-family: 'Roboto Condensed', sans-serif;
+    border: 3px;
+}
+
 .btn-primary {
-    background-color: $black !important;
+    background-color: $blueTransparent !important;
+    color: $blue !important;
+    border-color: $blue !important;
+
+    &:hover {
+        text-shadow: 0 0 3px $blue;
+        box-shadow: 0 0 5px $blue;
+    }
+}
+
+.btn-danger {
+    background-color: $yellowTransparent !important;
+    border-color: $yellow !important;
     color: $yellow !important;
-    border: none !important;
+
+    &:hover {
+        text-shadow: 0 0 3px $yellow;
+        box-shadow: 0 0 5px $yellow;
+    }
+
+    // clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%, 0 10px);
 }
 
 h1,
@@ -57,19 +84,40 @@ h3 {
 
 .text-container {
     padding: 1em;
-    background-color: $lightgrey;
-    color: $black;
+    background-color: $darkgrey;
+    color: white;
 }
 
 // Navbar
 .navbar {
     background-color: $black;
-    color: $yellow;
+    font-family: 'Roboto Condensed', sans-serif;
 
-    a {
+    .navbar-brand {
         color: $yellow;
+        font-size: 3em;
+        text-transform: uppercase;
+        text-shadow: 0 0 10px $yellow;
+
+        &:hover {
+            text-decoration: underline;
+
+        }
+    }
+
+    .nav-item {
+        display: flex;
+        align-items: center;
+        padding: 0 5px 0 5px;
+        text-transform: uppercase;
+
+        a {
+            color: $blue;
+            text-shadow: 0 0 3px $blue;
+        }
     }
 }
+
 
 // Dashboard
 .table-operations {
@@ -125,4 +173,16 @@ h3 {
 //Character editor
 .pell-content {
     height: 200px;
+    background-color: $lightgrey;
+    color: $black;
+}
+
+// .pell-actionbar {
+//     background-color: $black;
+//     color: $blue;
+// }
+
+.form-control,
+.form-select {
+    background-color: $lightgrey !important;
 }

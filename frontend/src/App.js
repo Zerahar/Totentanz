@@ -221,7 +221,7 @@ class App extends Component {
 
           <nav class="navbar navbar-expand-sm main-nav">
             <div class="container-fluid">
-              <a class="navbar-brand" href="/">Totentanz</a>
+              <Link class="navbar-brand" to="/">Totentanz</Link>
               <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Valikko">
                 <List />
               </button>
@@ -243,7 +243,7 @@ class App extends Component {
             <Route exact path="/">
               <Home />
             </Route>
-            <Route path="/info">
+            <Route exact path="/info">
               <Info />
             </Route>
             <Route exact path="/dashboard/info">
@@ -262,7 +262,7 @@ class App extends Component {
                 error={this.showError}
               />
             </Route>
-            <Route path="/dashboard">
+            <Route exact path="/dashboard">
               <PlayerDashboard loggedCharacter={this.state.userCharacter} characters={this.state.characters} fetchCharacters={this.fetchCharacters} />
             </Route>
             <Route exact path="/admin/newCharacter">
@@ -302,7 +302,7 @@ class App extends Component {
                 error={this.showError}
               />
             </Route>
-            <Route path="/admin">
+            <Route exact path="/admin">
               <AdminDashboard
                 characters={this.state.characters}
                 fetchCharacters={this.fetchCharacters}
@@ -316,7 +316,7 @@ class App extends Component {
                 error={this.showError}
               />
             </Route>
-            <Route path="/chat">
+            <Route exact path="/chat">
               <OpenChat
                 chat={this.state.selectedChat}
                 characterId={this.state.userCharacter}

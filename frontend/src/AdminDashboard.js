@@ -99,7 +99,7 @@ class AdminDashboard extends Component {
             <Link to="admin/newCharacter" class="nav-item">Uusi hahmo</Link>
           </nav>
           <h2>Hahmot</h2>
-          <table class="table">
+          <table class="table-dark w-100">
             <thead>
               <tr><th>Nimi</th><th>Pelaaja</th><th class="w-25">Operaatiot</th></tr>
             </thead>
@@ -109,7 +109,7 @@ class AdminDashboard extends Component {
           </table>
 
           <h2>Pelaajat</h2>
-          <table class="table">
+          <table class="table-dark w-100">
             <thead>
               <tr><th>Oikea nimi</th><th>Hahmon nimi</th><th>Tunnus</th><th class="w-25">Operaatiot</th></tr>
             </thead>
@@ -245,7 +245,7 @@ export class NewCharacter extends Component {
   render() {
     const players = this.props.players.map(player => <option value={player._id} key={player._id}>{player.userName}</option>)
     return (
-      <div>
+      <div class="text-container">
         <form onSubmit={this.handleSubmit} noValidate id="characterForm">
           <div class="mb-3">
             <label class="form-label">Nimi:</label>
