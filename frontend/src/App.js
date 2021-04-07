@@ -197,7 +197,7 @@ class App extends Component {
       this.ws.close()
   }
   render() {
-    let loginForm = <li class="nav-item"><form onSubmit={this.login}><div class="input-group"><input type="text" value={this.state.login} onChange={this.handleChange} class="form-control"></input>
+    let loginForm = <li class="nav-item"><form onSubmit={this.login} class="w-100"><div class="input-group"><input type="text" value={this.state.login} onChange={this.handleChange} class="form-control"></input>
       <button type="submit" class="btn btn-primary">Kirjaudu</button>
     </div></form><span color="red">{this.state.warning}</span></li>
     if (this.state.userId)
@@ -213,13 +213,8 @@ class App extends Component {
       </li>
     return (
       <Router>
-
-        <div class="container h-100 p-0">
-          <div class="alert alert-danger position-fixed bottom-0 start-50 translate-middle-x fade" id="errorMessage" role="alert">
-            {this.state.error}
-          </div>
-
-          <nav class="navbar navbar-expand-sm main-nav">
+        <div class="navbar-container w-100">
+          <nav class="navbar navbar-expand-lg main-nav container h-100">
             <div class="container-fluid">
               <Link class="navbar-brand" to="/">Totentanz</Link>
               <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Valikko">
@@ -230,6 +225,9 @@ class App extends Component {
                   <li class="nav-item">
                     <Link to="/info">Info</Link>
                   </li>
+                  <li class="nav-item">
+                    <Link to="/">Ilmoittaudu</Link>
+                  </li>
                   {playerPage}
                   {adminPage}
                   {loginForm}
@@ -238,6 +236,13 @@ class App extends Component {
               </div>
             </div>
           </nav>
+        </div>
+        <div class="container h-100 p-0">
+          <div class="alert alert-danger position-fixed bottom-0 start-50 translate-middle-x fade" id="errorMessage" role="alert">
+            {this.state.error}
+          </div>
+
+
 
           <Switch>
             <Route exact path="/">

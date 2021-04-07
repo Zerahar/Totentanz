@@ -12,8 +12,8 @@ function NewsFeed() {
 
 function Home() {
     return (<div>
-        <img src={FrontImg} alt="" class="w-100 d-none d-md-block" />
-        <img src={FrontSmallImg} alt="" class="w-100 d-block d-md-none" />
+        <div class="front-image d-none d-md-block"><img src={FrontImg} alt="" class="w-100" /></div>
+        <div class="front-image d-block d-md-none"><img src={FrontSmallImg} alt="" class="w-100" /></div>
         <div class="text-container">
 
             <h2>Home</h2>
