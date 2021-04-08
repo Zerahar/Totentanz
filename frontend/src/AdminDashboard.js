@@ -75,14 +75,14 @@ class AdminDashboard extends Component {
   render() {
     const characterName = (characters, id) => { if (id) { try { return characters.find(character => character._id === id).name } catch { return "-" } } else { return "-" } }
     const playerName = (players, id) => { if (id) { try { return players.find(player => player._id === id).userName } catch { return "-" } } else { return "-" } }
-    const characters = this.props.characters.map((character) => <tr>
+    const characters = this.props.characters.map((character) => <tr key={character._id}>
       <td>{character.name}</td><td>{playerName(this.props.players, character.player)}</td>
       <td class="table-operations"><Link id={character._id} onClick={this.editCharacter} to="admin/newCharacter" class="btn btn-primary flex-fill m-2 w-100">Muokkaa</Link>
         <button id={character._id} onClick={this.deleteCharacter} class="btn btn-danger flex-fill m-2 w-100">Poista</button></td>
     </tr>);
     let players = ''
     if (this.props.players)
-      players = this.props.players.map((player) => <tr>
+      players = this.props.players.map((player) => <tr key={player._id}>
         <td>{player.userName}</td>
         <td>{characterName(this.props.characters, player.character)}</td>
         <td>{player.login}</td>
@@ -91,7 +91,7 @@ class AdminDashboard extends Component {
       </tr>);
     if (this.props.admin === "admin")
       return (
-        <div class="text-container">
+        <div class="text-container container">
           <nav class="nav justify-content-center">
             <Link to="admin/transactions" class="nav-item">Maksutapahtumat</Link>
             <Link to="admin/messages" class="nav-item">Keskustelut</Link>
@@ -99,7 +99,7 @@ class AdminDashboard extends Component {
             <Link to="admin/newCharacter" class="nav-item">Uusi hahmo</Link>
           </nav>
           <h2>Hahmot</h2>
-          <table class="table-dark w-100">
+          <table class="table table-dark w-100">
             <thead>
               <tr><th>Nimi</th><th>Pelaaja</th><th class="w-25">Operaatiot</th></tr>
             </thead>
@@ -109,7 +109,7 @@ class AdminDashboard extends Component {
           </table>
 
           <h2>Pelaajat</h2>
-          <table class="table-dark w-100">
+          <table class="table table-dark w-100">
             <thead>
               <tr><th>Oikea nimi</th><th>Hahmon nimi</th><th>Tunnus</th><th class="w-25">Operaatiot</th></tr>
             </thead>
@@ -121,7 +121,7 @@ class AdminDashboard extends Component {
       )
     else
       return (
-        <div class="text-container"><p>Kirjaudu sisään nähdäksesi adminin työkalut.</p></div>
+        <div class="text-container container"><p>Kirjaudu sisään nähdäksesi adminin työkalut.</p></div>
       )
   }
 }
@@ -245,7 +245,7 @@ export class NewCharacter extends Component {
   render() {
     const players = this.props.players.map(player => <option value={player._id} key={player._id}>{player.userName}</option>)
     return (
-      <div class="text-container">
+      <div class="text-container container">
         <form onSubmit={this.handleSubmit} noValidate id="characterForm">
           <div class="mb-3">
             <label class="form-label">Nimi:</label>
@@ -448,7 +448,7 @@ export class NewUser extends Component {
   render() {
     const characters = this.props.characters.map((character) => <option value={character._id} key={character._id}>{character.name}</option>)
     return (
-      <div class="text-container">
+      <div class="text-container container">
         <form onSubmit={this.handleSubmit} noValidate id="userForm">
           <div class="mb-3">
             <label class="form-label">* Kirjautumistunnus</label>

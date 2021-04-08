@@ -65,10 +65,10 @@ class ChatList extends Component {
         const characters = this.props.characters.filter(character => character._id !== this.props.loggedCharacter).map((character) =>
             <div class="row">
                 <div class="col-auto">
-                    <input type="checkbox" class="form-check" name={character._id} onChange={this.handleChange} />
+                    <input type="checkbox" class="form-check-input" name={character._id} onChange={this.handleChange} />
                 </div>
                 <div class="col-auto">
-                    <label class="form-label">{character.name}</label>
+                    <label class="form-check-label">{character.name}</label>
                 </div>
             </div>)
         const chats = this.state.chats.map((chat) =>
@@ -79,15 +79,16 @@ class ChatList extends Component {
                 {chat.participants.map((participant, index, array) => index === array.length - 1 ? participant.name : participant.name + ", ")}
             </Link>);
         if (this.state.mode === "new") {
-            return (<div>
-                <label>Valitse keskustelun jäsenet</label>
+            return (<div class="text-container container">
+                <h2>Valitse keskustelun jäsenet</h2>
                 {characters}
+                <br />
                 <button onClick={this.createChat} class="btn btn-primary">Luo keskustelu</button>
             </div>)
         }
         else {
             return (
-                <div class="text-container">
+                <div class="text-container container">
                     <h2>Keskustelut</h2>
                     <p>{this.state.warning}</p>
                     <button onClick={() => this.setState({ mode: "new" })} class="btn btn-primary">Uusi keskustelu</button>

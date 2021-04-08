@@ -49,7 +49,8 @@ class App extends Component {
         description: '',
         mechanics: '',
         plots: ''
-      }
+      },
+      loading: true
     }
 
     this.login = this.login.bind(this)
@@ -60,6 +61,7 @@ class App extends Component {
     this.fetchPlayers = this.fetchPlayers.bind(this)
     this.showError = this.showError.bind(this)
     this.ws = null
+    this.closeMenu = this.closeMenu.bind(this)
   }
   componentDidMount() {
     // Check if login cookie
@@ -71,6 +73,7 @@ class App extends Component {
       }
       if (cookie.indexOf("login") === 0) {
         this.setState({ login: cookie.substring(6) }, () => this.login())
+        return;
       }
     });
 
@@ -84,6 +87,10 @@ class App extends Component {
           this.setState({
             players: result
           });
+          if (this.state.characters)
+            this.setState({
+              loading: false
+            });
         })
       .catch(error => this.showError(error))
   }
@@ -93,7 +100,7 @@ class App extends Component {
     if (this.state.login) {
       fetch('http://localhost:3002/user/' + this.state.login)
         .then(response => {
-          response.ok ? response.json().then(data => this.loginSuccess(data)) : this.showError(response.status)
+          response.ok ? response.json().then(data => this.loginSuccess(data)) : this.showError("Kirjautuminen ei onnistunut. Tarkista oikeinkirjoitus.")
         })
         .catch(error => this.showError(error))
     }
@@ -138,9 +145,13 @@ class App extends Component {
         userName = user.name
       else if (this.state.userType === "admin")
         userName = "admin"
-      this.ws.send(JSON.stringify({ text: userName, type: 'new', id: this.state.userCharacter }))
-      this.setState({ nameSent: true, ready: true })
+
+      if (this.ws && this.ws.readyState === 1) {
+        this.ws.send(JSON.stringify({ text: userName, type: 'new', id: this.state.userCharacter }))
+        this.setState({ nameSent: true, ready: true })
+      }
     }
+    this.ws.onerror = (e) => this.showError(e)
   }
   logout() {
     this.setState({
@@ -166,10 +177,15 @@ class App extends Component {
           this.setState({
             characters: result
           });
+          if (this.state.players)
+            this.setState({
+              loading: false
+            });
         })
       .catch(error => this.showError(error))
   }
   showError(error, warning) {
+    console.log("Showing error")
     // Translate the most common error
     if (error.message === "NetworkError when attempting to fetch resource.")
       this.setState({ error: "Yhteyttä palvelimeen ei saatu. Yritä hetken kuluttua uudelleen tai ota yhteys pelinjohtoon." })
@@ -192,12 +208,20 @@ class App extends Component {
   changeChat(e) {
     console.log(e)
   }
+  closeMenu() {
+    // Only needed when using mid-size or smaller screen, since then a collapsing navbar will be used
+    if (window.screen.width < 992) {
+      const navbar = document.getElementById("navbar")
+      const collapse = new Collapse(navbar)
+      collapse.hide()
+    }
+  }
   componentWillUnmount() {
     if (this.ws)
       this.ws.close()
   }
   render() {
-    let loginForm = <li class="nav-item"><form onSubmit={this.login} class="w-100"><div class="input-group"><input type="text" value={this.state.login} onChange={this.handleChange} class="form-control"></input>
+    let loginForm = <li class="nav-item"><form onSubmit={(e) => this.login(e)} class="w-100"><div class="input-group"><input type="text" value={this.state.login} onChange={this.handleChange} class="form-control"></input>
       <button type="submit" class="btn btn-primary">Kirjaudu</button>
     </div></form><span color="red">{this.state.warning}</span></li>
     if (this.state.userId)
@@ -205,12 +229,17 @@ class App extends Component {
     let playerPage, adminPage = ""
     if (this.state.userType === "player")
       playerPage = <li class="nav-item">
-        <Link to="/dashboard">Pelaajan sivut</Link>
+        <Link to="/dashboard" onClick={() => this.closeMenu()}>Pelaajan sivut</Link>
       </li>
     if (this.state.userType === "admin")
       adminPage = <li class="nav-item">
-        <Link to="/admin">Hallintapaneeli</Link>
+        <Link to="/admin" onClick={() => this.closeMenu()}>Hallintapaneeli</Link>
       </li>
+    let loading
+    if (this.state.loading)
+      loading = <div class="spinner-border position-absolute top-50 start-50 loading " role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
     return (
       <Router>
         <div class="navbar-container w-100">
@@ -223,10 +252,10 @@ class App extends Component {
               <div class="collapse navbar-collapse justify-content-end" id="navbar">
                 <ul class="navbar-nav">
                   <li class="nav-item">
-                    <Link to="/info">Info</Link>
+                    <Link to="/info" onClick={() => this.closeMenu()}>Info</Link>
                   </li>
                   <li class="nav-item">
-                    <Link to="/">Ilmoittaudu</Link>
+                    <Link to="/" onClick={() => this.closeMenu()}>Ilmoittaudu</Link>
                   </li>
                   {playerPage}
                   {adminPage}
@@ -237,7 +266,8 @@ class App extends Component {
             </div>
           </nav>
         </div>
-        <div class="container h-100 p-0">
+        {loading}
+        <div class="w-100 h-100 p-0">
           <div class="alert alert-danger position-fixed bottom-0 start-50 translate-middle-x fade" id="errorMessage" role="alert">
             {this.state.error}
           </div>

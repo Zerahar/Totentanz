@@ -90,7 +90,7 @@ class OpenChat extends Component {
             )
 
         return (
-            <div class="chat-container d-flex flex-column text-container">
+            <div class="chat-container d-flex flex-column text-container container">
                 <h2>{this.props.chat.participants.map((participant, index, array) => index === array.length - 1 ? participant.name : participant.name + ", ")}</h2>
                 <div class="overflow-auto messages-container p-3 flex-grow-1" id="message-container">{history}</div>
                 <div class="input-group">

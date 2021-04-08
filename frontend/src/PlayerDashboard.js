@@ -27,7 +27,7 @@ export class PlayerInfo extends Component {
     }
     render() {
         return (
-            <div class="text-container">
+            <div class="text-container container">
                 <Link to="/dashboard">Takaisin</Link>
                 <h2>Info</h2>
                 <ul>
@@ -129,11 +129,10 @@ export class Pay extends Component {
     render() {
         const options = this.props.characters.map((character) => { if (character._id !== this.props.character._id) return <option value={character._id}>{character.name}</option>; else return null });
         return (
-            <div class="text-container">
-                <Link to="/dashboard">Takaisin</Link>
+            <div class="text-container container">
                 <h2>Pay</h2>
                 {this.state.success}
-                <p>Sinulla on {this.props.character.saldo} eurodollaria.</p>
+                <p>Sinulla on <strong>{this.props.character.saldo}</strong> eurodollaria.</p>
                 <form onSubmit={this.submit}>
                     <div class="mb-3">
                         <label class="form-label">Vastaanottaja</label>
@@ -171,7 +170,7 @@ export class PlayerDashboard extends Component {
                     <Link to="dashboard/chat" class="btn btn-primary flex-fill fs-5">Viestit</Link>
                 </div></div>
         return (
-            <div class="text-container">
+            <div class="text-container container">
                 <h2>Omat tiedot</h2>
                 {access}
             </div>

@@ -46,8 +46,28 @@ body,
     color: $lightgrey;
 }
 
+.form-check-input {
+    &:checked {
+        background-color: $yellow !important;
+        border-color: $yellow !important;
+    }
+
+    &:focus {
+        border-color: $yellow !important;
+        box-shadow: 0 0 3px 3px $yellowDark !important;
+    }
+
+    &:checked[type="checkbox"] {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10l3 3l6-6'/%3e%3c/svg%3e") !important;
+    }
+}
+
 .container {
     font-family: 'Nunito', sans-serif;
+}
+
+strong {
+    color: $yellow;
 }
 
 .btn {
@@ -64,6 +84,10 @@ body,
     &:hover {
         background-color: $blueDark !important;
     }
+
+    &:focus {
+        box-shadow: 0 0 3px 10px $blue !important;
+    }
 }
 
 .btn-primary {
@@ -75,7 +99,22 @@ body,
         background-color: $yellowDark !important;
     }
 
+    &:focus {
+        box-shadow: 0 0 20px $yellow !important;
+    }
+
     // clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%, 0 10px);
+}
+
+#errorMessage {
+    z-index: 2;
+}
+
+.loading {
+    z-index: 3;
+    color: $yellow;
+    width: 5em;
+    height: 5em;
 }
 
 h1,
@@ -179,13 +218,20 @@ h3 {
     text-shadow: 0 0 3px $yellow;
 }
 
+.table-dark th,
+.table-dark td {
+    background-color: $black !important;
+}
+
 // Chat
 .my-message {
     margin: auto 0 1rem auto;
 }
 
 .chat-container {
-    max-height: 89vh;
+    position: absolute; // A trick to make div occupy the whole space
+    top: 107px;
+    bottom: 0;
 
     .toast {
         background-color: $darkgrey;
@@ -264,12 +310,20 @@ h3 {
 
 //Front page
 .front-image {
-    height: 35vw;
+    height: 60vh;
     max-height: 500px;
+    max-width: 2000px;
+    margin: auto;
+    background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0) 70%, black), url('./images/front-small.jpeg');
+    background-size: cover;
+
+    @include breakpoint(md) {
+        background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0) 70%, black), url('./images/front.jpeg');
+    }
 }
 
 .front-container {
-    background-image: linear-gradient(rgba(0, 0, 0, 0), $black 10%, $black);
+
     padding-top: 0;
 }
 
