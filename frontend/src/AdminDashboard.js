@@ -289,7 +289,7 @@ export class NewCharacter extends Component {
             <Editor changeEditor={(data) => this.setState({ mechanics: data })} html={this.state.mechanics} type="mechanics" />
           </div>
           <button type="submit" onClick={this.handleSubmit} class="btn btn-primary">Tallenna</button>
-          <Link to="/admin" class="btn btn-warning">Poistu tallentamatta</Link>
+          <Link to="/admin" class="btn btn-warning m-3">Poistu tallentamatta</Link>
         </form>
         {this.state.redirect}
       </div>
@@ -448,9 +448,8 @@ export class NewUser extends Component {
   render() {
     const characters = this.props.characters.map((character) => <option value={character._id} key={character._id}>{character.name}</option>)
     return (
-      <div>
-        <form onSubmit={this.handleSubmit} noValidate id="userForm"><br />
-          <Link to="/admin">Takaisin</Link>
+      <div class="text-container">
+        <form onSubmit={this.handleSubmit} noValidate id="userForm">
           <div class="mb-3">
             <label class="form-label">* Kirjautumistunnus</label>
             <input minLength="6" maxLength="20" required pattern="[a-öA-Ö\d]*" id="loginInput" class="form-control" type="text" name="login" value={this.state.login} onChange={this.handleChange} placeholder="Käyttäjän kirjautumiseen käyttämä tunnus"></input>
@@ -467,6 +466,7 @@ export class NewUser extends Component {
             <label class="form-label">Hahmo</label><select class="form-select" name="selectedCharacter" value={this.state.selectedCharacter} onChange={this.handleChange}><option value="" key="none">-</option>{characters}</select>
           </div>
           <button type="submit" class="btn btn-primary">Tallenna</button>
+          <Link to="/admin" class="btn btn-warning m-3">Poistu tallentamatta</Link>
         </form>
         {this.state.redirect}
       </div>

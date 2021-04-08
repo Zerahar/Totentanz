@@ -91,7 +91,8 @@ class ChatList extends Component {
                     <h2>Keskustelut</h2>
                     <p>{this.state.warning}</p>
                     <button onClick={() => this.setState({ mode: "new" })} class="btn btn-primary">Uusi keskustelu</button>
-                    <ul class="list-group">{chats}</ul>
+                    <br />
+                    <ul class="list-group chat-list">{chats}</ul>
                 </div>
             )
         }

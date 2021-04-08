@@ -162,13 +162,13 @@ export class PlayerDashboard extends Component {
         if (this.props.loggedCharacter)
             access = <div class="d-flex player-controls">
                 <div class="flex-fill d-flex p-3">
-                    <Link to="dashboard/pay" class="btn btn-primary flex-fill">Maksa</Link>
+                    <Link to="dashboard/pay" class="btn btn-primary flex-fill fs-5">Maksa</Link>
                 </div>
                 <div class="flex-fill d-flex p-3">
-                    <Link to="dashboard/info" class="btn btn-primary flex-fill">Info</Link>
+                    <Link to="dashboard/info" class="btn btn-primary flex-fill fs-5">Info</Link>
                 </div>
                 <div class="flex-fill d-flex p-3">
-                    <Link to="dashboard/chat" class="btn btn-primary flex-fill">Viestit</Link>
+                    <Link to="dashboard/chat" class="btn btn-primary flex-fill fs-5">Viestit</Link>
                 </div></div>
         return (
             <div class="text-container">

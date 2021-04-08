@@ -27,8 +27,10 @@ $yellowTransparent: rgba(254, 226, 66, 0.4);
 $yellowDark: rgb(94, 83, 23);
 $blue: #16e1b6ff;
 $blueTransparent: rgba(22, 225, 181, 0.4);
+$blueDark: rgb(10, 97, 78);
 $darkgrey: #454c4eff;
 $lightgrey: rgb(225, 233, 235);
+$almostBlack: rgb(36, 40, 41);
 
 // Fonts
 @import url('https://fonts.googleapis.com/css2?family=Nunito&family=Roboto+Condensed&display=swap');
@@ -41,6 +43,7 @@ body,
     padding: 0;
     height: 100%;
     background-color: $black;
+    color: $lightgrey;
 }
 
 .container {
@@ -54,13 +57,12 @@ body,
 }
 
 .btn-danger {
-    background-color: $blueTransparent !important;
+    background-color: $black !important;
     color: $blue !important;
     border-color: $blue !important;
 
     &:hover {
-        text-shadow: 0 0 3px $blue;
-        box-shadow: 0 0 5px $blue;
+        background-color: $blueDark !important;
     }
 }
 
@@ -84,11 +86,10 @@ h3 {
 }
 
 .text-container {
-    padding: 0 1em;
+    padding: 1em;
     color: $lightgrey;
     text-align: justify;
     position: relative;
-    background-image: linear-gradient(rgba(0, 0, 0, 0), $black 10%, $black);
     font-size: 1.15em;
 }
 
@@ -143,8 +144,8 @@ h3 {
     align-items: center;
     padding: 0 20px;
     min-height: 50px;
-
-
+    color: $yellow;
+    text-transform: uppercase;
 }
 
 .navbar-collapse {
@@ -173,6 +174,11 @@ h3 {
     }
 }
 
+.text-container .nav-item:hover {
+    color: $yellow;
+    text-shadow: 0 0 3px $yellow;
+}
+
 // Chat
 .my-message {
     margin: auto 0 1rem auto;
@@ -180,6 +186,17 @@ h3 {
 
 .chat-container {
     max-height: 89vh;
+
+    .toast {
+        background-color: $darkgrey;
+        font-size: 0.8em;
+        border: 1px solid $blue;
+    }
+
+    .toast-header {
+        background-color: $almostBlack;
+        color: $blue;
+    }
 }
 
 .main-nav {
@@ -187,10 +204,23 @@ h3 {
 }
 
 .chat-list-item {
+    background-color: $darkgrey !important;
+    color: $lightgrey !important;
+    margin: 3px 0;
+    border-radius: 3px;
+
     &:hover {
-        background-color: grey;
+        background-color: $almostBlack !important;
         cursor: pointer;
     }
+}
+
+.chat-list {
+    margin: 1em 0;
+}
+
+.messages-container {
+    margin-bottom: 0.5em;
 }
 
 //Player pages
@@ -236,4 +266,14 @@ h3 {
 .front-image {
     height: 35vw;
     max-height: 500px;
+}
+
+.front-container {
+    background-image: linear-gradient(rgba(0, 0, 0, 0), $black 10%, $black);
+    padding-top: 0;
+}
+
+// Transactions
+.transactions-table {
+    color: $lightgrey !important;
 }
