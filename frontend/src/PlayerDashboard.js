@@ -1,5 +1,5 @@
 import { Component } from "react";
-import { Link } from "react-router-dom"
+import { Link, Redirect } from "react-router-dom"
 
 export class PlayerInfo extends Component {
     constructor(props) {
@@ -28,7 +28,6 @@ export class PlayerInfo extends Component {
     render() {
         return (
             <div class="text-container container">
-                <Link to="/dashboard">Takaisin</Link>
                 <h2>Info</h2>
                 <ul>
                     <li>Nimi: {this.state.name}</li>
@@ -54,7 +53,8 @@ export class Pay extends Component {
             amount: 0,
             warning: '',
             selectedCharacter: '',
-            success: ''
+            success: '',
+            redirect: ''
         }
         this.submit = this.submit.bind(this)
         this.handleChange = this.handleChange.bind(this)
@@ -126,13 +126,22 @@ export class Pay extends Component {
             success: <span>Maksu onnistui!</span>
         })
     }
+    componentWillMount() {
+        // Handle page refresh
+        if (!this.props.character)
+            this.setState({ redirect: <Redirect to="/dashboard" /> })
+    }
     render() {
         const options = this.props.characters.map((character) => { if (character._id !== this.props.character._id) return <option value={character._id}>{character.name}</option>; else return null });
+        let saldo = "???"
+        if (this.props.character && this.props.character.saldo)
+            saldo = this.props.character.saldo
         return (
             <div class="text-container container">
+                {this.state.redirect}
                 <h2>Pay</h2>
                 {this.state.success}
-                <p>Sinulla on <strong>{this.props.character.saldo}</strong> eurodollaria.</p>
+                <p>Sinulla on <strong>{saldo}</strong> eurodollaria.</p>
                 <form onSubmit={this.submit}>
                     <div class="mb-3">
                         <label class="form-label">Vastaanottaja</label>

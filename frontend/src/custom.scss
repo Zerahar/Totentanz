@@ -232,6 +232,8 @@ h3 {
     position: absolute; // A trick to make div occupy the whole space
     top: 107px;
     bottom: 0;
+    right: 0;
+    left: 0;
 
     .toast {
         background-color: $darkgrey;

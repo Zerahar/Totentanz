@@ -223,7 +223,7 @@ export class NewCharacter extends Component {
         },
         body: data
       })
-        .then(response => response.json())
+        .then(response => console.log(response.status))
         .then(parsed => this.setState({ redirect: <Redirect to="/admin" /> }))
         .catch(error => this.props.error(error))
     }

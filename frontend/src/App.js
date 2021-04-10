@@ -50,7 +50,7 @@ class App extends Component {
         mechanics: '',
         plots: ''
       },
-      loading: true
+      loading: false
     }
 
     this.login = this.login.bind(this)
@@ -62,6 +62,7 @@ class App extends Component {
     this.showError = this.showError.bind(this)
     this.ws = null
     this.closeMenu = this.closeMenu.bind(this)
+    this.setReady = this.setReady.bind(this)
   }
   componentDidMount() {
     // Check if login cookie
@@ -82,6 +83,7 @@ class App extends Component {
     console.log("Fetching players")
     fetch('http://localhost:3002/user/')
       .then(res => res.json())
+      .then(result => result.sort(function (a, b) { return a.userName > b.userName })) // Sort by player name
       .then(
         (result) => {
           this.setState({
@@ -111,7 +113,8 @@ class App extends Component {
       userName: data.userName,
       userType: data.userType,
       userCharacter: data.character,
-      warning: ''
+      warning: '',
+      loading: true
     })
     // create a cookie
     document.cookie = "login=" + this.state.login
@@ -172,6 +175,7 @@ class App extends Component {
     console.log("Fetch characters")
     fetch('http://localhost:3002/character/')
       .then(res => res.json())
+      .then(result => result.sort(function (a, b) { return a.name > b.name })) // Sort by character name
       .then(
         (result) => {
           this.setState({
@@ -215,6 +219,12 @@ class App extends Component {
       const collapse = new Collapse(navbar)
       collapse.hide()
     }
+  }
+  setReady(state) {
+    if (state)
+      this.setState({ loading: false })
+    else
+      this.setState({ loading: true })
   }
   componentWillUnmount() {
     if (this.ws)
@@ -295,6 +305,7 @@ class App extends Component {
                 loggedCharacter={this.state.userCharacter}
                 type={this.state.userType}
                 error={this.showError}
+                isReady={this.setReady}
               />
             </Route>
             <Route exact path="/dashboard">
@@ -328,6 +339,7 @@ class App extends Component {
                 loggedCharacter={this.state.userCharacter}
                 type={this.state.userType}
                 error={this.showError}
+                isReady={this.setReady}
               />
             </Route>
             <Route exact path="/admin/transactions">
@@ -335,6 +347,7 @@ class App extends Component {
                 characters={this.state.characters}
                 fetchCharacters={this.fetchCharacters}
                 error={this.showError}
+                isReady={this.setReady}
               />
             </Route>
             <Route exact path="/admin">
@@ -359,6 +372,7 @@ class App extends Component {
                 characters={this.state.characters}
                 error={this.showError}
                 ws={this.ws}
+                isReady={this.setReady}
               />
             </Route>
 

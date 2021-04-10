@@ -19,23 +19,28 @@ class ChatList extends Component {
         this.fetchChats = this.fetchChats.bind(this)
     }
     componentDidMount() {
+
         this.fetchChats()
     }
     fetchChats() {
         let url = 'http://localhost:3002/chat/'
         if (this.props.loggedCharacter)
+
             url += this.props.loggedCharacter
         // If player has a character, fetch chats where they are participating. 
         // If admin, fetch all chats.
-        if (this.props.loggedCharacter || this.props.type === "admin")
+        if (this.props.loggedCharacter || this.props.type === "admin") {
+            this.props.isReady(false)
             fetch(url)
                 .then(res => res.json())
                 .then(
                     (result) => {
                         this.setState({ chats: result, isLoaded: true });
+                        this.props.isReady(true)
                     }
                 )
                 .catch(error => this.props.error(error))
+        }
         else if (this.props.type === "guest")
             this.setState({ warning: 'Kirjaudu sisään nähdäksesi keskustelut.' })
         else

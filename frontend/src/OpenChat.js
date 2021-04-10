@@ -1,6 +1,6 @@
 
+import { Redirect } from "react-router-dom";
 const { Component } = require("react");
-
 class OpenChat extends Component {
     constructor(props) {
         super(props);
@@ -10,7 +10,8 @@ class OpenChat extends Component {
             history: [],
             ready: false,
             chat: '',
-            currentName: this.props.name
+            currentName: this.props.name,
+            redirect: ''
         }
         this.sendMessage = this.sendMessage.bind(this)
         this.messageBeingWritten = this.messageBeingWritten.bind(this)
@@ -22,38 +23,44 @@ class OpenChat extends Component {
         this.ws = this.props.ws
     }
     componentDidMount() {
-        // Fill character name if undefined
-        if (!this.state.currentName)
-            this.setState({ currentName: this.props.characters.find(character => character._id === this.props.characterId).name })
-        // Tell server that chat is open
-        this.ws.send(JSON.stringify({ chat: this.props.chat._id, type: 'openChat' }))
+        // Go back if the page was refreshed
+        if (!this.props.chat)
+            this.setState({ redirect: <Redirect to="/" /> })
+        else {
+            this.props.isReady(false)
+            // Fill character name if undefined
+            if (!this.state.currentName)
+                this.setState({ currentName: this.props.characters.find(character => character._id === this.props.characterId).name })
+            // Tell server that chat is open
+            this.ws.send(JSON.stringify({ chat: this.props.chat._id, type: 'openChat' }))
 
-        this.ws.onmessage = evt => {
-            // listen to data sent from the websocket server
-            const message = JSON.parse(evt.data)
-            if (message.type === 'message') {
-                const newMessage = {
-                    time: new Date(message.data.time).toLocaleString("fi-FI", { timeStyle: "short", dateStyle: "medium" }),
-                    text: message.data.text,
-                    author: message.data.author,
-                    authorId: message.data.authorId
+            this.ws.onmessage = evt => {
+                // listen to data sent from the websocket server
+                const message = JSON.parse(evt.data)
+                if (message.type === 'message') {
+                    const newMessage = {
+                        time: new Date(message.data.time).toLocaleString("fi-FI", { timeStyle: "short", dateStyle: "medium" }),
+                        text: message.data.text,
+                        author: message.data.author,
+                        authorId: message.data.authorId
+                    }
+                    this.setState(prevState => ({
+                        history: [...prevState.history, newMessage]
+                    }), () => { document.getElementById("message-container").scrollTop = document.getElementById("message-container").scrollHeight; return null })
                 }
-                this.setState(prevState => ({
-                    history: [...prevState.history, newMessage]
-                }), () => { document.getElementById("message-container").scrollTop = document.getElementById("message-container").scrollHeight; return null })
-            }
-            if (message.type === 'history') {
-                message.data.map(msg => this.setState(prevState => ({
-                    history: [...prevState.history, {
-                        time: new Date(msg.time).toLocaleString("fi-FI", { timeStyle: "short", dateStyle: "medium" }),
-                        text: msg.text,
-                        author: msg.author,
-                        authorId: msg.authorId
-                    }]
-                })))
+                if (message.type === 'history') {
+                    message.data.map(msg => this.setState(prevState => ({
+                        history: [...prevState.history, {
+                            time: new Date(msg.time).toLocaleString("fi-FI", { timeStyle: "short", dateStyle: "medium" }),
+                            text: msg.text,
+                            author: msg.author,
+                            authorId: msg.authorId
+                        }]
+                    })))
+                    this.props.isReady(true)
+                }
             }
         }
-
     }
     addMessage(message) {
         if (message)
@@ -88,10 +95,13 @@ class OpenChat extends Component {
                     </div>
                 </div>
             )
-
+        let header = ''
+        if (this.props.chat && this.props.chat.participants)
+            header = this.props.chat.participants.map((participant, index, array) => index === array.length - 1 ? participant.name : participant.name + ", ")
         return (
             <div class="chat-container d-flex flex-column text-container container">
-                <h2>{this.props.chat.participants.map((participant, index, array) => index === array.length - 1 ? participant.name : participant.name + ", ")}</h2>
+                {this.state.redirect}
+                <h2>{header}</h2>
                 <div class="overflow-auto messages-container p-3 flex-grow-1" id="message-container">{history}</div>
                 <div class="input-group">
                     <input class="form-control" type="text" value={this.state.input} onChange={this.messageBeingWritten}></input>

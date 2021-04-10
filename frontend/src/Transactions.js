@@ -8,6 +8,7 @@ class Transactions extends Component {
         }
     }
     componentDidMount() {
+        this.props.isReady(false)
         if (this.props.characters.length === 0)
             this.props.fetchCharacters()
         fetch('http://localhost:3002/transaction/')
@@ -17,6 +18,7 @@ class Transactions extends Component {
                     this.setState({
                         history: result
                     });
+                    this.props.isReady(true)
                 })
             .catch(error => this.props.error(error))
     }

@@ -147,7 +147,6 @@ mongo.MongoClient.connect(url, function (err, client) {
 
   // Add character
   app.post('/character', (req, res) => {
-    console.log("Added a new character")
     const document = {
       name: req.body.name,
       age: req.body.age,
@@ -184,6 +183,7 @@ mongo.MongoClient.connect(url, function (err, client) {
       .then(result => result.insertedId)
       .then(id => promise2(id))
       .then(result => res.send(result))
+      .then(console.log("Added a new character"))
   })
 
   // Add user
