@@ -5,7 +5,7 @@ import { Link, Redirect } from "react-router-dom"
 import 'pell/dist/pell.css'
 import OpenChat from './OpenChat.js'
 import { Alert } from 'bootstrap'
-
+const { REACT_APP_SERVER_URL } = process.env;
 class AdminDashboard extends Component {
   constructor(props) {
     super(props);
@@ -211,7 +211,7 @@ export class NewCharacter extends Component {
         newPlayer: newPlayer,
         oldPlayer: oldPlayer
       })
-      let url = "http://localhost:3002/character/"
+      let url = REACT_APP_SERVER_URL + "/character/"
       if (this.props.character._id)
         url += this.props.character._id
       // Insert/update character
@@ -318,7 +318,7 @@ export class MessageAdmin extends Component {
       this.props.fetchCharacters()
   }
   fetchChats() {
-    fetch('http://localhost:3002/chat/')
+    fetch(REACT_APP_SERVER_URL + '/chat/')
       .then(res => res.json())
       .then(
         (result) => {
@@ -330,7 +330,7 @@ export class MessageAdmin extends Component {
   deleteChat(e) {
     let c = window.confirm("Haluatko varmasti poistaa keskustelun?")
     if (c)
-      fetch('http://localhost:3002/chat/delete/' + e.target.id)
+      fetch(REACT_APP_SERVER_URL + '/chat/delete/' + e.target.id)
         .then(response => response.json())
         .then(data => this.fetchChats())
         .catch(error => this.props.error(error))
@@ -338,7 +338,7 @@ export class MessageAdmin extends Component {
   createChat() {
     const data = { participants: this.state.selectedCharacters }
     let xhttp = new XMLHttpRequest();
-    xhttp.open("POST", "http://localhost:3002/chat/", true);
+    xhttp.open("POST", REACT_APP_SERVER_URL + "/chat/", true);
     xhttp.setRequestHeader("Content-type", "application/json");
     xhttp.onreadystatechange = (e) => this.fetchChats(e)
     xhttp.send(JSON.stringify(data));
@@ -410,7 +410,7 @@ export class NewUser extends Component {
     event.preventDefault();
     if (this.validateForm()) {
       const data = { login: this.state.login, userName: this.state.playerName, character: this.state.selectedCharacter, userType: 'player' }
-      let url = "http://localhost:3002/user/"
+      let url = REACT_APP_SERVER_URL + "/user/"
       if (this.props.existingUser)
         url += this.props.existingUser._id
 

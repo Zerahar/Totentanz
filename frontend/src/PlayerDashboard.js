@@ -58,6 +58,7 @@ export class Pay extends Component {
         }
         this.submit = this.submit.bind(this)
         this.handleChange = this.handleChange.bind(this)
+        this.checkSuccess = this.checkSuccess.bind(this)
     }
     submit(e) {
         e.preventDefault()
@@ -71,6 +72,7 @@ export class Pay extends Component {
             let c = window.confirm("Haluatko maksaa " + this.state.amount + " eurodollaria kohteelle " +
                 this.props.characters.find(character => character._id === this.state.selectedCharacter).name + "?")
             if (c) {
+                let success = true;
                 const transaction = JSON.stringify({
                     time: Date.now(),
                     user: this.props.character._id,
@@ -85,27 +87,8 @@ export class Pay extends Component {
                     },
                     body: transaction
                 })
-                    .then(
-                        fetch('http://localhost:3002/character/saldo/' + this.state.selectedCharacter, {
-                            method: 'POST',
-                            mode: 'cors',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ saldo: this.state.amount })
-                        })
-                            .then(
-                                fetch('http://localhost:3002/character/saldo/' + this.props.character._id, {
-                                    method: 'POST',
-                                    mode: 'cors',
-                                    headers: {
-                                        'Content-Type': 'application/json'
-                                    },
-                                    body: JSON.stringify({ saldo: -this.state.amount })
-                                })
-                                    .then(response => response.ok ? this.success() : this.setState({ warning: response.statusText }))
-                            )
-                    )
+                    .then(response => response.json())
+                    .then(result => this.checkSuccess(result))
             }
         }
     }
@@ -117,14 +100,23 @@ export class Pay extends Component {
             [name]: value
         });
     }
-    success() {
-        this.props.fetchCharacters()
-        this.setState({
-            amount: 0,
-            selectedCharacter: '',
-            warning: '',
-            success: <span>Maksu onnistui!</span>
-        })
+    checkSuccess(response) {
+        response.forEach((part, counter) => {
+            if (part.ok !== 1) {
+                this.setState({ warning: response.statusText })
+                return
+            }
+            // All clear, proceed
+            else if (counter === 2) {
+                this.props.fetchCharacters()
+                this.setState({
+                    amount: 0,
+                    selectedCharacter: '',
+                    warning: '',
+                    success: <span>Maksu onnistui!</span>
+                })
+            }
+        });
     }
     componentWillMount() {
         // Handle page refresh

@@ -1,7 +1,6 @@
-import OpenChat from './OpenChat.js'
 import { Component } from "react";
 import { Link } from "react-router-dom"
-
+const { REACT_APP_SERVER_URL } = process.env;
 class ChatList extends Component {
     constructor(props) {
         super(props);
@@ -19,13 +18,11 @@ class ChatList extends Component {
         this.fetchChats = this.fetchChats.bind(this)
     }
     componentDidMount() {
-
         this.fetchChats()
     }
     fetchChats() {
-        let url = 'http://localhost:3002/chat/'
+        let url = REACT_APP_SERVER_URL + '/chat/'
         if (this.props.loggedCharacter)
-
             url += this.props.loggedCharacter
         // If player has a character, fetch chats where they are participating. 
         // If admin, fetch all chats.
@@ -60,7 +57,7 @@ class ChatList extends Component {
         this.state.selectedCharacters.map(character => characters.push({ _id: character._id, name: character.name, player: character.player }))
         const data = { participants: characters }
         let xhttp = new XMLHttpRequest();
-        xhttp.open("POST", "http://localhost:3002/chat/", true);
+        xhttp.open("POST", REACT_APP_SERVER_URL + "/chat/", true);
         xhttp.setRequestHeader("Content-type", "application/json");
         xhttp.onreadystatechange = (e) => this.fetchChats(e)
         xhttp.send(JSON.stringify(data));

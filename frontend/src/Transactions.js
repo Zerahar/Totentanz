@@ -1,5 +1,5 @@
 import { Component } from "react";
-
+const { REACT_APP_SERVER_URL } = process.env;
 class Transactions extends Component {
     constructor(props) {
         super(props);
@@ -11,7 +11,7 @@ class Transactions extends Component {
         this.props.isReady(false)
         if (this.props.characters.length === 0)
             this.props.fetchCharacters()
-        fetch('http://localhost:3002/transaction/')
+        fetch(REACT_APP_SERVER_URL + '/transaction/')
             .then(res => res.json())
             .then(
                 (result) => {

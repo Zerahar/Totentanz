@@ -369,11 +369,44 @@ mongo.MongoClient.connect(url, function (err, client) {
 
   // Add payment
   app.post('/pay', (req, res) => {
-    db.collection('transactions').insertOne(req.body, function (err, result) {
-      if (err) throw err
-      res.send(result)
-      db.close
+    const promise = new Promise((resolve, reject) => {
+      // Save transaction event
+      db.collection('transactions').insertOne(req.body, function (err, result) {
+        if (err) reject(err)
+        resolve(result)
+        db.close
+      })
     })
+    // Increase recipient's saldo
+    const query = { _id: new mongo.ObjectId(req.params.recipient) }
+    const document = {
+      $inc: {
+        saldo: mongo.Double(req.body.saldo)
+      }
+    }
+    const promise2 = new Promise((resolve, reject) => {
+      db.collection('characters').updateOne(query, document, function (err, result) {
+        if (err) reject(err)
+        resolve(result)
+        db.close
+      })
+    })
+    // Decrease payer's saldo
+    const query2 = { _id: new mongo.ObjectId(req.params.user) }
+    const document2 = {
+      $inc: {
+        saldo: mongo.Double(-req.body.amount)
+      }
+    }
+    const promise3 = new Promise((resolve, reject) => {
+      db.collection('characters').updateOne(query2, document2, function (err, result) {
+        if (err) reject(err)
+        resolve(result)
+        db.close
+      })
+    })
+    Promise.all([promise, promise2, promise3])
+      .then(response => res.send(response))
   })
 
 

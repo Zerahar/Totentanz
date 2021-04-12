@@ -12,6 +12,7 @@ import { List, ChatDots } from 'react-bootstrap-icons'
 import { Collapse, Dropdown, Toast } from 'bootstrap'
 import './custom.scss'
 import OpenChat from './OpenChat.js';
+const { REACT_APP_SERVER_URL } = process.env;
 class App extends Component {
   constructor(props) {
     super(props);
@@ -81,7 +82,7 @@ class App extends Component {
   }
   fetchPlayers() {
     console.log("Fetching players")
-    fetch('http://localhost:3002/user/')
+    fetch(REACT_APP_SERVER_URL + '/user/')
       .then(res => res.json())
       .then(result => result.sort(function (a, b) { return a.userName > b.userName })) // Sort by player name
       .then(
@@ -100,7 +101,7 @@ class App extends Component {
     if (event)
       event.preventDefault()
     if (this.state.login) {
-      fetch('http://localhost:3002/user/' + this.state.login)
+      fetch(REACT_APP_SERVER_URL + '/user/' + this.state.login)
         .then(response => {
           response.ok ? response.json().then(data => this.loginSuccess(data)) : this.showError("Kirjautuminen ei onnistunut. Tarkista oikeinkirjoitus.")
         })
@@ -173,7 +174,7 @@ class App extends Component {
   }
   fetchCharacters() {
     console.log("Fetch characters")
-    fetch('http://localhost:3002/character/')
+    fetch(REACT_APP_SERVER_URL + '/character/')
       .then(res => res.json())
       .then(result => result.sort(function (a, b) { return a.name > b.name })) // Sort by character name
       .then(
