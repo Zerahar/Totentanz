@@ -17,15 +17,6 @@ mongo.MongoClient.connect(url, function (err, client) {
   if (err) throw err
 
   const db = client.db('data')
-  // Fetch character
-  app.get('/character/:charId', (req, res) => {
-    const query = { _id: new mongo.ObjectId(req.params.charId) }
-    db.collection('characters').findOne(query, function (err, result) {
-      if (err) throw err
-      res.send(result)
-      db.close
-    })
-  })
 
   // Remove character
   app.get('/character/delete/:charId', (req, res) => {
@@ -33,16 +24,17 @@ mongo.MongoClient.connect(url, function (err, client) {
     db.collection('characters').deleteOne(query, function (err, result) {
       if (err) throw err
       res.send(result)
+      console.log("Removed character ", req.params.charId)
       db.close
     })
   })
 
   // Fetch all characters
   app.get('/character/', (req, res) => {
-    console.log("Fetching all characters")
     db.collection('characters').find().toArray(function (err, result) {
       if (err) throw err
       res.send(result)
+      console.log("Fetched all characters")
       db.close
     })
   })
@@ -111,38 +103,7 @@ mongo.MongoClient.connect(url, function (err, client) {
     }
     Promise.all([promise1, promise2, promise3])
       .then(responses => res.send(responses))
-  })
-
-  // Update character's player
-  app.post('/character/user/:charId', (req, res) => {
-    console.log("Player for character " + req.params.charId + " updated")
-    const query = { _id: new mongo.ObjectId(req.params.charId) }
-    const document = {
-      $set: {
-        player: req.body.player
-      }
-    }
-    db.collection('characters').updateOne(query, document, function (err, result) {
-      if (err) throw err
-      res.send(result)
-      db.close
-    })
-  })
-
-  // Update character's saldo
-  app.post('/character/saldo/:charId', (req, res) => {
-    console.log(req.body.saldo, req.params.charId)
-    const query = { _id: new mongo.ObjectId(req.params.charId) }
-    const document = {
-      $inc: {
-        saldo: mongo.Double(req.body.saldo)
-      }
-    }
-    db.collection('characters').updateOne(query, document, function (err, result) {
-      if (err) throw err
-      res.send(result)
-      db.close
-    })
+      .then(console.log("Updated character ", req.params.charId))
   })
 
   // Add character
@@ -261,16 +222,27 @@ mongo.MongoClient.connect(url, function (err, client) {
 
     Promise.all([promise1, promise2])
       .then(results => Promise.all([promise3, promise4])
-        .then(results => res.send(results)))
-    // .catch(res.status(500).send("Käyttäjää lisätessä tapahtui virhe. Yritä uudelleen tai ota yhteys pelinjohtoon."))
-
+        .then(results => res.send(results))
+        .then(console.log("Added a new user, id ", newId)))
   })
 
   // Update user
   app.post('/user/:userId', (req, res) => {
+    let oldCharacter, newCharacter
 
+    // Check if user had a character assigned
     const query = { _id: new mongo.ObjectId(req.params.userId) }
-    const document = {
+    const promise = new Promise((resolve, reject) => {
+      db.collection('users').findOne(query, function (err, result) {
+        if (err) reject(err)
+        resolve(result)
+        db.close
+      })
+    })
+
+    // Update user
+    const query2 = { _id: new mongo.ObjectId(req.params.userId) }
+    const document2 = {
       $set: {
         userName: req.body.userName,
         login: req.body.login,
@@ -278,23 +250,118 @@ mongo.MongoClient.connect(url, function (err, client) {
         userType: req.body.userType
       }
     }
-    db.collection('users').updateOne(query, document, function (err, result) {
-      if (err) throw err
-      res.send(result)
-      db.close
+    const promise2 = new Promise((resolve, reject) => {
+      db.collection('users').updateOne(query2, document2, function (err, result) {
+        if (err) reject(err)
+        resolve(result)
+        db.close
+      })
     })
+
+    // Update old character
+    // const promise3 = new Promise((resolve, reject) => {
+    //   console.log("old")
+    //   if (oldCharacter) {
+    //     const query3 = { _id: new mongo.ObjectId(oldCharacter) }
+    //     const document3 = {
+    //       $set: {
+    //         player: ''
+    //       }
+    //     }
+    //     db.collection('characters').updateOne(query3, document3, function (err, result) {
+    //       if (err) reject(err)
+    //       db.close
+    //       console.log("Updated user's previous character")
+    //       resolve(result)
+    //     })
+    //   }
+    //   else
+    //     resolve(null)
+    // })
+
+    // //Update new character
+    // const promise4 = new Promise((resolve, reject) => {
+    //   console.log("new")
+    //   if (newCharacter) {
+    //     const query4 = { _id: new mongo.ObjectId(newCharacter) }
+    //     const document4 = {
+    //       $set: {
+    //         player: req.params.userId
+    //       }
+    //     }
+    //     db.collection('characters').updateOne(query4, document4, function (err, result) {
+    //       if (err) reject(err)
+    //       console.log("Updated user's current character")
+    //       db.close
+    //       resolve(result)
+    //     })
+    //   }
+    //   else
+    //     resolve(null)
+    // })
+
+    // Check if characters need update
+    function editCharacters(old) {
+      oldCharacter = old
+      newCharacter = req.body.character
+      console.log("User character was modified, old character: ", oldCharacter, ", new: ", newCharacter)
+      return Promise.all([new Promise((resolve, reject) => {
+        if (newCharacter) {
+          const query4 = { _id: new mongo.ObjectId(newCharacter) }
+          const document4 = {
+            $set: {
+              player: req.params.userId
+            }
+          }
+          db.collection('characters').updateOne(query4, document4, function (err, result) {
+            if (err) reject(err)
+            console.log("Updated user's current character")
+            db.close
+            resolve(result)
+          })
+        }
+        else
+          resolve(null)
+      }), new Promise((resolve, reject) => {
+        if (oldCharacter) {
+          const query3 = { _id: new mongo.ObjectId(oldCharacter) }
+          const document3 = {
+            $set: {
+              player: ''
+            }
+          }
+          db.collection('characters').updateOne(query3, document3, function (err, result) {
+            if (err) reject(err)
+            db.close
+            console.log("Updated user's previous character")
+            resolve(result)
+          })
+        }
+        else
+          resolve(null)
+      })])
+    }
+
+    // Execute all promises
+    promise
+      .then(result => result.character === req.body.character ? promise2 : editCharacters(result.character))
+      .then(result => res.send(result))
+      .then(console.log("Updated user ", req.params.userId))
   })
 
   // Fetch user
   app.get('/user/:login', (req, res) => {
-    console.log(req.params.login)
     const query = { login: req.params.login }
     db.collection('users').findOne(query, function (err, result) {
       if (err) throw err
-      if (result)
+      if (result) {
         res.send(result)
-      else
+        console.log("Successfull login attempt, id ", result._id)
+      }
+      else {
         res.status(404).send('')
+        console.log("Unsuccessfull login attempt")
+      }
       db.close
     })
   })
@@ -305,16 +372,18 @@ mongo.MongoClient.connect(url, function (err, client) {
     db.collection('users').find().toArray(function (err, result) {
       if (err) throw err
       res.send(result)
+      console.log("Fetched all users")
       db.close
     })
   })
 
   // Remove user
-  app.get('/user/delete/:charId', (req, res) => {
-    const query = { _id: new mongo.ObjectId(req.params.charId) }
+  app.get('/user/delete/:userId', (req, res) => {
+    const query = { _id: new mongo.ObjectId(req.params.userId) }
     db.collection('users').deleteOne(query, function (err, result) {
       if (err) throw err
       res.send(result)
+      console.log("Removed user ", req.params.userId)
       db.close
     })
   })
@@ -324,6 +393,7 @@ mongo.MongoClient.connect(url, function (err, client) {
     db.collection('chats').insertOne(req.body, function (err, result) {
       if (err) throw err
       res.send(result)
+      console.log("Created a new chat, participants: ", req.body.participants)
       db.close
     })
   })
@@ -333,6 +403,7 @@ mongo.MongoClient.connect(url, function (err, client) {
     db.collection('chats').find().toArray(function (err, result) {
       if (err) throw err
       res.send(result)
+      console.log("Fetched all chats")
       db.close
     })
   })
@@ -343,6 +414,7 @@ mongo.MongoClient.connect(url, function (err, client) {
     db.collection('chats').find(query).toArray(function (err, result) {
       if (err) throw err
       res.send(result)
+      console.log("Fetched all chats for character ", req.params.charId)
       db.close
     })
   })
@@ -352,6 +424,7 @@ mongo.MongoClient.connect(url, function (err, client) {
     db.collection('chats').deleteOne(query, function (err, result) {
       if (err) throw err
       res.send(result)
+      console.log("Removed chat with id ", req.params.chatId)
       db.close
     })
   })
@@ -361,7 +434,7 @@ mongo.MongoClient.connect(url, function (err, client) {
     const query = { _id: new mongo.ObjectId(req.params.chatId) }
     db.collection('chats').findOne(query, function (err, result) {
       if (err) throw err
-      console.log("Fetchin a chat with id " + req.params.chatId)
+      console.log("Fetched a chat with id " + req.params.chatId)
       res.send(result)
       db.close
     })
@@ -378,7 +451,7 @@ mongo.MongoClient.connect(url, function (err, client) {
       })
     })
     // Increase recipient's saldo
-    const query = { _id: new mongo.ObjectId(req.params.recipient) }
+    const query = { _id: new mongo.ObjectId(req.body.recipient) }
     const document = {
       $inc: {
         saldo: mongo.Double(req.body.saldo)
@@ -392,7 +465,7 @@ mongo.MongoClient.connect(url, function (err, client) {
       })
     })
     // Decrease payer's saldo
-    const query2 = { _id: new mongo.ObjectId(req.params.user) }
+    const query2 = { _id: new mongo.ObjectId(req.body.user) }
     const document2 = {
       $inc: {
         saldo: mongo.Double(-req.body.amount)
@@ -407,6 +480,7 @@ mongo.MongoClient.connect(url, function (err, client) {
     })
     Promise.all([promise, promise2, promise3])
       .then(response => res.send(response))
+      .then(console.log(req.body.user, " paid ", req.body.amount, " ED to ", req.body.recipient))
   })
 
 
@@ -415,6 +489,7 @@ mongo.MongoClient.connect(url, function (err, client) {
     db.collection('transactions').find().sort({ "time": -1 }).toArray(function (err, result) {
       if (err) throw err
       res.send(result)
+      console.log("Fetched all payments")
       db.close
     })
   })

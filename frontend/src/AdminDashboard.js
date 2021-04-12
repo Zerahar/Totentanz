@@ -3,8 +3,6 @@ import React, { Component } from 'react'
 import { init, formatBlock, exec } from 'pell';
 import { Link, Redirect } from "react-router-dom"
 import 'pell/dist/pell.css'
-import OpenChat from './OpenChat.js'
-import { Alert } from 'bootstrap'
 const { REACT_APP_SERVER_URL } = process.env;
 class AdminDashboard extends Component {
   constructor(props) {
@@ -13,6 +11,7 @@ class AdminDashboard extends Component {
     this.deleteCharacter = this.deleteCharacter.bind(this)
     this.editUser = this.editUser.bind(this)
     this.deleteUser = this.deleteUser.bind(this)
+    this.success = this.success.bind(this)
   }
   editCharacter(e) {
     this.props.changeCharacter(this.props.characters.find(character => character._id === e.target.id))
@@ -22,48 +21,26 @@ class AdminDashboard extends Component {
   }
   deleteUser(e) {
     const player = this.props.players.find(player => player._id === e.target.id)
-    const character = this.props.characters.find(character => character.player === player._id)
     let c = window.confirm("Haluatko varmasti poistaa käyttäjän " + player.userName + "?")
     if (c) {
-      const promise1 = fetch('http://localhost:3002/user/delete/' + e.target.id)
-      let promise2
-      if (character) {
-        character.player = ""
-        promise2 = fetch('http://localhost:3002/character/' + character._id, {
-          method: 'POST',
-          mode: 'cors',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(character)
-        })
-      }
-      Promise.all([promise1, promise2])
-        .then(responses => this.props.fetchPlayers())
-        .then(this.props.fetchCharacters())
+      fetch(REACT_APP_SERVER_URL + '/user/delete/' + e.target.id)
+        .then(response => response.json())
+        .then(result => result.ok === 1 ? this.success() : this.props.error("Käyttäjän poisto ei onnistunut."))
+        .catch(error => this.props.error(error))
     }
+  }
+  success() {
+    this.props.fetchCharacters()
+    this.props.fetchPlayers()
   }
   deleteCharacter(e) {
     const character = this.props.characters.find(character => character._id === e.target.id)
-    const player = this.props.players.find(player => player._id === character.player)
     let c = window.confirm("Haluatko varmasti poistaa hahmon " + character.name + "?")
     if (c) {
-      const promise1 = fetch('http://localhost:3002/character/delete/' + e.target.id)
-      let promise2
-      if (player) {
-        player.character = ""
-        promise2 = fetch('http://localhost:3002/user/' + player._id, {
-          method: 'POST',
-          mode: 'cors',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(player)
-        })
-      }
-      Promise.all([promise1, promise2])
-        .then(responses => this.props.fetchPlayers())
-        .then(responses => this.props.fetchCharacters())
+      fetch(REACT_APP_SERVER_URL + '/character/delete/' + e.target.id)
+        .then(response => response.json())
+        .then(result => result.ok === 1 ? this.success() : this.props.error("Käyttäjän poisto ei onnistunut."))
+        .catch(error => this.props.error(error))
     }
 
   }
@@ -82,13 +59,13 @@ class AdminDashboard extends Component {
     </tr>);
     let players = ''
     if (this.props.players)
-      players = this.props.players.map((player) => <tr key={player._id}>
+      players = this.props.players.map((player) => player.userType === "player" ? <tr key={player._id}>
         <td>{player.userName}</td>
         <td>{characterName(this.props.characters, player.character)}</td>
         <td>{player.login}</td>
         <td class="table-operations"><Link id={player._id} onClick={this.editUser} to="admin/newUser" class="btn btn-primary flex-fill m-2 w-100">Muokkaa</Link>
           <button id={player._id} onClick={this.deleteUser} class="btn btn-danger flex-fill m-2 w-100">Poista</button></td>
-      </tr>);
+      </tr> : '');
     if (this.props.admin === "admin")
       return (
         <div class="text-container container">
@@ -181,6 +158,7 @@ export class NewCharacter extends Component {
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.checkInput = this.checkInput.bind(this)
+    this.checkSuccess = this.checkSuccess.bind(this)
   }
   handleChange(event) {
     const target = event.target;
@@ -223,10 +201,21 @@ export class NewCharacter extends Component {
         },
         body: data
       })
-        .then(response => console.log(response.status))
-        .then(parsed => this.setState({ redirect: <Redirect to="/admin" /> }))
+        .then(response => response.json())
+        .then(parsed => this.checkSuccess(parsed))
         .catch(error => this.props.error(error))
     }
+  }
+  checkSuccess(result) {
+    result.forEach((part, counter) => {
+      if (part !== null && part.ok !== 1) {
+        this.props.error("Hahmon lisäys ei onnistunut.")
+        return
+      }
+      else if (counter === 2) {
+        this.setState({ redirect: <Redirect to="/admin" /> })
+      }
+    });
   }
   checkInput() {
     const form = document.getElementById('characterForm')
@@ -294,94 +283,6 @@ export class NewCharacter extends Component {
         {this.state.redirect}
       </div>
     );
-  }
-}
-
-export class MessageAdmin extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      chats: [],
-      selectedChat: '',
-      mode: '',
-      isLoaded: true,
-      selectedCharacters: []
-    };
-    this.fetchChats = this.fetchChats.bind(this)
-    this.deleteChat = this.deleteChat.bind(this)
-    this.handleChange = this.handleChange.bind(this)
-    this.createChat = this.createChat.bind(this)
-  }
-  componentDidMount() {
-    this.fetchChats()
-    if (this.props.characters.length === 0)
-      this.props.fetchCharacters()
-  }
-  fetchChats() {
-    fetch(REACT_APP_SERVER_URL + '/chat/')
-      .then(res => res.json())
-      .then(
-        (result) => {
-          this.setState({ chats: result, isLoaded: true });
-        }
-      )
-      .catch(error => this.props.error(error))
-  }
-  deleteChat(e) {
-    let c = window.confirm("Haluatko varmasti poistaa keskustelun?")
-    if (c)
-      fetch(REACT_APP_SERVER_URL + '/chat/delete/' + e.target.id)
-        .then(response => response.json())
-        .then(data => this.fetchChats())
-        .catch(error => this.props.error(error))
-  }
-  createChat() {
-    const data = { participants: this.state.selectedCharacters }
-    let xhttp = new XMLHttpRequest();
-    xhttp.open("POST", REACT_APP_SERVER_URL + "/chat/", true);
-    xhttp.setRequestHeader("Content-type", "application/json");
-    xhttp.onreadystatechange = (e) => this.fetchChats(e)
-    xhttp.send(JSON.stringify(data));
-    this.setState({ mode: '', selectedCharacters: [] })
-  }
-  handleChange(event) {
-    if (event.target.checked)
-      this.setState(prevState => ({ selectedCharacters: [...prevState.selectedCharacters, this.props.characters.find(character => character._id === event.target.name)] }))
-    else {
-      let filteredArray = this.state.selectedCharacters.filter(character => character._id !== event.target.name)
-      this.setState({ selectedCharacters: filteredArray })
-    }
-  }
-  render() {
-    const characters = this.props.characters.map((character) => <li><input class="form-check-input" type="checkbox" name={character._id} onChange={this.handleChange} />{character.name}</li>)
-    const chats = this.state.chats.map((chat) => <li>
-      {chat.participants.map((participant) => participant.name + ", ")}
-      <button onClick={() => this.setState({ mode: "open", selectedChat: chat })}>Avaa</button>
-      <button onClick={this.deleteChat} id={chat._id}>Poista</button>
-    </li>);
-    if (this.state.mode === "new") {
-      return (<div>
-        <button onClick={() => this.setState({ mode: "" })}>Takaisin</button>
-        <label class="form-label">Valitse keskustelun jäsenet</label>
-        <ul>
-          {characters}
-        </ul>
-        <button onClick={this.createChat}>Luo keskustelu</button>
-      </div>)
-    }
-    else if (this.state.mode === "open") {
-      return (
-        <OpenChat chat={this.state.selectedChat} user="admin" />
-      )
-    }
-    else {
-      return (
-        <div>
-          <Link to="/admin">Takaisin</Link><button onClick={() => this.setState({ mode: "new" })}>Uusi keskustelu</button>
-          <ul>{chats}</ul>
-        </div>
-      )
-    }
   }
 }
 export class NewUser extends Component {

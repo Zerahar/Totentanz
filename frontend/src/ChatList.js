@@ -56,11 +56,17 @@ class ChatList extends Component {
         let characters = [{ _id: loggedCharacter._id, name: loggedCharacter.name, player: loggedCharacter.player }]
         this.state.selectedCharacters.map(character => characters.push({ _id: character._id, name: character.name, player: character.player }))
         const data = { participants: characters }
-        let xhttp = new XMLHttpRequest();
-        xhttp.open("POST", REACT_APP_SERVER_URL + "/chat/", true);
-        xhttp.setRequestHeader("Content-type", "application/json");
-        xhttp.onreadystatechange = (e) => this.fetchChats(e)
-        xhttp.send(JSON.stringify(data));
+        fetch(REACT_APP_SERVER_URL + "/chat/", {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: data
+        })
+            .then(response => response.json())
+            .then(result => result.ok === 1 ? this.fetchChats() : this.props.error("Chatin luonti ei onnistunut."))
+            .catch(error => this.props.error(error))
         this.setState({ mode: '', selectedCharacters: [] })
     }
     render() {

@@ -72,7 +72,6 @@ export class Pay extends Component {
             let c = window.confirm("Haluatko maksaa " + this.state.amount + " eurodollaria kohteelle " +
                 this.props.characters.find(character => character._id === this.state.selectedCharacter).name + "?")
             if (c) {
-                let success = true;
                 const transaction = JSON.stringify({
                     time: Date.now(),
                     user: this.props.character._id,
@@ -89,6 +88,7 @@ export class Pay extends Component {
                 })
                     .then(response => response.json())
                     .then(result => this.checkSuccess(result))
+                    .catch(error => this.props.error(error))
             }
         }
     }
