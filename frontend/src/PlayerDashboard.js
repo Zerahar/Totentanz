@@ -88,7 +88,7 @@ export class Pay extends Component {
                 })
                     .then(response => response.json())
                     .then(result => this.checkSuccess(result))
-                    .catch(error => this.props.error(error))
+                    .catch(error => this.props.error(error, "danger"))
             }
         }
     }

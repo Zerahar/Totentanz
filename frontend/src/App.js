@@ -8,7 +8,7 @@ import { Pay, PlayerInfo, PlayerDashboard } from './PlayerDashboard.js'
 import { NewCharacter, NewUser } from './AdminDashboard.js'
 import ChatList from './ChatList.js'
 import Transactions from './Transactions.js'
-import { List, ChatDots } from 'react-bootstrap-icons'
+import { List, ChatDots, Download } from 'react-bootstrap-icons'
 import { Collapse, Dropdown, Toast } from 'bootstrap'
 import './custom.scss'
 import OpenChat from './OpenChat.js';
@@ -23,7 +23,6 @@ class App extends Component {
       userType: 'guest',
       userCharacter: '',
       characters: [],
-      warning: '',
       selectedChat: '',
       nameSent: false,
       ready: false,
@@ -46,7 +45,7 @@ class App extends Component {
         age: '',
         gender: '',
         player: '',
-        saldo: '',
+        saldo: 0,
         description: '',
         mechanics: '',
         plots: ''
@@ -78,7 +77,35 @@ class App extends Component {
         return;
       }
     });
+    // // Initialize deferredPrompt for use later to show browser install prompt.
+    // let deferredPrompt;
 
+    // window.addEventListener('beforeinstallprompt', (e) => {
+    //   // Prevent the mini-infobar from appearing on mobile
+    //   e.preventDefault();
+    //   // Stash the event so it can be triggered later.
+    //   deferredPrompt = e;
+    //   // Update UI notify the user they can install the PWA
+    //   // showInstallPromotion();
+    //   // Optionally, send analytics event that PWA install promo was shown.
+    //   console.log(`'beforeinstallprompt' event was fired.`);
+    // });
+    // document.getElementById("install-app").addEventListener('click', async () => {
+    //   // Hide the app provided install promotion
+    //   // hideInstallPromotion();
+    //   // Show the install prompt
+    //   if (deferredPrompt) {
+    //     deferredPrompt.prompt();
+    //     // Wait for the user to respond to the prompt
+    //     const { outcome } = await deferredPrompt.userChoice;
+    //     // Optionally, send analytics event with outcome of user choice
+    //     console.log(`User response to the install prompt: ${outcome}`);
+    //     // We've used the prompt, and can't use it again, throw it away
+    //     deferredPrompt = null;
+    //   }
+    //   else
+    //     this.showError("Laitteesi ei tue sivuston asentamista.", "warning")
+    // });
   }
   fetchPlayers() {
     console.log("Fetching players")
@@ -87,6 +114,7 @@ class App extends Component {
       .then(result => result.sort(function (a, b) { return a.userName > b.userName })) // Sort by player name
       .then(
         (result) => {
+          // Save into state
           this.setState({
             players: result
           });
@@ -95,7 +123,7 @@ class App extends Component {
               loading: false
             });
         })
-      .catch(error => this.showError(error))
+      .catch(error => this.showError(error, "danger"))
   }
   login(event) {
     if (event)
@@ -103,9 +131,9 @@ class App extends Component {
     if (this.state.login) {
       fetch(REACT_APP_SERVER_URL + '/user/' + this.state.login)
         .then(response => {
-          response.ok ? response.json().then(data => this.loginSuccess(data)) : this.showError("Kirjautuminen ei onnistunut. Tarkista oikeinkirjoitus.")
+          response.ok ? response.json().then(data => this.loginSuccess(data)) : this.showError("Kirjautuminen ei onnistunut. Tarkista oikeinkirjoitus.", "warning")
         })
-        .catch(error => this.showError(error))
+        .catch(error => this.showError(error, "danger"))
     }
   }
   loginSuccess(data) {
@@ -143,19 +171,23 @@ class App extends Component {
     }
     this.ws.onopen = () => {
       console.log('connected')
+      // Find username, either character name or "admin"
       let user = this.state.characters.find(character => character._id === this.state.userCharacter)
       let userName
       if (user)
         userName = user.name
       else if (this.state.userType === "admin")
         userName = "admin"
-
-      if (this.ws && this.ws.readyState === 1) {
+      // If user has no character assigned, they cannot participate in chat
+      else
+        this.ws.close()
+      // Send username to the websocket
+      if (userName && this.ws && this.ws.readyState === 1) {
         this.ws.send(JSON.stringify({ text: userName, type: 'new', id: this.state.userCharacter }))
         this.setState({ nameSent: true, ready: true })
       }
     }
-    this.ws.onerror = (e) => this.showError(e)
+    this.ws.onerror = (e) => this.showError(e, "danger")
   }
   logout() {
     this.setState({
@@ -179,6 +211,7 @@ class App extends Component {
       .then(result => result.sort(function (a, b) { return a.name > b.name })) // Sort by character name
       .then(
         (result) => {
+          // Save in state
           this.setState({
             characters: result
           });
@@ -187,31 +220,26 @@ class App extends Component {
               loading: false
             });
         })
-      .catch(error => this.showError(error))
+      .catch(error => this.showError(error, "danger"))
   }
-  showError(error, warning) {
+  showError(message, type) {
     console.log("Showing error")
     // Translate the most common error
-    if (error.message === "NetworkError when attempting to fetch resource.")
+    if (message.message === "NetworkError when attempting to fetch resource.")
       this.setState({ error: "Yhteyttä palvelimeen ei saatu. Yritä hetken kuluttua uudelleen tai ota yhteys pelinjohtoon." })
     // If the error is something else, show it anyway
     else
-      this.setState({ error: error.message || error })
+      this.setState({ error: message.message || message })
     // Show alert element
     const alert = document.getElementById("errorMessage")
-    alert.classList.add('show')
-    if (warning) {
-      alert.classList.add("alert-warning")
-      alert.classList.remove("alert-danger")
-    }
-    else {
-      alert.classList.remove("alert-warning")
-      alert.classList.add("alert-danger")
+    alert.className = "alert position-fixed bottom-0 start-50 translate-middle-x fade show"
+    switch (type) {
+      case "warning": alert.classList.add("alert-warning"); break;
+      case "danger": alert.classList.add("alert-danger"); break;
+      case "success": alert.classList.add("alert-success"); break;
+      default: break;
     }
     setTimeout(function () { alert.classList.remove('show') }, 7000);
-  }
-  changeChat(e) {
-    console.log(e)
   }
   closeMenu() {
     // Only needed when using mid-size or smaller screen, since then a collapsing navbar will be used
@@ -234,7 +262,7 @@ class App extends Component {
   render() {
     let loginForm = <li class="nav-item"><form onSubmit={(e) => this.login(e)} class="w-100"><div class="input-group"><input type="text" value={this.state.login} onChange={this.handleChange} class="form-control"></input>
       <button type="submit" class="btn btn-primary">Kirjaudu</button>
-    </div></form><span color="red">{this.state.warning}</span></li>
+    </div></form></li>
     if (this.state.userId)
       loginForm = <li class="nav-item"><button type="submit" onClick={this.logout} class="btn btn-primary">Kirjaudu ulos</button></li>
     let playerPage, adminPage = ""
@@ -282,8 +310,9 @@ class App extends Component {
           <div class="alert alert-danger position-fixed bottom-0 start-50 translate-middle-x fade" id="errorMessage" role="alert">
             {this.state.error}
           </div>
-
-
+          <div class="install-button position-fixed" id="install-app">
+            <Download />
+          </div>
 
           <Switch>
             <Route exact path="/">
@@ -384,7 +413,6 @@ class App extends Component {
           <div class="toast-header">
             <ChatDots />
             <strong class="me-auto">{this.state.notifSender}</strong>
-            {/* <small>11 mins ago</small> */}
             <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
           </div>
           <div class="toast-body">

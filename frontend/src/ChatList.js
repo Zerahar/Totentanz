@@ -36,7 +36,7 @@ class ChatList extends Component {
                         this.props.isReady(true)
                     }
                 )
-                .catch(error => this.props.error(error))
+                .catch(error => this.props.error(error, "danger"))
         }
         else if (this.props.type === "guest")
             this.setState({ warning: 'Kirjaudu sisään nähdäksesi keskustelut.' })
@@ -66,7 +66,7 @@ class ChatList extends Component {
         })
             .then(response => response.json())
             .then(result => result.ok === 1 ? this.fetchChats() : this.props.error("Chatin luonti ei onnistunut."))
-            .catch(error => this.props.error(error))
+            .catch(error => this.props.error(error, "danger"))
         this.setState({ mode: '', selectedCharacters: [] })
     }
     render() {

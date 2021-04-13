@@ -20,7 +20,7 @@ class Transactions extends Component {
                     });
                     this.props.isReady(true)
                 })
-            .catch(error => this.props.error(error))
+            .catch(error => this.props.error(error, "danger"))
     }
     render() {
         const history = this.state.history.map(event => {

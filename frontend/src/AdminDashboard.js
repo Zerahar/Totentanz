@@ -26,10 +26,11 @@ class AdminDashboard extends Component {
       fetch(REACT_APP_SERVER_URL + '/user/delete/' + e.target.id)
         .then(response => response.json())
         .then(result => result.ok === 1 ? this.success() : this.props.error("Käyttäjän poisto ei onnistunut."))
-        .catch(error => this.props.error(error))
+        .catch(error => this.props.error(error, "danger"))
     }
   }
   success() {
+    this.props.error("Poisto onnistui!", "success")
     this.props.fetchCharacters()
     this.props.fetchPlayers()
   }
@@ -40,12 +41,10 @@ class AdminDashboard extends Component {
       fetch(REACT_APP_SERVER_URL + '/character/delete/' + e.target.id)
         .then(response => response.json())
         .then(result => result.ok === 1 ? this.success() : this.props.error("Käyttäjän poisto ei onnistunut."))
-        .catch(error => this.props.error(error))
+        .catch(error => this.props.error(error, "danger"))
     }
-
   }
   componentDidMount() {
-    console.log("Admindashboard mounted")
     this.props.fetchCharacters()
     this.props.fetchPlayers()
   }
@@ -203,7 +202,7 @@ export class NewCharacter extends Component {
       })
         .then(response => response.json())
         .then(parsed => this.checkSuccess(parsed))
-        .catch(error => this.props.error(error))
+        .catch(error => this.props.error(error, "danger"))
     }
   }
   checkSuccess(result) {
@@ -324,7 +323,7 @@ export class NewUser extends Component {
         body: JSON.stringify(data)
       })
         .then(response => this.setState({ redirect: <Redirect to="/admin" /> }))
-        .catch(error => this.props.error(error))
+        .catch(error => this.props.error(error, "danger"))
     }
   }
   validateForm() {
