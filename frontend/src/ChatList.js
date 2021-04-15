@@ -55,7 +55,7 @@ class ChatList extends Component {
         const loggedCharacter = this.props.characters.find(character => character._id === this.props.loggedCharacter)
         let characters = [{ _id: loggedCharacter._id, name: loggedCharacter.name, player: loggedCharacter.player }]
         this.state.selectedCharacters.map(character => characters.push({ _id: character._id, name: character.name, player: character.player }))
-        const data = { participants: characters }
+        const data = JSON.stringify({ participants: characters })
         fetch(REACT_APP_SERVER_URL + "/chat/", {
             method: 'POST',
             mode: 'cors',

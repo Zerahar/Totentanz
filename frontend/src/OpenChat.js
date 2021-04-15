@@ -11,7 +11,8 @@ class OpenChat extends Component {
             ready: false,
             chat: '',
             currentName: this.props.name,
-            redirect: ''
+            redirect: '',
+            noMessages: false
         }
         this.sendMessage = this.sendMessage.bind(this)
         this.messageBeingWritten = this.messageBeingWritten.bind(this)
@@ -45,18 +46,25 @@ class OpenChat extends Component {
                         authorId: message.data.authorId
                     }
                     this.setState(prevState => ({
-                        history: [...prevState.history, newMessage]
+                        history: [...prevState.history, newMessage],
+                        noMessages: false
                     }), () => { document.getElementById("message-container").scrollTop = document.getElementById("message-container").scrollHeight; return null })
                 }
                 if (message.type === 'history') {
-                    message.data.map(msg => this.setState(prevState => ({
-                        history: [...prevState.history, {
-                            time: new Date(msg.time).toLocaleString("fi-FI", { timeStyle: "short", dateStyle: "medium" }),
-                            text: msg.text,
-                            author: msg.author,
-                            authorId: msg.authorId
-                        }]
-                    })))
+                    if (message.data.length === 0) {
+                        this.setState({ noMessages: true })
+                    }
+                    else {
+                        message.data.map(msg => this.setState(prevState => ({
+                            history: [...prevState.history, {
+                                time: new Date(msg.time).toLocaleString("fi-FI", { timeStyle: "short", dateStyle: "medium" }),
+                                text: msg.text,
+                                author: msg.author,
+                                authorId: msg.authorId
+                            }]
+                        })))
+                        document.getElementById("message-container").scrollTop = document.getElementById("message-container").scrollHeight;
+                    }
                     this.props.isReady(true)
                 }
             }
@@ -68,17 +76,19 @@ class OpenChat extends Component {
                 history: [...prevState.history, message]
             }))
     }
-    sendMessage() {
-
+    sendMessage(e) {
+        e.preventDefault()
         console.log("Sent ", this.state.input)
         this.ws.send(JSON.stringify({ text: this.state.input, chat: this.props.chat._id, characterId: this.props.characterId, name: this.state.currentName, type: 'message' }))
         this.setState({
             input: ''
         })
-
     }
     messageBeingWritten(event) {
         this.setState({ input: event.target.value })
+    }
+    componentWillUnmount() {
+        this.props.clear()
     }
     render() {
         let history = ''
@@ -98,15 +108,24 @@ class OpenChat extends Component {
         let header = ''
         if (this.props.chat && this.props.chat.participants)
             header = this.props.chat.participants.map((participant, index, array) => index === array.length - 1 ? participant.name : participant.name + ", ")
+        let noMessagesTip = ""
+        if (this.state.noMessages)
+            noMessagesTip = <p class="text-center">Tässä keskustelussa ei ole vielä viestejä. Lähetä yksi!</p>
         return (
             <div class="chat-container d-flex flex-column text-container container">
                 {this.state.redirect}
                 <h2>{header}</h2>
-                <div class="overflow-auto messages-container p-3 flex-grow-1" id="message-container">{history}</div>
-                <div class="input-group">
-                    <input class="form-control" type="text" value={this.state.input} onChange={this.messageBeingWritten}></input>
-                    <button class="btn btn-primary" onClick={this.sendMessage}>Lähetä</button>
+                <div class="overflow-auto messages-container p-3 flex-grow-1" id="message-container">
+                    {noMessagesTip}
+                    {history}
                 </div>
+
+                <form onSubmit={this.sendMessage}><div class="input-group">
+                    <input class="form-control" type="text" value={this.state.input} onChange={this.messageBeingWritten} id="message-input"></input>
+
+                    <button class="btn btn-primary" type="submit">Lähetä</button>
+                </div></form>
+
             </div>
         )
     }

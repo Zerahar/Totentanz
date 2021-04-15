@@ -72,6 +72,7 @@ export class Pay extends Component {
             let c = window.confirm("Haluatko maksaa " + this.state.amount + " eurodollaria kohteelle " +
                 this.props.characters.find(character => character._id === this.state.selectedCharacter).name + "?")
             if (c) {
+                this.props.isReady(false)
                 const transaction = JSON.stringify({
                     time: Date.now(),
                     user: this.props.character._id,
@@ -101,6 +102,7 @@ export class Pay extends Component {
         });
     }
     checkSuccess(response) {
+        this.props.isReady(true)
         response.forEach((part, counter) => {
             if (part.ok !== 1) {
                 this.setState({ warning: response.statusText })
@@ -159,7 +161,9 @@ export class PlayerDashboard extends Component {
     }
     render() {
         let access = <p>Kirjaudu sisään nähdäksesi hahmotietosi</p>
-        if (this.props.loggedCharacter)
+        if (this.props.userType === "player" && !this.props.loggedCharacter)
+            access = <p>Sinulle ei ole vielä annettu hahmoa. Yritä uudelleen myöhemmin tai ota yhteys pelinjohtoon.</p>
+        else if (this.props.loggedCharacter)
             access = <div class="d-flex player-controls">
                 <div class="flex-fill d-flex p-3">
                     <Link to="dashboard/pay" class="btn btn-primary flex-fill fs-5">Maksa</Link>

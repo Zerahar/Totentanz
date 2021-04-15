@@ -4,7 +4,7 @@ import FrontSmallImg from './images/front-small.jpeg'
 function NewsFeed() {
     return (
         <div>
-            <h2>Update 11/11/2021</h2>
+            <h3>Update 11/11/2021</h3>
             <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in.</p>
         </div>
     );

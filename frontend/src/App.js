@@ -76,7 +76,8 @@ class App extends Component {
         this.setState({ login: cookie.substring(6) }, () => this.login())
         return;
       }
-    });
+    })
+    this.fetchCharacters()
     // // Initialize deferredPrompt for use later to show browser install prompt.
     // let deferredPrompt;
 
@@ -116,12 +117,9 @@ class App extends Component {
         (result) => {
           // Save into state
           this.setState({
-            players: result
+            players: result,
+            loading: false
           });
-          if (this.state.characters)
-            this.setState({
-              loading: false
-            });
         })
       .catch(error => this.showError(error, "danger"))
   }
@@ -142,8 +140,7 @@ class App extends Component {
       userName: data.userName,
       userType: data.userType,
       userCharacter: data.character,
-      warning: '',
-      loading: true
+      warning: ''
     })
     // create a cookie
     document.cookie = "login=" + this.state.login
@@ -159,15 +156,16 @@ class App extends Component {
     }
     this.ws.onmessage = evt => {
       // listen to data sent from the websocket server
-
+      // But don't show notification if chat is open
       const message = JSON.parse(evt.data)
       console.log("Got a message: ", message)
-      const toast = new Toast(document.getElementById("notifToast"))
-      this.setState({
-        notifMsg: message.data.text,
-        notifSender: message.data.author
-      }, toast.show())
-
+      if (this.state.selectedChat !== message.data.chat) {
+        const toast = new Toast(document.getElementById("notifToast"))
+        this.setState({
+          notifMsg: message.data.text,
+          notifSender: message.data.author
+        }, toast.show())
+      }
     }
     this.ws.onopen = () => {
       console.log('connected')
@@ -179,8 +177,10 @@ class App extends Component {
       else if (this.state.userType === "admin")
         userName = "admin"
       // If user has no character assigned, they cannot participate in chat
-      else
+      else {
+        console.log("No character assigned, closing websocket")
         this.ws.close()
+      }
       // Send username to the websocket
       if (userName && this.ws && this.ws.readyState === 1) {
         this.ws.send(JSON.stringify({ text: userName, type: 'new', id: this.state.userCharacter }))
@@ -195,6 +195,7 @@ class App extends Component {
       userType: 'guest',
       userCharacter: '',
       login: '',
+      loading: false,
       redirect: <Redirect to="/" />
     })
     // Remove login cookie
@@ -213,20 +214,21 @@ class App extends Component {
         (result) => {
           // Save in state
           this.setState({
-            characters: result
+            characters: result,
+            loading: false
           });
-          if (this.state.players)
-            this.setState({
-              loading: false
-            });
         })
       .catch(error => this.showError(error, "danger"))
   }
   showError(message, type) {
     console.log("Showing error")
-    // Translate the most common error
+    // Prevent forever loading state
+    this.setState({ loading: false })
+    // Translate the most common errors
     if (message.message === "NetworkError when attempting to fetch resource.")
       this.setState({ error: "Yhteyttä palvelimeen ei saatu. Yritä hetken kuluttua uudelleen tai ota yhteys pelinjohtoon." })
+    else if (message.message === "JSON.parse: unexpected character at line 1 column 1 of the JSON data")
+      this.setState({ error: "Sovellus kohtasi virheen. Yritä hetken kuluttua uudelleen tai ota yhteys pelinjohtoon." })
     // If the error is something else, show it anyway
     else
       this.setState({ error: message.message || message })
@@ -306,7 +308,7 @@ class App extends Component {
           </nav>
         </div>
         {loading}
-        <div class="w-100 h-100 p-0">
+        <div class="w-100 p-0">
           <div class="alert alert-danger position-fixed bottom-0 start-50 translate-middle-x fade" id="errorMessage" role="alert">
             {this.state.error}
           </div>
@@ -325,7 +327,12 @@ class App extends Component {
               <PlayerInfo character={this.state.characters.find(character => character._id === this.state.userCharacter)} />
             </Route>
             <Route exact path="/dashboard/pay">
-              <Pay characters={this.state.characters} character={this.state.characters.find(character => character._id === this.state.userCharacter)} fetchCharacters={this.fetchCharacters} />
+              <Pay
+                characters={this.state.characters}
+                character={this.state.characters.find(character => character._id === this.state.userCharacter)}
+                fetchCharacters={this.fetchCharacters}
+                isReady={this.setReady}
+                error={this.showError} />
             </Route>
             <Route exact path="/dashboard/chat">
               <ChatList
@@ -339,7 +346,11 @@ class App extends Component {
               />
             </Route>
             <Route exact path="/dashboard">
-              <PlayerDashboard loggedCharacter={this.state.userCharacter} characters={this.state.characters} fetchCharacters={this.fetchCharacters} />
+              <PlayerDashboard
+                loggedCharacter={this.state.userCharacter}
+                characters={this.state.characters}
+                fetchCharacters={this.fetchCharacters}
+                userType={this.state.userType} />
             </Route>
             <Route exact path="/admin/newCharacter">
               <NewCharacter
@@ -403,16 +414,17 @@ class App extends Component {
                 error={this.showError}
                 ws={this.ws}
                 isReady={this.setReady}
+                clear={() => this.setState({ selectedChat: '' })}
               />
             </Route>
 
           </Switch>
         </div>
         {this.state.redirect}
-        <div id="notifToast" class="toast position-fixed bottom-0 end-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div id="notifToast" class="toast position-fixed" role="alert" aria-live="assertive" aria-atomic="true">
           <div class="toast-header">
             <ChatDots />
-            <strong class="me-auto">{this.state.notifSender}</strong>
+            <strong class="me-auto ml-1">{this.state.notifSender}</strong>
             <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
           </div>
           <div class="toast-body">
