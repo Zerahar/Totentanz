@@ -86,7 +86,7 @@ p strong {
     }
 
     &:focus {
-        box-shadow: 0 0 3px 10px $blue !important;
+        box-shadow: 0 0 0 1px $blue !important;
     }
 }
 
@@ -100,7 +100,7 @@ p strong {
     }
 
     &:focus {
-        box-shadow: 0 0 20px $yellow !important;
+        box-shadow: 0 0 0 1px $yellow !important;
     }
 
     // clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%, 0 10px);
@@ -207,6 +207,10 @@ h3 {
 
 .navbar-toggler {
     background-color: $yellow !important;
+
+    &:focus {
+        border: 1px solid white;
+    }
 }
 
 .navbar {
@@ -245,6 +249,10 @@ h3 {
     min-height: 50px;
     color: $yellow;
     text-transform: uppercase;
+
+    a:focus {
+        text-shadow: 0 0 5px $yellow;
+    }
 }
 
 .navbar-collapse {

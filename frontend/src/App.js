@@ -221,17 +221,21 @@ class App extends Component {
       .catch(error => this.showError(error, "danger"))
   }
   showError(message, type) {
-    console.log("Showing error")
+    console.log("Showing error ", message)
     // Prevent forever loading state
     this.setState({ loading: false })
+    // Make sure that error is not an object
+    // if (message)
     // Translate the most common errors
-    if (message.message === "NetworkError when attempting to fetch resource.")
-      this.setState({ error: "Yhteyttä palvelimeen ei saatu. Yritä hetken kuluttua uudelleen tai ota yhteys pelinjohtoon." })
-    else if (message.message === "JSON.parse: unexpected character at line 1 column 1 of the JSON data")
-      this.setState({ error: "Sovellus kohtasi virheen. Yritä hetken kuluttua uudelleen tai ota yhteys pelinjohtoon." })
-    // If the error is something else, show it anyway
-    else
-      this.setState({ error: message.message || message })
+    switch (message.message) {
+      case "NetworkError when attempting to fetch resource.":
+      case "Failed to fetch":
+        this.setState({ error: "Yhteyttä palvelimeen ei saatu. Yritä hetken kuluttua uudelleen tai ota yhteys pelinjohtoon." }); break;
+      case "JSON.parse: unexpected character at line 1 column 1 of the JSON data":
+        this.setState({ error: "Sovellus kohtasi virheen. Yritä hetken kuluttua uudelleen tai ota yhteys pelinjohtoon." }); break;
+      default:
+        this.setState({ error: message.message || message }); break;
+    }
     // Show alert element
     const alert = document.getElementById("errorMessage")
     alert.className = "alert position-fixed bottom-0 start-50 translate-middle-x fade show"
@@ -262,9 +266,13 @@ class App extends Component {
       this.ws.close()
   }
   render() {
-    let loginForm = <li class="nav-item"><form onSubmit={(e) => this.login(e)} class="w-100"><div class="input-group"><input type="text" value={this.state.login} onChange={this.handleChange} class="form-control"></input>
-      <button type="submit" class="btn btn-primary">Kirjaudu</button>
-    </div></form></li>
+    let loginForm = <li class="nav-item">
+      <form onSubmit={(e) => this.login(e)} class="w-100">
+        <div class="input-group">
+          <label for="login-input" class="visually-hidden">Kirjaudu sisään</label>
+          <input id="login-input" type="text" value={this.state.login} onChange={this.handleChange} class="form-control"></input>
+          <button type="submit" class="btn btn-primary">Kirjaudu</button>
+        </div></form></li>
     if (this.state.userId)
       loginForm = <li class="nav-item"><button type="submit" onClick={this.logout} class="btn btn-primary">Kirjaudu ulos</button></li>
     let playerPage, adminPage = ""
@@ -283,7 +291,7 @@ class App extends Component {
       </div>
     return (
       <Router>
-        <div class="navbar-container w-100">
+        <header class="navbar-container w-100">
           <nav class="navbar navbar-expand-lg main-nav container h-100">
             <div class="container-fluid">
               <Link class="navbar-brand" to="/">Totentanz</Link>
@@ -306,15 +314,15 @@ class App extends Component {
               </div>
             </div>
           </nav>
-        </div>
+        </header>
         {loading}
         <div class="w-100 p-0">
-          <div class="alert alert-danger position-fixed bottom-0 start-50 translate-middle-x fade" id="errorMessage" role="alert">
+          <div class="alert alert-danger position-fixed bottom-0 start-50 translate-middle-x fade hidden" id="errorMessage" role="alert" aria-live="assertive" aria-atomic="true">
             {this.state.error}
           </div>
-          <div class="install-button position-fixed" id="install-app">
+          {/* <div class="install-button position-fixed" id="install-app">
             <Download />
-          </div>
+          </div> */}
 
           <Switch>
             <Route exact path="/">

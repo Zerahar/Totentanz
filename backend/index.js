@@ -570,7 +570,7 @@ wss.on('connection', function connection(ws) {
         };
         // Broadcast if part of the chat
         const currentChat = chats.find(chat => chat._id == data.chat)
-        if (client.readyState === WebSocket.OPEN && (client.characterId === "admin" || currentChat.participants.find(participant => participant._id === client.characterId))) {
+        if (client.readyState === WebSocket.OPEN && (client.characterId === "admin" || (currentChat && currentChat.participants.find(participant => participant._id === client.characterId)))) {
           console.log("Broadcasted to " + data.name)
           const packet = { type: "message", data: obj }
           client.send(JSON.stringify(packet));

@@ -112,7 +112,7 @@ class OpenChat extends Component {
         if (this.state.noMessages)
             noMessagesTip = <p class="text-center">Tässä keskustelussa ei ole vielä viestejä. Lähetä yksi!</p>
         return (
-            <div class="chat-container d-flex flex-column text-container container">
+            <main class="chat-container d-flex flex-column text-container container">
                 {this.state.redirect}
                 <h2>{header}</h2>
                 <div class="overflow-auto messages-container p-3 flex-grow-1" id="message-container">
@@ -126,7 +126,7 @@ class OpenChat extends Component {
                     <button class="btn btn-primary" type="submit">Lähetä</button>
                 </div></form>
 
-            </div>
+            </main>
         )
     }
 }

@@ -27,7 +27,7 @@ export class PlayerInfo extends Component {
     }
     render() {
         return (
-            <div class="text-container container">
+            <main class="text-container container">
                 <h2>Info</h2>
                 <ul>
                     <li>Nimi: {this.state.name}</li>
@@ -41,7 +41,7 @@ export class PlayerInfo extends Component {
                 <div dangerouslySetInnerHTML={{ __html: this.state.plots }} />
                 <h3>Pelimekaniikat</h3>
                 <div dangerouslySetInnerHTML={{ __html: this.state.mechanics }} />
-            </div>
+            </main>
         );
     }
 }
@@ -131,7 +131,7 @@ export class Pay extends Component {
         if (this.props.character && this.props.character.saldo)
             saldo = this.props.character.saldo
         return (
-            <div class="text-container container">
+            <main class="text-container container">
                 {this.state.redirect}
                 <h2>Pay</h2>
                 {this.state.success}
@@ -149,7 +149,7 @@ export class Pay extends Component {
                     <span>{this.state.warning}</span>
                     <button type="submit" class="btn btn-primary">Maksa</button>
                 </form>
-            </div>
+            </main>
         )
     }
 }
@@ -175,10 +175,10 @@ export class PlayerDashboard extends Component {
                     <Link to="dashboard/chat" class="btn btn-primary flex-fill fs-5">Viestit</Link>
                 </div></div>
         return (
-            <div class="text-container container">
+            <main class="text-container container">
                 <h2>Omat tiedot</h2>
                 {access}
-            </div>
+            </main>
         )
     }
 }

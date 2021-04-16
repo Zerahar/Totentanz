@@ -53,10 +53,11 @@ class AdminDashboard extends Component {
     const playerName = (players, id) => { if (id) { try { return players.find(player => player._id === id).userName } catch { return "-" } } else { return "-" } }
     const characters = this.props.characters.map((character) => <tr key={character._id}>
       <td>{character.name}</td><td>{playerName(this.props.players, character.player)}</td>
-      <td class="table-operations"><Link id={character._id} onClick={this.editCharacter} to="admin/newCharacter" class="btn btn-primary flex-fill m-2 w-100">Muokkaa</Link>
+      <td class="table-operations">
+        <Link id={character._id} onClick={this.editCharacter} to="admin/newCharacter" class="btn btn-primary flex-fill m-2 w-100">Muokkaa</Link>
         <button id={character._id} onClick={this.deleteCharacter} class="btn btn-danger flex-fill m-2 w-100">Poista</button></td>
     </tr>);
-    let players = ''
+    let players = null
     if (this.props.players)
       players = this.props.players.map((player) => player.userType === "player" ? <tr key={player._id}>
         <td>{player.userName}</td>
@@ -64,10 +65,10 @@ class AdminDashboard extends Component {
         <td>{player.login}</td>
         <td class="table-operations"><Link id={player._id} onClick={this.editUser} to="admin/newUser" class="btn btn-primary flex-fill m-2 w-100">Muokkaa</Link>
           <button id={player._id} onClick={this.deleteUser} class="btn btn-danger flex-fill m-2 w-100">Poista</button></td>
-      </tr> : '');
+      </tr> : null);
     if (this.props.admin === "admin")
       return (
-        <div class="text-container container">
+        <main class="text-container container">
           <nav class="nav justify-content-center">
             <Link to="admin/transactions" class="nav-item">Maksutapahtumat</Link>
             <Link to="admin/messages" class="nav-item">Keskustelut</Link>
@@ -79,9 +80,7 @@ class AdminDashboard extends Component {
             <thead>
               <tr><th>Nimi</th><th>Pelaaja</th><th class="w-25">Operaatiot</th></tr>
             </thead>
-            <tbody>
-              {characters}
-            </tbody>
+            <tbody>{characters}</tbody>
           </table>
 
           <h2>Pelaajat</h2>
@@ -89,15 +88,13 @@ class AdminDashboard extends Component {
             <thead>
               <tr><th>Oikea nimi</th><th>Hahmon nimi</th><th>Tunnus</th><th class="w-25">Operaatiot</th></tr>
             </thead>
-            <tbody>
-              {players}
-            </tbody>
+            <tbody>{players}</tbody>
           </table>
-        </div>
+        </main>
       )
     else
       return (
-        <div class="text-container container"><p>Kirjaudu sisään nähdäksesi adminin työkalut.</p></div>
+        <main class="text-container container"><p>Kirjaudu sisään nähdäksesi adminin työkalut.</p></main>
       )
   }
 }
@@ -233,7 +230,7 @@ export class NewCharacter extends Component {
   render() {
     const players = this.props.players.map(player => <option value={player._id} key={player._id}>{player.userName}</option>)
     return (
-      <div class="text-container container">
+      <main class="text-container container">
         <form onSubmit={this.handleSubmit} noValidate id="characterForm">
           <div class="mb-3">
             <label class="form-label">Nimi:</label>
@@ -280,7 +277,7 @@ export class NewCharacter extends Component {
           <Link to="/admin" class="btn btn-warning m-3">Poistu tallentamatta</Link>
         </form>
         {this.state.redirect}
-      </div>
+      </main>
     );
   }
 }
@@ -348,7 +345,7 @@ export class NewUser extends Component {
   render() {
     const characters = this.props.characters.map((character) => <option value={character._id} key={character._id}>{character.name}</option>)
     return (
-      <div class="text-container container">
+      <main class="text-container container">
         <form onSubmit={this.handleSubmit} noValidate id="userForm">
           <div class="mb-3">
             <label class="form-label">* Kirjautumistunnus</label>
@@ -369,7 +366,7 @@ export class NewUser extends Component {
           <Link to="/admin" class="btn btn-warning m-3">Poistu tallentamatta</Link>
         </form>
         {this.state.redirect}
-      </div>
+      </main>
     )
   }
 }

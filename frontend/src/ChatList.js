@@ -53,7 +53,9 @@ class ChatList extends Component {
     }
     createChat() {
         const loggedCharacter = this.props.characters.find(character => character._id === this.props.loggedCharacter)
-        let characters = [{ _id: loggedCharacter._id, name: loggedCharacter.name, player: loggedCharacter.player }]
+        let characters = []
+        if (loggedCharacter)
+            characters = [{ _id: loggedCharacter._id, name: loggedCharacter.name, player: loggedCharacter.player }]
         this.state.selectedCharacters.map(character => characters.push({ _id: character._id, name: character.name, player: character.player }))
         const data = JSON.stringify({ participants: characters })
         fetch(REACT_APP_SERVER_URL + "/chat/", {
@@ -87,22 +89,22 @@ class ChatList extends Component {
                 {chat.participants.map((participant, index, array) => index === array.length - 1 ? participant.name : participant.name + ", ")}
             </Link>);
         if (this.state.mode === "new") {
-            return (<div class="text-container container">
+            return (<main class="text-container container">
                 <h2>Valitse keskustelun jäsenet</h2>
                 {characters}
                 <br />
                 <button onClick={this.createChat} class="btn btn-primary">Luo keskustelu</button>
-            </div>)
+            </main>)
         }
         else {
             return (
-                <div class="text-container container">
+                <main class="text-container container">
                     <h2>Keskustelut</h2>
                     <p>{this.state.warning}</p>
                     <button onClick={() => this.setState({ mode: "new" })} class="btn btn-primary">Uusi keskustelu</button>
                     <br />
                     <ul class="list-group chat-list">{chats}</ul>
-                </div>
+                </main>
             )
         }
     }
