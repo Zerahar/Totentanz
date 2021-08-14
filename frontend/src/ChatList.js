@@ -86,7 +86,10 @@ class ChatList extends Component {
                 class="list-group-item chat-list-item" to="/chat"
                 onClick={() => this.props.changeChat(chat)}
             >
-                {chat.participants.map((participant, index, array) => index === array.length - 1 ? participant.name : participant.name + ", ")}
+                {/* Filter current user's name and then show all other participants in a chat */}
+                {chat.participants
+                    .filter(a => a._id != this.props.loggedCharacter)
+                    .map((participant, index, array) => index === array.length - 1 ? participant.name : participant.name + ", ")}
             </Link>);
         if (this.state.mode === "new") {
             return (<main class="text-container container">

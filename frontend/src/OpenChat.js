@@ -111,7 +111,10 @@ class OpenChat extends Component {
             )
         let header = ''
         if (this.props.chat && this.props.chat.participants)
-            header = this.props.chat.participants.map((participant, index, array) => index === array.length - 1 ? participant.name : participant.name + ", ")
+            // Filter current user name and then show other participants in header
+            header = this.props.chat.participants
+                .filter(a => a._id != this.props.characterId)
+                .map((participant, index, array) => index === array.length - 1 ? participant.name : participant.name + ", ")
         let noMessagesTip = ""
         if (this.state.noMessages)
             noMessagesTip = <p class="text-center">Tässä keskustelussa ei ole vielä viestejä. Lähetä yksi!</p>

@@ -1,5 +1,4 @@
 - Hahmoa lisätessä vastausta ei tule, mutta tieto tallentuu
 - Käyttäjän luonnin jälkeen ei uudelleenohjausta tai viestiä, mutta tallentuu. Käyttäjää muokatessa kaikki toimii.
 - Käyttäjänluonnin jälkeen hahmoon ei päivity pelaaja. Muokatessa toimii.
-- Chattilistassa näkyy hahmon oma nimi keskustelussa, samoin keskustelun otsikossa
-- Chatissa viestejä ei broadcastata
+- Chatissa viestejä ei broadcastata (paitsi jos admin lähettää)
