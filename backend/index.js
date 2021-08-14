@@ -370,7 +370,7 @@ mongo.MongoClient.connect(url, function (err, client) {
 
   // Fetch all chats for certain character
   app.get('/chat/:charId', (req, res) => {
-    const query = { "participants._id": req.params.charId }
+    const query = { "participants": req.params.charId }
     db.collection('chats').find(query).toArray(function (err, result) {
       if (err) throw err
       res.send(result)
@@ -531,6 +531,11 @@ wss.on('connection', function connection(ws) {
         };
         // Broadcast if part of the chat
         const currentChat = chats.find(chat => chat._id == data.chat)
+        console.log("ABOUT TO BROADCAST.")
+        console.log(currentChat)
+        console.log(chats)
+        console.log(client.characterId)
+        // console.log(currentChat.participants.find(participant => participant._id === client.characterId))
         if (client.readyState === WebSocket.OPEN && (client.characterId === "admin" || (currentChat && currentChat.participants.find(participant => participant._id === client.characterId)))) {
           console.log("Broadcasted to " + data.name)
           const packet = { type: "message", data: obj }

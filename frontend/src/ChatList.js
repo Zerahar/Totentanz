@@ -32,6 +32,12 @@ class ChatList extends Component {
                 .then(res => res.json())
                 .then(
                     (result) => {
+                        // fill character names into chats
+                        result.forEach(chat => {
+                            let newParticipants = []
+                            chat.participants.forEach(participant => newParticipants.push({ _id: participant, name: this.props.characters.find(a => a._id == participant).name }))
+                            chat.participants = newParticipants
+                        })
                         this.setState({ chats: result, isLoaded: true });
                         this.props.isReady(true)
                     }
@@ -55,8 +61,8 @@ class ChatList extends Component {
         const loggedCharacter = this.props.characters.find(character => character._id === this.props.loggedCharacter)
         let characters = []
         if (loggedCharacter)
-            characters = [{ _id: loggedCharacter._id, name: loggedCharacter.name, player: loggedCharacter.player }]
-        this.state.selectedCharacters.map(character => characters.push({ _id: character._id, name: character.name, player: character.player }))
+            characters = [loggedCharacter._id]
+        this.state.selectedCharacters.map(character => characters.push(character._id))
         const data = JSON.stringify({ participants: characters })
         fetch(REACT_APP_SERVER_URL + "/chat/", {
             method: 'POST',
