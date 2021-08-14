@@ -1,8 +1,5 @@
 - Hahmoa lisätessä vastausta ei tule, mutta tieto tallentuu
 - Käyttäjän luonnin jälkeen ei uudelleenohjausta tai viestiä, mutta tallentuu. Käyttäjää muokatessa kaikki toimii.
 - Käyttäjänluonnin jälkeen hahmoon ei päivity pelaaja. Muokatessa toimii.
-- Mahdollisuus valita pelaajaksi admin, vaikka ei pitäisi olla mahdollista
 - Chattilistassa näkyy hahmon oma nimi keskustelussa, samoin keskustelun otsikossa
 - Chatissa viestejä ei broadcastata
-- Maksaessa kohteen saldosta tulee NaN
-- Maksun onnistuessa popup viesti, ei lause tekstissä

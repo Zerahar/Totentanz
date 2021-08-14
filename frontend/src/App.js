@@ -83,6 +83,7 @@ class App extends Component {
     console.log("Fetching players")
     fetch(REACT_APP_SERVER_URL + '/user/')
       .then(res => res.json())
+      .then(result => result.filter(a => a.userType == "player"))
       .then(result => result.sort(function (a, b) { return a.userName > b.userName })) // Sort by player name
       .then(
         (result) => {

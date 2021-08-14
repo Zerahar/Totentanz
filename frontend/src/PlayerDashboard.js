@@ -51,9 +51,7 @@ export class Pay extends Component {
         super(props);
         this.state = {
             amount: 0,
-            warning: '',
             selectedCharacter: '',
-            success: '',
             redirect: ''
         }
         this.submit = this.submit.bind(this)
@@ -113,10 +111,9 @@ export class Pay extends Component {
                 this.props.fetchCharacters()
                 this.setState({
                     amount: 0,
-                    selectedCharacter: '',
-                    warning: '',
-                    success: <span>Maksu onnistui!</span>
+                    selectedCharacter: ''
                 })
+                this.props.error("Maksu onnistui!", "success")
             }
         });
     }
