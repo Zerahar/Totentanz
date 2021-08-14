@@ -78,35 +78,6 @@ class App extends Component {
       }
     })
     this.fetchCharacters()
-    // // Initialize deferredPrompt for use later to show browser install prompt.
-    // let deferredPrompt;
-
-    // window.addEventListener('beforeinstallprompt', (e) => {
-    //   // Prevent the mini-infobar from appearing on mobile
-    //   e.preventDefault();
-    //   // Stash the event so it can be triggered later.
-    //   deferredPrompt = e;
-    //   // Update UI notify the user they can install the PWA
-    //   // showInstallPromotion();
-    //   // Optionally, send analytics event that PWA install promo was shown.
-    //   console.log(`'beforeinstallprompt' event was fired.`);
-    // });
-    // document.getElementById("install-app").addEventListener('click', async () => {
-    //   // Hide the app provided install promotion
-    //   // hideInstallPromotion();
-    //   // Show the install prompt
-    //   if (deferredPrompt) {
-    //     deferredPrompt.prompt();
-    //     // Wait for the user to respond to the prompt
-    //     const { outcome } = await deferredPrompt.userChoice;
-    //     // Optionally, send analytics event with outcome of user choice
-    //     console.log(`User response to the install prompt: ${outcome}`);
-    //     // We've used the prompt, and can't use it again, throw it away
-    //     deferredPrompt = null;
-    //   }
-    //   else
-    //     this.showError("Laitteesi ei tue sivuston asentamista.", "warning")
-    // });
   }
   fetchPlayers() {
     console.log("Fetching players")
@@ -224,8 +195,6 @@ class App extends Component {
     console.log("Showing error ", message)
     // Prevent forever loading state
     this.setState({ loading: false })
-    // Make sure that error is not an object
-    // if (message)
     // Translate the most common errors
     switch (message.message) {
       case "NetworkError when attempting to fetch resource.":
@@ -317,7 +286,13 @@ class App extends Component {
         </header>
         {loading}
         <div class="w-100 p-0">
-          <div class="alert alert-danger position-fixed bottom-0 start-50 translate-middle-x fade hidden" id="errorMessage" role="alert" aria-live="assertive" aria-atomic="true">
+          <div
+            class="alert alert-danger position-fixed bottom-0 start-50 translate-middle-x fade hidden"
+            id="errorMessage"
+            role="alert"
+            aria-live="assertive"
+            aria-atomic="true"
+          >
             {this.state.error}
           </div>
           {/* <div class="install-button position-fixed" id="install-app">

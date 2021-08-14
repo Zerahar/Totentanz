@@ -1,6 +1,3 @@
-import FrontImg from './images/front.jpeg'
-import FrontSmallImg from './images/front-small.jpeg'
-
 function NewsFeed() {
     return (
         <article>
@@ -12,7 +9,7 @@ function NewsFeed() {
 
 function Home() {
     return (<div>
-        <figure class="front-image" alt="Kuva mekaanikosta värikkäässä valaistuksessa"></figure>
+        <figure class="front-image" alt="Kuva mekaanikosta värikkäässä valaistuksessa" loading="lazy"></figure>
         <main class="text-container front-container container">
 
             <h2>Home</h2>

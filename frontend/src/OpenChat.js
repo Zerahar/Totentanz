@@ -78,11 +78,15 @@ class OpenChat extends Component {
     }
     sendMessage(e) {
         e.preventDefault()
-        console.log("Sent ", this.state.input)
-        this.ws.send(JSON.stringify({ text: this.state.input, chat: this.props.chat._id, characterId: this.props.characterId, name: this.state.currentName, type: 'message' }))
-        this.setState({
-            input: ''
-        })
+        const form = document.getElementById('msgForm')
+        form.classList.add("was-validated")
+        if (form.checkValidity()) {
+            console.log("Sent ", this.state.input)
+            this.ws.send(JSON.stringify({ text: this.state.input, chat: this.props.chat._id, characterId: this.props.characterId, name: this.state.currentName, type: 'message' }))
+            this.setState({
+                input: ''
+            })
+        }
     }
     messageBeingWritten(event) {
         this.setState({ input: event.target.value })
@@ -120,10 +124,13 @@ class OpenChat extends Component {
                     {history}
                 </div>
 
-                <form onSubmit={this.sendMessage}><div class="input-group">
-                    <input class="form-control" type="text" value={this.state.input} onChange={this.messageBeingWritten} id="message-input"></input>
-
+                <form onSubmit={this.sendMessage} noValidate id="msgForm"><div class="input-group">
+                    <input class="form-control" type="text" value={this.state.input} onChange={this.messageBeingWritten} id="message-input" pattern="[ .,\-a-öA-Ö\d]*" />
                     <button class="btn btn-primary" type="submit">Lähetä</button>
+                    <div class="invalid-feedback" id="messageFeedback">
+                        Viesti voi sisältää ainoastaan kirjaimia, numeroita ja seuraavia merkkejä: ,.-
+      </div>
+
                 </div></form>
 
             </main>

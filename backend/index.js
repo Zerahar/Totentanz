@@ -12,11 +12,11 @@ app.listen(port, () => {
 })
 
 var mongo = require('mongodb')
-const url = `mongodb+srv://dbAdmin:${pass}@oppari.q4dhm.mongodb.net/data?retryWrites=true&w=majority`
+const url = `mongodb+srv://dbAdmin:${pass}@cluster0.q4dhm.mongodb.net/app?retryWrites=true&w=majority`
 mongo.MongoClient.connect(url, function (err, client) {
   if (err) throw err
 
-  const db = client.db('data')
+  const db = client.db('app')
 
   // Remove character
   app.get('/character/delete/:charId', (req, res) => {
@@ -258,47 +258,7 @@ mongo.MongoClient.connect(url, function (err, client) {
       })
     })
 
-    // Update old character
-    // const promise3 = new Promise((resolve, reject) => {
-    //   console.log("old")
-    //   if (oldCharacter) {
-    //     const query3 = { _id: new mongo.ObjectId(oldCharacter) }
-    //     const document3 = {
-    //       $set: {
-    //         player: ''
-    //       }
-    //     }
-    //     db.collection('characters').updateOne(query3, document3, function (err, result) {
-    //       if (err) reject(err)
-    //       db.close
-    //       console.log("Updated user's previous character")
-    //       resolve(result)
-    //     })
-    //   }
-    //   else
-    //     resolve(null)
-    // })
 
-    // //Update new character
-    // const promise4 = new Promise((resolve, reject) => {
-    //   console.log("new")
-    //   if (newCharacter) {
-    //     const query4 = { _id: new mongo.ObjectId(newCharacter) }
-    //     const document4 = {
-    //       $set: {
-    //         player: req.params.userId
-    //       }
-    //     }
-    //     db.collection('characters').updateOne(query4, document4, function (err, result) {
-    //       if (err) reject(err)
-    //       console.log("Updated user's current character")
-    //       db.close
-    //       resolve(result)
-    //     })
-    //   }
-    //   else
-    //     resolve(null)
-    // })
 
     // Check if characters need update
     function editCharacters(old) {
@@ -454,7 +414,7 @@ mongo.MongoClient.connect(url, function (err, client) {
     const query = { _id: new mongo.ObjectId(req.body.recipient) }
     const document = {
       $inc: {
-        saldo: mongo.Double(req.body.saldo)
+        saldo: mongo.Double(req.body.amount)
       }
     }
     const promise2 = new Promise((resolve, reject) => {
@@ -486,6 +446,7 @@ mongo.MongoClient.connect(url, function (err, client) {
 
   // Fetch all payments
   app.get('/transaction/', (req, res) => {
+    // Sort by timestamps, newest first
     db.collection('transactions').find().sort({ "time": -1 }).toArray(function (err, result) {
       if (err) throw err
       res.send(result)

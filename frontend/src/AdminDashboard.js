@@ -174,9 +174,9 @@ export class NewCharacter extends Component {
       if (this.props.character.player && this.props.character.player !== this.state.player)
         oldPlayer = this.props.players.find(player => player._id === this.props.character.player)._id
       const data = JSON.stringify({
-        name: this.state.name,
-        age: this.state.age,
-        gender: this.state.gender,
+        name: this.state.name.replace(/["=';]/g, ""), // Clean input just to be sure
+        age: this.state.age.replace(/[\D]/g, ""),
+        gender: this.state.gender.replace(/["=';]/g, ""),
         player: this.state.player,
         saldo: parseFloat(this.state.saldo),
         description: this.state.description,
@@ -234,7 +234,7 @@ export class NewCharacter extends Component {
         <form onSubmit={this.handleSubmit} noValidate id="characterForm">
           <div class="mb-3">
             <label class="form-label">Nimi:</label>
-            <input class="form-control" maxlength="30" required pattern="[ .,\-'a-öA-Ö\d]*" type="text" value={this.state.name} onChange={this.handleChange} name="name"></input>
+            <input class="form-control" maxLength="30" required pattern="[ .,\-'a-öA-Ö\d]*" type="text" value={this.state.name} onChange={this.handleChange} name="name"></input>
             <div class="invalid-feedback">
               Hahmolla täytyy olla nimi, ja ainoat sallitut erikoismerkit ovat .,-' ja numerot.
     </div>
@@ -306,7 +306,12 @@ export class NewUser extends Component {
   handleSubmit(event) {
     event.preventDefault();
     if (this.validateForm()) {
-      const data = { login: this.state.login, userName: this.state.playerName, character: this.state.selectedCharacter, userType: 'player' }
+      const data = {
+        login: this.state.login.replace(/["=';]/g, ""),
+        userName: this.state.playerName.replace(/["=';]/g, ""),
+        character: this.state.selectedCharacter,
+        userType: 'player'
+      }
       let url = REACT_APP_SERVER_URL + "/user/"
       if (this.props.existingUser)
         url += this.props.existingUser._id
@@ -349,7 +354,19 @@ export class NewUser extends Component {
         <form onSubmit={this.handleSubmit} noValidate id="userForm">
           <div class="mb-3">
             <label class="form-label">* Kirjautumistunnus</label>
-            <input minLength="6" maxLength="20" required pattern="[a-öA-Ö\d]*" id="loginInput" class="form-control" type="text" name="login" value={this.state.login} onChange={this.handleChange} placeholder="Käyttäjän kirjautumiseen käyttämä tunnus"></input>
+            <input
+              minLength="6"
+              maxLength="20"
+              required
+              pattern="[a-öA-Ö\d]*"
+              id="loginInput"
+              class="form-control"
+              type="text"
+              name="login"
+              value={this.state.login}
+              onChange={this.handleChange}
+              placeholder="Käyttäjän kirjautumiseen käyttämä tunnus"
+            ></input>
             <div class="invalid-feedback" id="loginFeedback">
               Tarkista, että kirjautumistunnus on vähintään 6 merkkiä pitkä ja sisältää ainoastaan kirjaimia ja numeroita.
       </div>
