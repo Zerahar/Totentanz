@@ -26,7 +26,7 @@ class OpenChat extends Component {
     componentDidMount() {
         // Go back if the page was refreshed
         if (!this.props.chat)
-            this.setState({ redirect: <Redirect to="/Totentanz/" /> })
+            this.setState({ redirect: <Redirect to="/" /> })
         else {
             this.props.isReady(false)
             // Fill character name if undefined
