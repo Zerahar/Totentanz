@@ -22,7 +22,7 @@ class ChatList extends Component {
         this.fetchChats()
     }
     fetchChats() {
-        let url = REACT_APP_SERVER_URL + '/chat/'
+        let url = REACT_APP_SERVER_URL + "chat/"
         if (this.props.loggedCharacter)
             url += this.props.loggedCharacter
         // If player has a character, fetch chats where they are participating. 
@@ -65,7 +65,7 @@ class ChatList extends Component {
             characters = [loggedCharacter._id]
         this.state.selectedCharacters.map(character => characters.push(character._id))
         const data = JSON.stringify({ participants: characters })
-        fetch(REACT_APP_SERVER_URL + "/chat/", {
+        fetch(REACT_APP_SERVER_URL + "chat/", {
             method: 'POST',
             mode: 'cors',
             headers: {
@@ -82,7 +82,7 @@ class ChatList extends Component {
         console.log(chat)
         let c = window.confirm("Haluatko poistaa keskustelun, jossa jäseninä ovat " + chat.participants.map(a => a.name) + "?")
         if (c) {
-            fetch(REACT_APP_SERVER_URL + "/chat/delete/" + chat._id, {
+            fetch(REACT_APP_SERVER_URL + "chat/delete/" + chat._id, {
                 method: 'GET',
                 mode: 'cors',
                 headers: {

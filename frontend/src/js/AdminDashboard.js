@@ -23,7 +23,7 @@ class AdminDashboard extends Component {
     const player = this.props.players.find(player => player._id === e.target.id)
     let c = window.confirm("Haluatko varmasti poistaa käyttäjän " + player.userName + "?")
     if (c) {
-      fetch(REACT_APP_SERVER_URL + '/user/delete/' + e.target.id)
+      fetch(REACT_APP_SERVER_URL + "user/delete/" + e.target.id)
         .then(response => response.json())
         .then(result => result.ok === 1 ? this.success() : this.props.error("Käyttäjän poisto ei onnistunut."))
         .catch(error => this.props.error(error, "danger"))
@@ -38,7 +38,7 @@ class AdminDashboard extends Component {
     const character = this.props.characters.find(character => character._id === e.target.id)
     let c = window.confirm("Haluatko varmasti poistaa hahmon " + character.name + "?")
     if (c) {
-      fetch(REACT_APP_SERVER_URL + '/character/delete/' + e.target.id)
+      fetch(REACT_APP_SERVER_URL + "character/delete/" + e.target.id)
         .then(response => response.json())
         .then(result => result.ok === 1 ? this.success() : this.props.error("Käyttäjän poisto ei onnistunut."))
         .catch(error => this.props.error(error, "danger"))
@@ -185,7 +185,7 @@ export class NewCharacter extends Component {
         newPlayer: newPlayer,
         oldPlayer: oldPlayer
       })
-      let url = REACT_APP_SERVER_URL + "/character/"
+      let url = REACT_APP_SERVER_URL + "character/"
       if (this.props.character._id)
         url += this.props.character._id
       // Insert/update character
@@ -313,7 +313,7 @@ export class NewUser extends Component {
         character: this.state.selectedCharacter,
         userType: 'player'
       }
-      let url = REACT_APP_SERVER_URL + "/user/"
+      let url = REACT_APP_SERVER_URL + "user/"
       if (this.props.existingUser)
         url += this.props.existingUser._id
 

@@ -81,7 +81,7 @@ class App extends Component {
   }
   fetchPlayers() {
     console.log("Fetching players")
-    fetch(REACT_APP_SERVER_URL + '/user/')
+    fetch(REACT_APP_SERVER_URL + "user/")
       .then(res => res.json())
       .then(result => result.filter(a => a.userType == "player"))
       .then(result => result.sort(function (a, b) { return a.userName > b.userName })) // Sort by player name
@@ -99,7 +99,7 @@ class App extends Component {
     if (event)
       event.preventDefault()
     if (this.state.login) {
-      fetch(REACT_APP_SERVER_URL + '/user/' + this.state.login)
+      fetch(REACT_APP_SERVER_URL + "user/" + this.state.login)
         .then(response => {
           response.ok ? response.json().then(data => this.loginSuccess(data)) : this.showError("Kirjautuminen ei onnistunut. Tarkista oikeinkirjoitus.", "warning")
         })
@@ -179,7 +179,7 @@ class App extends Component {
   }
   fetchCharacters() {
     console.log("Fetch characters")
-    fetch(REACT_APP_SERVER_URL + '/character/')
+    fetch(REACT_APP_SERVER_URL + "character/")
       .then(res => res.json())
       .then(result => result.sort(function (a, b) { return a.name > b.name })) // Sort by character name
       .then(
