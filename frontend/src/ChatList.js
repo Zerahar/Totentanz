@@ -1,5 +1,6 @@
 import { Component } from "react";
 import { Link } from "react-router-dom"
+import { Trash } from 'react-bootstrap-icons'
 const { REACT_APP_SERVER_URL } = process.env;
 class ChatList extends Component {
     constructor(props) {
@@ -77,6 +78,22 @@ class ChatList extends Component {
             .catch(error => this.props.error(error, "danger"))
         this.setState({ mode: '', selectedCharacters: [] })
     }
+    removeChat(chat) {
+        console.log(chat)
+        let c = window.confirm("Haluatko poistaa keskustelun, jossa jäseninä ovat " + chat.participants.map(a => a.name) + "?")
+        if (c) {
+            fetch(REACT_APP_SERVER_URL + "/chat/delete/" + chat._id, {
+                method: 'GET',
+                mode: 'cors',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(result => result.ok === 1 ? this.fetchChats() : this.props.error("Chatin poisto ei onnistunut."))
+                .catch(error => this.props.error(error, "danger"))
+        }
+    }
     render() {
         const characters = this.props.characters.filter(character => character._id !== this.props.loggedCharacter).map((character) =>
             <div class="row">
@@ -88,15 +105,16 @@ class ChatList extends Component {
                 </div>
             </div>)
         const chats = this.state.chats.map((chat) =>
-            <Link id={chat._id}
-                class="list-group-item chat-list-item" to="/chat"
+            <li class="list-group-item chat-list-item d-flex justify-content-between"><Link id={chat._id} to="/chat"
                 onClick={() => this.props.changeChat(chat)}
             >
                 {/* Filter current user's name and then show all other participants in a chat */}
                 {chat.participants
                     .filter(a => a._id != this.props.loggedCharacter)
                     .map((participant, index, array) => index === array.length - 1 ? participant.name : participant.name + ", ")}
-            </Link>);
+            </Link>
+                {this.props.type == "admin" ? <button class="btn btn-danger" onClick={() => this.removeChat(chat)}><Trash /></button> : ""}
+            </li>);
         if (this.state.mode === "new") {
             return (<main class="text-container container">
                 <h2>Valitse keskustelun jäsenet</h2>

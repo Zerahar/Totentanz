@@ -321,18 +321,26 @@ h3 {
 
 .chat-list-item {
     background-color: $darkgrey !important;
-    color: $lightgrey !important;
     margin: 3px 0;
     border-radius: 3px;
+
+    a,
+    a:hover {
+        color: $lightgrey;
+        text-decoration: none;
+    }
 
     &:hover {
         background-color: $almostBlack !important;
         cursor: pointer;
+        border: $blue;
     }
 }
 
 .chat-list {
     margin: 1em 0;
+
+
 }
 
 .messages-container {

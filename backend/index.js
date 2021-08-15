@@ -383,8 +383,13 @@ mongo.MongoClient.connect(url, function (err, client) {
     const query = { _id: new mongo.ObjectId(req.params.chatId) }
     db.collection('chats').deleteOne(query, function (err, result) {
       if (err) throw err
-      res.send(result)
-      console.log("Removed chat with id ", req.params.chatId)
+      db.collection('messages').deleteMany({ chat: req.params.chatId }, function (err, result) {
+        if (err) throw err
+        res.send(result)
+        console.log("Removed chat with id ", req.params.chatId)
+        db.close
+      })
+
       db.close
     })
   })
