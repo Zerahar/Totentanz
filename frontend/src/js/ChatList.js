@@ -29,7 +29,7 @@ class ChatList extends Component {
         // If admin, fetch all chats.
         if (this.props.loggedCharacter || this.props.type === "admin") {
             this.props.isReady(false)
-            fetch(url)
+            fetch(url, { headers: { 'Access-Control-Allow-Origin': 'https://totentanz.herokuapp.com' } })
                 .then(res => res.json())
                 .then(
                     (result) => {
@@ -69,7 +69,8 @@ class ChatList extends Component {
             method: 'POST',
             mode: 'cors',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': 'https://totentanz.herokuapp.com'
             },
             body: data
         })
@@ -86,7 +87,8 @@ class ChatList extends Component {
                 method: 'GET',
                 mode: 'cors',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': 'https://totentanz.herokuapp.com'
                 }
             })
                 .then(response => response.json())

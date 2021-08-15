@@ -11,7 +11,7 @@ class Transactions extends Component {
         this.props.isReady(false)
         if (this.props.characters.length === 0)
             this.props.fetchCharacters()
-        fetch(REACT_APP_SERVER_URL + "transaction/")
+        fetch(REACT_APP_SERVER_URL + "transaction/", { headers: { 'Access-Control-Allow-Origin': 'https://totentanz.herokuapp.com' } })
             .then(res => res.json())
             .then(
                 (result) => {

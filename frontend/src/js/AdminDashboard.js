@@ -23,7 +23,7 @@ class AdminDashboard extends Component {
     const player = this.props.players.find(player => player._id === e.target.id)
     let c = window.confirm("Haluatko varmasti poistaa käyttäjän " + player.userName + "?")
     if (c) {
-      fetch(REACT_APP_SERVER_URL + "user/delete/" + e.target.id)
+      fetch(REACT_APP_SERVER_URL + "user/delete/" + e.target.id, { headers: { 'Access-Control-Allow-Origin': 'https://totentanz.herokuapp.com' } })
         .then(response => response.json())
         .then(result => result.ok === 1 ? this.success() : this.props.error("Käyttäjän poisto ei onnistunut."))
         .catch(error => this.props.error(error, "danger"))
@@ -38,7 +38,7 @@ class AdminDashboard extends Component {
     const character = this.props.characters.find(character => character._id === e.target.id)
     let c = window.confirm("Haluatko varmasti poistaa hahmon " + character.name + "?")
     if (c) {
-      fetch(REACT_APP_SERVER_URL + "character/delete/" + e.target.id)
+      fetch(REACT_APP_SERVER_URL + "character/delete/" + e.target.id, { headers: { 'Access-Control-Allow-Origin': 'https://totentanz.herokuapp.com' } })
         .then(response => response.json())
         .then(result => result.ok === 1 ? this.success() : this.props.error("Käyttäjän poisto ei onnistunut."))
         .catch(error => this.props.error(error, "danger"))
@@ -194,6 +194,7 @@ export class NewCharacter extends Component {
         mode: 'cors',
         headers: {
           'Content-Type': 'application/json'
+          , 'Access-Control-Allow-Origin': 'https://totentanz.herokuapp.com'
         },
         body: data
       })
@@ -321,7 +322,8 @@ export class NewUser extends Component {
         method: 'POST',
         mode: 'cors',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': 'https://totentanz.herokuapp.com'
         },
         body: JSON.stringify(data)
       })

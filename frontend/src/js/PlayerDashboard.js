@@ -1,5 +1,6 @@
 import { Component } from "react";
 import { Link, Redirect } from "react-router-dom"
+const { REACT_APP_SERVER_URL } = process.env;
 
 export class PlayerInfo extends Component {
     constructor(props) {
@@ -77,11 +78,12 @@ export class Pay extends Component {
                     recipient: this.state.selectedCharacter,
                     amount: this.state.amount
                 })
-                fetch('http://localhost:3002/pay/', {
+                fetch(REACT_APP_SERVER_URL, {
                     method: 'POST',
                     mode: 'cors',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': 'https://totentanz.herokuapp.com'
                     },
                     body: transaction
                 })
