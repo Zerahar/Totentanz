@@ -212,7 +212,7 @@ export class NewCharacter extends Component {
       }
     })
     if (!fail)
-      this.setState({ redirect: <Redirect to="/admin" /> })
+      this.setState({ redirect: <Redirect to="/Totentanz/admin" /> })
   }
   checkInput() {
     const form = document.getElementById('characterForm')
@@ -275,7 +275,7 @@ export class NewCharacter extends Component {
             <Editor changeEditor={(data) => this.setState({ mechanics: data })} html={this.state.mechanics} type="mechanics" />
           </div>
           <button type="submit" onClick={this.handleSubmit} class="btn btn-primary">Tallenna</button>
-          <Link to="/admin" class="btn btn-warning m-3">Poistu tallentamatta</Link>
+          <Link to="/Totentanz/admin" class="btn btn-warning m-3">Poistu tallentamatta</Link>
         </form>
         {this.state.redirect}
       </main>
@@ -325,7 +325,7 @@ export class NewUser extends Component {
         },
         body: JSON.stringify(data)
       })
-        .then(response => this.setState({ redirect: <Redirect to="/admin" /> }))
+        .then(response => this.setState({ redirect: <Redirect to="/Totentanz/admin" /> }))
         .catch(error => this.props.error(error, "danger"))
     }
   }
@@ -381,7 +381,7 @@ export class NewUser extends Component {
             <label class="form-label">Hahmo</label><select class="form-select" name="selectedCharacter" value={this.state.selectedCharacter} onChange={this.handleChange}><option value="" key="none">-</option>{characters}</select>
           </div>
           <button type="submit" class="btn btn-primary">Tallenna</button>
-          <Link to="/admin" class="btn btn-warning m-3">Poistu tallentamatta</Link>
+          <Link to="/Totentanz/admin" class="btn btn-warning m-3">Poistu tallentamatta</Link>
         </form>
         {this.state.redirect}
       </main>

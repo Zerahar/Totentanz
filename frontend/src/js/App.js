@@ -117,10 +117,10 @@ class App extends Component {
     // create a cookie
     document.cookie = "login=" + this.state.login
     if (data.userType === "player") {
-      this.setState({ redirect: <Redirect to="/dashboard" /> })
+      this.setState({ redirect: <Redirect to="/Totentanz/dashboard" /> })
     }
     else {
-      this.setState({ redirect: <Redirect to="/admin" /> })
+      this.setState({ redirect: <Redirect to="/Totentanz/admin" /> })
     }
     this.ws = new WebSocket('ws://127.0.0.1:1337');
     this.ws.onclose = () => {
@@ -168,7 +168,7 @@ class App extends Component {
       userCharacter: '',
       login: '',
       loading: false,
-      redirect: <Redirect to="/" />
+      redirect: <Redirect to="/Totentanz/" />
     })
     // Remove login cookie
     document.cookie = "login="
@@ -248,11 +248,11 @@ class App extends Component {
     let playerPage, adminPage = ""
     if (this.state.userType === "player")
       playerPage = <li class="nav-item">
-        <Link to="/dashboard" onClick={() => this.closeMenu()}>Pelaajan sivut</Link>
+        <Link to="/Totentanz/dashboard" onClick={() => this.closeMenu()}>Pelaajan sivut</Link>
       </li>
     if (this.state.userType === "admin")
       adminPage = <li class="nav-item">
-        <Link to="/admin" onClick={() => this.closeMenu()}>Hallintapaneeli</Link>
+        <Link to="/Totentanz/admin" onClick={() => this.closeMenu()}>Hallintapaneeli</Link>
       </li>
     let loading
     if (this.state.loading)
@@ -264,17 +264,17 @@ class App extends Component {
         <header class="navbar-container w-100">
           <nav class="navbar navbar-expand-lg main-nav container h-100">
             <div class="container-fluid">
-              <Link class="navbar-brand" to="/">Totentanz</Link>
+              <Link class="navbar-brand" to="/Totentanz/">Totentanz</Link>
               <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Valikko">
                 <List />
               </button>
               <div class="collapse navbar-collapse justify-content-end" id="navbar">
                 <ul class="navbar-nav">
                   <li class="nav-item">
-                    <Link to="/info" onClick={() => this.closeMenu()}>Info</Link>
+                    <Link to="/Totentanz/info" onClick={() => this.closeMenu()}>Info</Link>
                   </li>
                   <li class="nav-item">
-                    <Link to="/" onClick={() => this.closeMenu()}>Ilmoittaudu</Link>
+                    <Link to="/Totentanz/" onClick={() => this.closeMenu()}>Ilmoittaudu</Link>
                   </li>
                   {playerPage}
                   {adminPage}

@@ -120,7 +120,7 @@ export class Pay extends Component {
     componentWillMount() {
         // Handle page refresh
         if (!this.props.character)
-            this.setState({ redirect: <Redirect to="/dashboard" /> })
+            this.setState({ redirect: <Redirect to="/Totentanz/dashboard" /> })
     }
     render() {
         const options = this.props.characters.map((character) => { if (character._id !== this.props.character._id) return <option value={character._id}>{character.name}</option>; else return null });

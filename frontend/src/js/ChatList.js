@@ -105,7 +105,7 @@ class ChatList extends Component {
                 </div>
             </div>)
         const chats = this.state.chats.map((chat) =>
-            <li class="list-group-item chat-list-item d-flex justify-content-between"><Link id={chat._id} to="/chat"
+            <li class="list-group-item chat-list-item d-flex justify-content-between"><Link id={chat._id} to="/Totentanz/chat"
                 onClick={() => this.props.changeChat(chat)}
             >
                 {/* Filter current user's name and then show all other participants in a chat */}
