@@ -1,0 +1,28 @@
+{
+  "files": {
+    "main.css": "/totentanz/static/css/main.960791bc.chunk.css",
+    "main.js": "/totentanz/static/js/main.366f0b47.chunk.js",
+    "main.js.map": "/totentanz/static/js/main.366f0b47.chunk.js.map",
+    "runtime-main.js": "/totentanz/static/js/runtime-main.0617990d.js",
+    "runtime-main.js.map": "/totentanz/static/js/runtime-main.0617990d.js.map",
+    "static/css/2.fc64925e.chunk.css": "/totentanz/static/css/2.fc64925e.chunk.css",
+    "static/js/2.356e89dc.chunk.js": "/totentanz/static/js/2.356e89dc.chunk.js",
+    "static/js/2.356e89dc.chunk.js.map": "/totentanz/static/js/2.356e89dc.chunk.js.map",
+    "static/js/3.ca4df7a5.chunk.js": "/totentanz/static/js/3.ca4df7a5.chunk.js",
+    "static/js/3.ca4df7a5.chunk.js.map": "/totentanz/static/js/3.ca4df7a5.chunk.js.map",
+    "index.html": "/totentanz/index.html",
+    "service-worker.js": "/totentanz/service-worker.js",
+    "service-worker.js.map": "/totentanz/service-worker.js.map",
+    "static/css/2.fc64925e.chunk.css.map": "/totentanz/static/css/2.fc64925e.chunk.css.map",
+    "static/css/main.960791bc.chunk.css.map": "/totentanz/static/css/main.960791bc.chunk.css.map",
+    "static/js/2.356e89dc.chunk.js.LICENSE.txt": "/totentanz/static/js/2.356e89dc.chunk.js.LICENSE.txt",
+    "static/media/custom.scss": "/totentanz/static/media/front.de4dae2a.jpeg"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.0617990d.js",
+    "static/css/2.fc64925e.chunk.css",
+    "static/js/2.356e89dc.chunk.js",
+    "static/css/main.960791bc.chunk.css",
+    "static/js/main.366f0b47.chunk.js"
+  ]
+}
