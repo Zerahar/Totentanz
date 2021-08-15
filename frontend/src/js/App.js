@@ -1,6 +1,6 @@
 
 import { Component } from 'react'
-import { BrowserRouter as Router, Route, Link, Switch, Redirect } from "react-router-dom";
+import { HashRouter as Router, Route, Link, Switch, Redirect } from "react-router-dom";
 import Home from './Home.js'
 import Info from './Info.js'
 import AdminDashboard from './AdminDashboard.js'
