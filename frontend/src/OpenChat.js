@@ -82,7 +82,7 @@ class OpenChat extends Component {
         form.classList.add("was-validated")
         if (form.checkValidity()) {
             console.log("Sent ", this.state.input)
-            this.ws.send(JSON.stringify({ text: this.state.input, chat: this.props.chat._id, characterId: this.props.characterId, name: this.state.currentName, type: 'message' }))
+            this.ws.send(JSON.stringify({ text: this.state.input, chat: this.props.chat, characterId: this.props.characterId, name: this.state.currentName, type: 'message' }))
             this.setState({
                 input: ''
             })
@@ -132,7 +132,7 @@ class OpenChat extends Component {
                     <button class="btn btn-primary" type="submit">Lähetä</button>
                     <div class="invalid-feedback" id="messageFeedback">
                         Viesti voi sisältää ainoastaan kirjaimia, numeroita ja seuraavia merkkejä: ,.-
-      </div>
+                    </div>
 
                 </div></form>
 

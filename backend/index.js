@@ -460,18 +460,6 @@ const WebSocket = require('ws');
 
 const wss = new WebSocket.Server({ port: 1337 });
 
-// Fetch all chats
-let chats
-mongo.MongoClient.connect(url, function (err, client) {
-  if (err) throw err
-  const db = client.db('data')
-  db.collection('chats').find().toArray(function (err, result) {
-    if (err) throw err
-    chats = result
-    db.close
-  })
-})
-
 wss.on('connection', function connection(ws) {
   console.log("New connection")
   ws.on('message', function incoming(rawdata) {
@@ -487,7 +475,7 @@ wss.on('connection', function connection(ws) {
       // send back chat history when chat is opened
       mongo.MongoClient.connect(url, function (err, dbclient) {
         if (err) throw err
-        const db = dbclient.db('data')
+        const db = dbclient.db('app')
         db.collection('messages').find({ chat: data.chat }).toArray(function (err, result) {
           if (err) throw err
           console.log("Sent chat history")
@@ -504,12 +492,12 @@ wss.on('connection', function connection(ws) {
         time: (new Date()).getTime(),
         text: data.text,
         author: data.name,
-        authorId: data.id,
-        chat: data.chat
+        authorId: data.characterId,
+        chat: data.chat._id
       };
       mongo.MongoClient.connect(url, function (err, client) {
         if (err) throw err
-        const db = client.db('data')
+        const db = client.db('app')
         db.collection('messages').insertOne(obj, function (err, result) {
           if (err) throw err
           db.close
@@ -527,17 +515,11 @@ wss.on('connection', function connection(ws) {
           text: data.text,
           author: data.name,
           authorId: data.id,
-          chat: data.chat
+          chat: data.chat._id
         };
         // Broadcast if part of the chat
-        const currentChat = chats.find(chat => chat._id == data.chat)
-        console.log("ABOUT TO BROADCAST.")
-        console.log(currentChat)
-        console.log(chats)
-        console.log(client.characterId)
-        // console.log(currentChat.participants.find(participant => participant._id === client.characterId))
-        if (client.readyState === WebSocket.OPEN && (client.characterId === "admin" || (currentChat && currentChat.participants.find(participant => participant._id === client.characterId)))) {
-          console.log("Broadcasted to " + data.name)
+        if (client.readyState === WebSocket.OPEN && (client.characterId === "admin" || data.chat.participants.find(a => a._id == client.characterId))) {
+          console.log("Broadcasted to " + client.characterId)
           const packet = { type: "message", data: obj }
           client.send(JSON.stringify(packet));
         }
