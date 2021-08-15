@@ -126,23 +126,25 @@ mongo.MongoClient.connect(url, function (err, client) {
         db.close
       })
     })
-    if (req.body.player) {
-      const query2 = { _id: new mongo.ObjectId(req.body.player) }
-      promise2 = (id) => new Promise(function (resolve, reject) {
+
+    promise2 = (id, previousResult) => new Promise(function (resolve, reject) {
+      if (req.body.player) {
+        const query2 = { _id: new mongo.ObjectId(req.body.player) }
         db.collection('users').updateOne(query2, {
           $set: {
             character: id
           }
         }, function (err, result) {
           if (err) reject(err)
-          resolve(result)
+          resolve([previousResult, result])
           db.close
         })
-      })
-    }
+      }
+      else
+        resolve([previousResult])
+    })
     promise1
-      .then(result => result.insertedId)
-      .then(id => promise2(id))
+      .then(result => promise2(result.insertedId, result))
       .then(result => res.send(result))
       .then(console.log("Added a new character"))
   })

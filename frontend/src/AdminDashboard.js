@@ -203,15 +203,16 @@ export class NewCharacter extends Component {
     }
   }
   checkSuccess(result) {
+    let fail = false
     result.forEach((part, counter) => {
       if (part !== null && part.ok !== 1) {
         this.props.error("Hahmon lisäys ei onnistunut.")
+        fail = true
         return
       }
-      else if (counter === 2) {
-        this.setState({ redirect: <Redirect to="/admin" /> })
-      }
-    });
+    })
+    if (!fail)
+      this.setState({ redirect: <Redirect to="/admin" /> })
   }
   checkInput() {
     const form = document.getElementById('characterForm')
@@ -237,19 +238,19 @@ export class NewCharacter extends Component {
             <input class="form-control" maxLength="30" required pattern="[ .,\-'a-öA-Ö\d]*" type="text" value={this.state.name} onChange={this.handleChange} name="name"></input>
             <div class="invalid-feedback">
               Hahmolla täytyy olla nimi, ja ainoat sallitut erikoismerkit ovat .,-' ja numerot.
-    </div>
+            </div>
           </div>
           <div class="mb-3">
             <label class="form-label">Ikä:</label> <input class="form-control" pattern="[\d]*" type="text" value={this.state.age} onChange={this.handleChange} name="age"></input>
             <div class="invalid-feedback">
               Iän täytyy olla numero.
-    </div>
+            </div>
           </div>
           <div class="mb-3">
             <label class="form-label">Sukupuoli:</label> <input class="form-control" pattern="[a-öA-Ö]*" type="text" value={this.state.gender} onChange={this.handleChange} name="gender"></input>
             <div class="invalid-feedback">
               Sukupuoli ei voi sisältää numeroita tai erikoismerkkejä.
-    </div>
+            </div>
           </div>
           <div class="mb-3">
             <label class="form-label">Pelaaja:</label> <select class="form-select" value={this.state.player} onChange={this.handleChange} name="player">
@@ -259,7 +260,7 @@ export class NewCharacter extends Component {
             <label class="form-label">Saldo:</label> <input class="form-control" pattern="^[\d]+(,\d\d)*" type="text" value={this.state.saldo} onChange={this.handleChange} name="saldo"></input>
             <div class="invalid-feedback">
               Saldon täytyy olla numero. Senttien erottimena käytetään pilkkua.
-    </div>
+            </div>
           </div>
           <div class="mb-3">
             <label class="form-label">Kuvaus: </label>
@@ -369,13 +370,13 @@ export class NewUser extends Component {
             ></input>
             <div class="invalid-feedback" id="loginFeedback">
               Tarkista, että kirjautumistunnus on vähintään 6 merkkiä pitkä ja sisältää ainoastaan kirjaimia ja numeroita.
-      </div>
+            </div>
           </div><div class="mb-3">
             <label class="form-label">* Pelaajan nimi</label>
             <input minLength="3" maxLength="30" required pattern="[ .,\-'a-öA-Ö\d]*" id="nameInput" class="form-control" type="text" name="playerName" value={this.state.playerName} onChange={this.handleChange}></input>
             <div class="invalid-feedback" id="nameFeedback">
               Nimi on pakollinen tieto ja se voi sisältää ainoastaan kirjaimia ja seuraavia merkkejä: ,.'-
-      </div>
+            </div>
           </div><div class="mb-3">
             <label class="form-label">Hahmo</label><select class="form-select" name="selectedCharacter" value={this.state.selectedCharacter} onChange={this.handleChange}><option value="" key="none">-</option>{characters}</select>
           </div>
