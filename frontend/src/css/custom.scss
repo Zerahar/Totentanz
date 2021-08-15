@@ -403,11 +403,11 @@ h3 {
     max-height: 500px;
     max-width: 2000px;
     margin: auto;
-    background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0) 70%, black), url('./images/front-small.jpeg');
+    background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0) 70%, black), url('../images/front-small.jpeg');
     background-size: cover;
 
     @include breakpoint(md) {
-        background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0) 70%, black), url('./images/front.jpeg');
+        background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0) 70%, black), url('../images/front.jpeg');
     }
 }
 

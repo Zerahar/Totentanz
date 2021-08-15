@@ -10,7 +10,7 @@ import ChatList from './ChatList.js'
 import Transactions from './Transactions.js'
 import { List, ChatDots, Download } from 'react-bootstrap-icons'
 import { Collapse, Dropdown, Toast } from 'bootstrap'
-import './custom.scss'
+import '../css/custom.scss'
 import OpenChat from './OpenChat.js';
 const { REACT_APP_SERVER_URL } = process.env;
 class App extends Component {
