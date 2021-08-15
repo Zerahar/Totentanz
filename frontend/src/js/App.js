@@ -12,7 +12,7 @@ import { List, ChatDots, Download } from 'react-bootstrap-icons'
 import { Collapse, Dropdown, Toast } from 'bootstrap'
 import '../css/custom.scss'
 import OpenChat from './OpenChat.js';
-const { REACT_APP_SERVER_URL, WS_SERVER_URL } = process.env;
+const { REACT_APP_SERVER_URL, REACT_APP_WS_SERVER_URL } = process.env;
 class App extends Component {
   constructor(props) {
     super(props);
@@ -122,7 +122,7 @@ class App extends Component {
     else {
       this.setState({ redirect: <Redirect to="/admin" /> })
     }
-    this.ws = new WebSocket(WS_SERVER_URL);
+    this.ws = new WebSocket(REACT_APP_WS_SERVER_URL);
     this.ws.onclose = () => {
       console.log('disconnected')
     }
