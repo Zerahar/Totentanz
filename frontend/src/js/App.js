@@ -127,6 +127,7 @@ class App extends Component {
       this.ws = new WebSocket(REACT_APP_WS_SERVER_URL);
     } catch (e) {
       console.log("Websocket init failed. Error: " + e)
+      this.showError("Yhteyttä chat-palveluun ei saatu muodostettua. Pikaviestit eivät välttämättä toimi.", "danger")
     }
     this.ws.onclose = () => {
       console.log('disconnected')
@@ -206,10 +207,8 @@ class App extends Component {
       case "NetworkError when attempting to fetch resource.":
       case "Failed to fetch":
         this.setState({ error: "Yhteyttä palvelimeen ei saatu. Yritä hetken kuluttua uudelleen tai ota yhteys pelinjohtoon." }); break;
-      case "JSON.parse: unexpected character at line 1 column 1 of the JSON data":
-        this.setState({ error: "Sovellus kohtasi virheen. Yritä hetken kuluttua uudelleen tai ota yhteys pelinjohtoon." }); break;
       default:
-        this.setState({ error: message.message || message }); break;
+        this.setState({ error: "Sovellus kohtasi virheen. Yritä hetken kuluttua uudelleen tai ota yhteys pelinjohtoon." }); break;
     }
     // Show alert element
     const alert = document.getElementById("errorMessage")
