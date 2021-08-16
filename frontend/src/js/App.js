@@ -122,7 +122,12 @@ class App extends Component {
     else {
       this.setState({ redirect: <Redirect to="/admin" /> })
     }
-    this.ws = new WebSocket(REACT_APP_WS_SERVER_URL);
+    this.ws = null
+    try {
+      this.ws = new WebSocket(REACT_APP_WS_SERVER_URL);
+    } catch (e) {
+      console.log("Websocket init failed. Error: " + e)
+    }
     this.ws.onclose = () => {
       console.log('disconnected')
     }
