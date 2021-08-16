@@ -1,8 +1,8 @@
 {
   "files": {
     "main.css": "/Totentanz/static/css/main.8a1ff632.chunk.css",
-    "main.js": "/Totentanz/static/js/main.664b192b.chunk.js",
-    "main.js.map": "/Totentanz/static/js/main.664b192b.chunk.js.map",
+    "main.js": "/Totentanz/static/js/main.5bb5f04e.chunk.js",
+    "main.js.map": "/Totentanz/static/js/main.5bb5f04e.chunk.js.map",
     "runtime-main.js": "/Totentanz/static/js/runtime-main.66469165.js",
     "runtime-main.js.map": "/Totentanz/static/js/runtime-main.66469165.js.map",
     "static/css/2.fc64925e.chunk.css": "/Totentanz/static/css/2.fc64925e.chunk.css",
@@ -23,6 +23,6 @@
     "static/css/2.fc64925e.chunk.css",
     "static/js/2.3d7ec684.chunk.js",
     "static/css/main.8a1ff632.chunk.css",
-    "static/js/main.664b192b.chunk.js"
+    "static/js/main.5bb5f04e.chunk.js"
   ]
 }
