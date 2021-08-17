@@ -122,50 +122,7 @@ class App extends Component {
     else {
       this.setState({ redirect: <Redirect to="/admin" /> })
     }
-    this.ws = null
-    try {
-      this.ws = new WebSocket(REACT_APP_WS_SERVER_URL);
-    } catch (e) {
-      console.log("Websocket init failed. Error: " + e)
-      this.showError("Yhteyttä chat-palveluun ei saatu muodostettua. Pikaviestit eivät välttämättä toimi.", "danger")
-    }
-    this.ws.onclose = () => {
-      console.log('disconnected')
-    }
-    this.ws.onmessage = evt => {
-      // listen to data sent from the websocket server
-      // But don't show notification if chat is open
-      const message = JSON.parse(evt.data)
-      console.log("Got a message: ", message)
-      if (this.state.selectedChat !== message.data.chat) {
-        const toast = new Toast(document.getElementById("notifToast"))
-        this.setState({
-          notifMsg: message.data.text,
-          notifSender: message.data.author
-        }, toast.show())
-      }
-    }
-    this.ws.onopen = () => {
-      console.log('connected')
-      // Find username, either character name or "admin"
-      let user = this.state.characters.find(character => character._id === this.state.userCharacter)
-      let userName
-      if (user)
-        userName = user.name
-      else if (this.state.userType === "admin")
-        userName = "admin"
-      // If user has no character assigned, they cannot participate in chat
-      else {
-        console.log("No character assigned, closing websocket")
-        this.ws.close()
-      }
-      // Send username to the websocket
-      if (userName && this.ws && this.ws.readyState === 1) {
-        this.ws.send(JSON.stringify({ text: userName, type: 'new', id: this.state.userCharacter }))
-        this.setState({ nameSent: true, ready: true })
-      }
-    }
-    this.ws.onerror = (e) => this.showError(e, "danger")
+    this.wsInit()
   }
   logout() {
     this.setState({
@@ -234,6 +191,58 @@ class App extends Component {
       this.setState({ loading: false })
     else
       this.setState({ loading: true })
+  }
+  wsInit() {
+    // Websocket closes connection after 55 sec inactivity
+    this.ws = null
+    try {
+      this.ws = new WebSocket(REACT_APP_WS_SERVER_URL);
+    } catch (e) {
+      console.log("Websocket init failed. Error: " + e)
+      this.showError("Yhteyttä chat-palveluun ei saatu muodostettua. Pikaviestit eivät välttämättä toimi.", "danger")
+    }
+    this.ws.onclose = () => {
+      console.log('disconnected')
+    }
+    this.ws.onmessage = evt => {
+      // listen to data sent from the websocket server
+      // But don't show notification if chat is open
+      const message = JSON.parse(evt.data)
+      console.log("Got a message: ", message)
+      if (this.state.selectedChat !== message.data.chat) {
+        const toast = new Toast(document.getElementById("notifToast"))
+        this.setState({
+          notifMsg: message.data.text,
+          notifSender: message.data.author
+        }, toast.show())
+      }
+    }
+    this.ws.onopen = () => {
+      console.log('connected')
+      // Find username, either character name or "admin"
+      let user = this.state.characters.find(character => character._id === this.state.userCharacter)
+      let userName
+      if (user)
+        userName = user.name
+      else if (this.state.userType === "admin")
+        userName = "admin"
+      // If user has no character assigned, they cannot participate in chat
+      else {
+        console.log("No character assigned, closing websocket")
+        this.ws.close()
+      }
+      // Send username to the websocket
+      if (userName && this.ws && this.ws.readyState === 1) {
+        this.ws.send(JSON.stringify({ text: userName, type: 'new', id: this.state.userCharacter }))
+        this.setState({ nameSent: true, ready: true })
+        return true
+      }
+      else {
+        return false
+      }
+
+    }
+    this.ws.onerror = (e) => this.showError(e, "danger")
   }
   componentWillUnmount() {
     if (this.ws)
@@ -403,6 +412,7 @@ class App extends Component {
                 ws={this.ws}
                 isReady={this.setReady}
                 clear={() => this.setState({ selectedChat: '' })}
+                wsInit={this.wsInit}
               />
             </Route>
 

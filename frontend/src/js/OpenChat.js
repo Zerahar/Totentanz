@@ -33,7 +33,13 @@ class OpenChat extends Component {
             if (!this.state.currentName)
                 this.setState({ currentName: this.props.characters.find(character => character._id === this.props.characterId).name })
             // Tell server that chat is open
-            this.ws.send(JSON.stringify({ chat: this.props.chat._id, type: 'openChat' }))
+            if (this.ws.readyState !== 1) {
+                this.props.wsInit()
+                    .then(this.ws.send(JSON.stringify({ chat: this.props.chat._id, type: 'openChat' })))
+            }
+            else {
+                this.ws.send(JSON.stringify({ chat: this.props.chat._id, type: 'openChat' }))
+            }
 
             this.ws.onmessage = evt => {
                 // listen to data sent from the websocket server
@@ -82,7 +88,14 @@ class OpenChat extends Component {
         form.classList.add("was-validated")
         if (form.checkValidity()) {
             console.log("Sent ", this.state.input)
-            this.ws.send(JSON.stringify({ text: this.state.input, chat: this.props.chat, characterId: this.props.characterId, name: this.state.currentName, type: 'message' }))
+            // Check that websocket is still open
+            if (this.ws.readyState !== 1) {
+                this.props.wsInit()
+                    .then(this.ws.send(JSON.stringify({ text: this.state.input, chat: this.props.chat, characterId: this.props.characterId, name: this.state.currentName, type: 'message' })))
+            }
+            else {
+                this.ws.send(JSON.stringify({ text: this.state.input, chat: this.props.chat, characterId: this.props.characterId, name: this.state.currentName, type: 'message' }))
+            }
             this.setState({
                 input: ''
             })
