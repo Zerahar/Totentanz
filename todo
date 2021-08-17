@@ -1,1 +1,10 @@
 - turvallisuus
+- kirjautuessa latausikoni
+- käyttäjän tallennuksessa latausikoni
+- käyttäjänmuokkkauksessa hahmon valinnassa poista edelliseltä käyttäjältä
+- pienellä näytöllä poista tekstin tasaus
+- kirjaudu-nappi menee kentän päälle
+- sulje menu painaessa kirjaudu-nappia
+- keskustelu-linkki koko palkkiin
+- luo keskustelu-sivu liian lyhyt, näkyy valkoista
+- chat historia ei lataudu

@@ -128,7 +128,7 @@ class OpenChat extends Component {
                 </div>
 
                 <form onSubmit={this.sendMessage} noValidate id="msgForm"><div class="input-group">
-                    <input class="form-control" type="text" value={this.state.input} onChange={this.messageBeingWritten} id="message-input" pattern="[ .,\-a-öA-Ö\d]*" />
+                    <input class="form-control" type="text" value={this.state.input} onChange={this.messageBeingWritten} id="message-input" required />
                     <button class="btn btn-primary" type="submit">Lähetä</button>
                     <div class="invalid-feedback" id="messageFeedback">
                         Viesti voi sisältää ainoastaan kirjaimia, numeroita ja seuraavia merkkejä: ,.-
