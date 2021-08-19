@@ -99,6 +99,7 @@ class App extends Component {
   login(event) {
     if (event)
       event.preventDefault()
+
     if (this.state.login) {
       //Show loading
       this.setState({ loading: true })
@@ -110,6 +111,7 @@ class App extends Component {
     }
   }
   loginSuccess(data) {
+    this.closeMenu()
     this.setState({
       userId: data._id,
       userName: data.userName,
