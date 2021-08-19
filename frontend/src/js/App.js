@@ -171,7 +171,7 @@ class App extends Component {
       case "Failed to fetch":
         this.setState({ error: "Yhteyttä palvelimeen ei saatu. Yritä hetken kuluttua uudelleen tai ota yhteys pelinjohtoon." }); break;
       default:
-        this.setState({ error: "Sovellus kohtasi virheen. Yritä hetken kuluttua uudelleen tai ota yhteys pelinjohtoon." }); break;
+        this.setState({ error: message }); break;
     }
     // Show alert element
     const alert = document.getElementById("errorMessage")
@@ -193,10 +193,8 @@ class App extends Component {
     }
   }
   setReady(state) {
-    if (state)
-      this.setState({ loading: false })
-    else
-      this.setState({ loading: true })
+    if (state) { this.setState({ loading: false }); console.log("ready") }
+    else { this.setState({ loading: true }); console.log("loading") }
   }
   wsInit() {
     // Websocket closes connection after 55 sec inactivity
@@ -279,7 +277,7 @@ class App extends Component {
       </li>
     let loading
     if (this.state.loading)
-      loading = <div class="spinner-border position-absolute top-50 start-50 loading " role="status">
+      loading = <div class="spinner-border position-fixed top-50 start-50 loading " role="status">
         <span class="visually-hidden">Loading...</span>
       </div>
     return (
@@ -367,6 +365,7 @@ class App extends Component {
                 fetchCharacters={this.fetchCharacters}
                 clearSelectedCharacter={() => this.setState({ selectedCharacter: this.state.defaultCharacter })}
                 error={this.showError}
+                isReady={this.setReady}
               />
             </Route>
             <Route exact path="/admin/newUser">
@@ -377,6 +376,7 @@ class App extends Component {
                 fetchCharacters={this.fetchCharacters}
                 fetchPlayers={this.fetchPlayers}
                 error={this.showError}
+                isReady={this.setReady}
               />
             </Route>
             <Route exact path="/admin/messages">
@@ -410,6 +410,7 @@ class App extends Component {
                 changeUser={e => this.setState({ selectedUser: e })}
                 admin={this.state.userType}
                 error={this.showError}
+                isReady={this.setReady}
               />
             </Route>
             <Route exact path="/chat">

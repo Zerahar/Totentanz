@@ -23,6 +23,7 @@ class AdminDashboard extends Component {
     const player = this.props.players.find(player => player._id === e.target.id)
     let c = window.confirm("Haluatko varmasti poistaa käyttäjän " + player.userName + "?")
     if (c) {
+      this.props.isReady(false)
       fetch(REACT_APP_SERVER_URL + "user/delete/" + e.target.id, { headers: { 'Access-Control-Allow-Origin': 'https://totentanz.herokuapp.com' } })
         .then(response => response.json())
         .then(result => result.ok === 1 ? this.success() : this.props.error("Käyttäjän poisto ei onnistunut."))
@@ -38,6 +39,7 @@ class AdminDashboard extends Component {
     const character = this.props.characters.find(character => character._id === e.target.id)
     let c = window.confirm("Haluatko varmasti poistaa hahmon " + character.name + "?")
     if (c) {
+      this.props.isReady(false)
       fetch(REACT_APP_SERVER_URL + "character/delete/" + e.target.id, { headers: { 'Access-Control-Allow-Origin': 'https://totentanz.herokuapp.com' } })
         .then(response => response.json())
         .then(result => result.ok === 1 ? this.success() : this.props.error("Käyttäjän poisto ei onnistunut."))
@@ -167,6 +169,7 @@ export class NewCharacter extends Component {
   handleSubmit(event) {
     event.preventDefault();
     if (this.checkInput()) {
+      this.props.isReady(false)
       let newPlayer = false
       let oldPlayer
       if (this.props.character.player !== this.state.player && this.state.player)
@@ -205,6 +208,7 @@ export class NewCharacter extends Component {
   }
   checkSuccess(result) {
     let fail = false
+    this.props.isReady(true)
     result.forEach((part, counter) => {
       if (part !== null && part.ok !== 1) {
         this.props.error("Hahmon lisäys ei onnistunut.")
@@ -308,6 +312,7 @@ export class NewUser extends Component {
   handleSubmit(event) {
     event.preventDefault();
     if (this.validateForm()) {
+      this.props.isReady(false)
       const data = {
         login: this.state.login.replace(/["=';]/g, ""),
         userName: this.state.playerName.replace(/["=';]/g, ""),
@@ -327,7 +332,7 @@ export class NewUser extends Component {
         },
         body: JSON.stringify(data)
       })
-        .then(response => this.setState({ redirect: <Redirect to="/admin" /> }))
+        .then(response => { this.setState({ redirect: <Redirect to="/admin" /> }); this.props.isReady(true) })
         .catch(error => this.props.error(error, "danger"))
     }
   }
