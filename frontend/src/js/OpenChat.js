@@ -34,6 +34,7 @@ class OpenChat extends Component {
                 this.setState({ currentName: this.props.characters.find(character => character._id === this.props.characterId).name })
             // Tell server that chat is open
             if (this.ws.readyState !== 1) {
+                console.log('reconnecting')
                 this.props.wsInit()
                     .then(this.ws.send(JSON.stringify({ chat: this.props.chat._id, type: 'openChat' })))
             }
@@ -90,6 +91,7 @@ class OpenChat extends Component {
             console.log("Sent ", this.state.input)
             // Check that websocket is still open
             if (this.ws.readyState !== 1) {
+                console.log('reconnect')
                 this.props.wsInit()
                     .then(this.ws.send(JSON.stringify({ text: this.state.input, chat: this.props.chat, characterId: this.props.characterId, name: this.state.currentName, type: 'message' })))
             }

@@ -107,16 +107,17 @@ class ChatList extends Component {
                 </div>
             </div>)
         const chats = this.state.chats.map((chat) =>
-            <li class="list-group-item chat-list-item d-flex justify-content-between"><Link id={chat._id} to="/chat"
+            <Link to="/chat"
                 onClick={() => this.props.changeChat(chat)}
-            >
-                {/* Filter current user's name and then show all other participants in a chat */}
-                {chat.participants
-                    .filter(a => a._id != this.props.loggedCharacter)
-                    .map((participant, index, array) => index === array.length - 1 ? participant.name : participant.name + ", ")}
-            </Link>
-                {this.props.type == "admin" ? <button class="btn btn-danger" onClick={() => this.removeChat(chat)}><Trash /></button> : ""}
-            </li>);
+                class="no-decoration"><li id={chat._id} class="list-group-item chat-list-item d-flex justify-content-between align-items-center">
+                    {/* Filter current user's name and then show all other participants in a chat */}
+                    {chat.participants
+                        .filter(a => a._id != this.props.loggedCharacter)
+                        .map((participant, index, array) => index === array.length - 1 ? participant.name : participant.name + ", ")}
+                    {this.props.type == "admin" ? <button class="btn btn-danger" onClick={() => this.removeChat(chat)}><Trash /></button> : ""}
+                </li></Link>
+
+        );
         if (this.state.mode === "new") {
             return (<main class="text-container container">
                 <h2>Valitse keskustelun jäsenet</h2>

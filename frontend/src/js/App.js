@@ -28,6 +28,7 @@ class App extends Component {
       ready: false,
       notifMsg: '',
       notifSender: '',
+      ws: null,
       selectedCharacter: {
         name: '',
         age: '',
@@ -60,9 +61,9 @@ class App extends Component {
     this.fetchCharacters = this.fetchCharacters.bind(this)
     this.fetchPlayers = this.fetchPlayers.bind(this)
     this.showError = this.showError.bind(this)
-    this.ws = null
     this.closeMenu = this.closeMenu.bind(this)
     this.setReady = this.setReady.bind(this)
+    this.wsInit = this.wsInit.bind(this)
   }
   componentDidMount() {
     // Check if login cookie
@@ -99,11 +100,13 @@ class App extends Component {
     if (event)
       event.preventDefault()
     if (this.state.login) {
+      //Show loading
+      this.setState({ loading: true })
       fetch(REACT_APP_SERVER_URL + "user/" + this.state.login, { headers: { 'Access-Control-Allow-Origin': 'https://totentanz.herokuapp.com' } })
         .then(response => {
           response.ok ? response.json().then(data => this.loginSuccess(data)) : this.showError("Kirjautuminen ei onnistunut. Tarkista oikeinkirjoitus.", "warning")
         })
-        .catch(error => this.showError(error, "danger"))
+        .catch(error => { this.showError(error, "danger"); this.setState({ loading: false }) })
     }
   }
   loginSuccess(data) {
@@ -112,7 +115,8 @@ class App extends Component {
       userName: data.userName,
       userType: data.userType,
       userCharacter: data.character,
-      warning: ''
+      warning: '',
+      loading: false
     })
     // create a cookie
     document.cookie = "login=" + this.state.login
@@ -135,7 +139,7 @@ class App extends Component {
     })
     // Remove login cookie
     document.cookie = "login="
-    this.ws.close()
+    this.state.ws.close()
   }
   handleChange(event) {
     this.setState({ login: event.target.value })
@@ -194,17 +198,20 @@ class App extends Component {
   }
   wsInit() {
     // Websocket closes connection after 55 sec inactivity
-    this.ws = null
+    console.log('Trying to connect to a websocket')
     try {
-      this.ws = new WebSocket(REACT_APP_WS_SERVER_URL);
+      this.setState({
+        ws: new WebSocket(REACT_APP_WS_SERVER_URL)
+      })
     } catch (e) {
       console.log("Websocket init failed. Error: " + e)
       this.showError("Yhteyttä chat-palveluun ei saatu muodostettua. Pikaviestit eivät välttämättä toimi.", "danger")
+      return false
     }
-    this.ws.onclose = () => {
+    this.state.ws.onclose = () => {
       console.log('disconnected')
     }
-    this.ws.onmessage = evt => {
+    this.state.ws.onmessage = evt => {
       // listen to data sent from the websocket server
       // But don't show notification if chat is open
       const message = JSON.parse(evt.data)
@@ -217,7 +224,7 @@ class App extends Component {
         }, toast.show())
       }
     }
-    this.ws.onopen = () => {
+    this.state.ws.onopen = () => {
       console.log('connected')
       // Find username, either character name or "admin"
       let user = this.state.characters.find(character => character._id === this.state.userCharacter)
@@ -229,11 +236,11 @@ class App extends Component {
       // If user has no character assigned, they cannot participate in chat
       else {
         console.log("No character assigned, closing websocket")
-        this.ws.close()
+        this.state.ws.close()
       }
       // Send username to the websocket
-      if (userName && this.ws && this.ws.readyState === 1) {
-        this.ws.send(JSON.stringify({ text: userName, type: 'new', id: this.state.userCharacter }))
+      if (userName && this.state.ws && this.state.ws.readyState === 1) {
+        this.state.ws.send(JSON.stringify({ text: userName, type: 'new', id: this.state.userCharacter }))
         this.setState({ nameSent: true, ready: true })
         return true
       }
@@ -242,11 +249,12 @@ class App extends Component {
       }
 
     }
-    this.ws.onerror = (e) => this.showError(e, "danger")
+    this.state.ws.onerror = (e) => this.showError(e, "danger")
+    return true
   }
   componentWillUnmount() {
-    if (this.ws)
-      this.ws.close()
+    if (this.state.ws)
+      this.state.ws.close()
   }
   render() {
     let loginForm = <li class="nav-item">
@@ -409,7 +417,7 @@ class App extends Component {
                 name={this.state.userType === "admin" ? "admin" : undefined}
                 characters={this.state.characters}
                 error={this.showError}
-                ws={this.ws}
+                ws={this.state.ws}
                 isReady={this.setReady}
                 clear={() => this.setState({ selectedChat: '' })}
                 wsInit={this.wsInit}

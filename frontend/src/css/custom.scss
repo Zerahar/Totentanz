@@ -181,9 +181,12 @@ h3 {
 .text-container {
     padding: 1em;
     color: $lightgrey;
-    text-align: justify;
     position: relative;
     font-size: 1.15em;
+
+    @include breakpoint(sm) {
+        text-align: justify;
+    }
 }
 
 // Navbar
@@ -319,28 +322,28 @@ h3 {
     height: 10vh;
 }
 
+.no-decoration {
+    text-decoration: none;
+}
+
 .chat-list-item {
     background-color: $darkgrey !important;
-    margin: 3px 0;
+    margin: 0.7rem 0;
+    padding: 0.7rem 1.2rem !important;
     border-radius: 3px;
-
-    a,
-    a:hover {
-        color: $lightgrey;
-        text-decoration: none;
-    }
+    color: $lightgrey !important;
+    text-decoration: none;
+    border-radius: 20px !important;
 
     &:hover {
         background-color: $almostBlack !important;
         cursor: pointer;
-        border: $blue;
+        border: 1px solid $blue !important;
     }
 }
 
 .chat-list {
     margin: 1em 0;
-
-
 }
 
 .messages-container {
