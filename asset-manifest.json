@@ -1,8 +1,8 @@
 {
   "files": {
-    "main.css": "/Totentanz/static/css/main.8a1ff632.chunk.css",
-    "main.js": "/Totentanz/static/js/main.93931d75.chunk.js",
-    "main.js.map": "/Totentanz/static/js/main.93931d75.chunk.js.map",
+    "main.css": "/Totentanz/static/css/main.4bb80ae0.chunk.css",
+    "main.js": "/Totentanz/static/js/main.44d88af6.chunk.js",
+    "main.js.map": "/Totentanz/static/js/main.44d88af6.chunk.js.map",
     "runtime-main.js": "/Totentanz/static/js/runtime-main.66469165.js",
     "runtime-main.js.map": "/Totentanz/static/js/runtime-main.66469165.js.map",
     "static/css/2.fc64925e.chunk.css": "/Totentanz/static/css/2.fc64925e.chunk.css",
@@ -14,7 +14,7 @@
     "service-worker.js": "/Totentanz/service-worker.js",
     "service-worker.js.map": "/Totentanz/service-worker.js.map",
     "static/css/2.fc64925e.chunk.css.map": "/Totentanz/static/css/2.fc64925e.chunk.css.map",
-    "static/css/main.8a1ff632.chunk.css.map": "/Totentanz/static/css/main.8a1ff632.chunk.css.map",
+    "static/css/main.4bb80ae0.chunk.css.map": "/Totentanz/static/css/main.4bb80ae0.chunk.css.map",
     "static/js/2.3d7ec684.chunk.js.LICENSE.txt": "/Totentanz/static/js/2.3d7ec684.chunk.js.LICENSE.txt",
     "static/media/custom.scss": "/Totentanz/static/media/front.de4dae2a.jpeg"
   },
@@ -22,7 +22,7 @@
     "static/js/runtime-main.66469165.js",
     "static/css/2.fc64925e.chunk.css",
     "static/js/2.3d7ec684.chunk.js",
-    "static/css/main.8a1ff632.chunk.css",
-    "static/js/main.93931d75.chunk.js"
+    "static/css/main.4bb80ae0.chunk.css",
+    "static/js/main.44d88af6.chunk.js"
   ]
 }
